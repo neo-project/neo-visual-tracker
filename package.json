@@ -1,0 +1,47 @@
+{
+    "publisher": "ngdseattle",
+    "name": "neo-express-tracker",
+    "displayName": "NEO Express Tracker",
+    "description": "A NEO Express blockchain explorer that is directly available within Visual Studio Code",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.38.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:extension.openTracker"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.openTracker",
+                "title": "Open NEO Express Tracker",
+                "category": "NEO Express"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/glob": "^7.1.1",
+        "@types/mocha": "^5.2.6",
+        "@types/node": "^10.12.21",
+        "@types/vscode": "^1.38.0",
+        "glob": "^7.1.4",
+        "mocha": "^6.1.4",
+        "typescript": "^3.3.1",
+        "tslint": "^5.12.1",
+        "vscode-test": "^1.2.0"
+    },
+    "dependencies": {
+        "@cityofzion/neon-js": "^4.7.0"
+    }
+}
