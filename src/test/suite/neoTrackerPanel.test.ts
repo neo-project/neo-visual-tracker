@@ -2,42 +2,104 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 
 import { NeoTrackerPanel } from '../../neoTrackerPanel';
-import { INeoRpcConnection, BlockchainInfo } from '../../neoRpcConnection';
+import { INeoRpcConnection, BlockchainInfo, Block, INeoSubscription } from '../../neoRpcConnection';
 
 const disposables : vscode.Disposable[] = [];
 const extensionRoot : string = __dirname + '/../../../';
 
 class MockRpcConnection implements INeoRpcConnection {
-    public getBlockchainInfo() {
-        return new BlockchainInfo(1234);
+
+	public subscriptions : number = 0;
+
+	public blocks : Block[] = [
+		new Block("BLOCK_0"),
+		new Block("BLOCK_1"),
+		new Block("BLOCK_2"),
+	];
+
+	public blockchainInfo : BlockchainInfo = new BlockchainInfo(1234);
+
+    public async getBlockchainInfo() {
+        return this.blockchainInfo;
     }
+
+	public async getBlocks(startAt?: number | undefined): Promise<Block[]> {
+		return this.blocks;
+	}
+
+	public subscribe(subscriber: INeoSubscription): void {
+		this.subscriptions++;
+	}
+
+	public unsubscribe(subscriber: INeoSubscription): void {
+		this.subscriptions--;
+	}
 }
 
 suite('NEO Tracker Panel Test Suite', () => {
 
-	const rpcConnection = new MockRpcConnection();
-
 	test('Webview can be opened', async () => {		
-		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		const target = new NeoTrackerPanel(extensionRoot, new MockRpcConnection(), disposables);
 		assert.equal('NEO Express Tracker', target.panel.title);
 		assert.equal(true, target.panel.visible);
 	});
 
 	test('Webview can be closed', async () => {		
-		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		const target = new NeoTrackerPanel(extensionRoot, new MockRpcConnection(), disposables);
 		target.dispose();
 	});
 
 	test('Content security policy is correct', async () => {
 		const ExpectedCSP = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src vscode-resource:;">';
-		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		const target = new NeoTrackerPanel(extensionRoot, new MockRpcConnection(), disposables);
 		assert.notEqual(
 			target.panel.webview.html.indexOf(ExpectedCSP), 
 			-1);
 	});
 
 	test('Injected Javascript is invoked', async () => {
-		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		const target = new NeoTrackerPanel(extensionRoot, new MockRpcConnection(), disposables);
 		await target.ready; // test will timeout and fail if promise is never resolved
+	});
+
+	test('Panel subscribes/unsubscribes to/from blockchain updates', async () => {
+		const rpcConnection = new MockRpcConnection();
+		assert.equal(rpcConnection.subscriptions, 0);
+		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+
+		assert.equal(rpcConnection.subscriptions, 1);
+		
+		target.dispose();
+		
+		assert.equal(rpcConnection.subscriptions, 0);
+	});
+
+	test('Panel responds to first blockchain update', async () => {
+		const rpcConnection = new MockRpcConnection();
+		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		assert.equal(target.viewState.firstBlock, undefined);
+		assert.equal(target.viewState.blockChainInfo, undefined);
+		assert.equal(target.viewState.blocks.length, 0);
+		
+		await target.onNewBlock(rpcConnection.blockchainInfo);
+
+		assert.equal(target.viewState.firstBlock, undefined);
+		assert.notEqual(target.viewState.blockChainInfo, undefined);
+		assert.equal(target.viewState.blocks.length, rpcConnection.blocks.length);
+	});
+
+	test('New blocks do not reset pagination', async () => {
+		const rpcConnection = new MockRpcConnection();
+		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		await target.onNewBlock(rpcConnection.blockchainInfo);
+		const initialBlockLength = rpcConnection.blocks.length;
+		assert.equal(initialBlockLength > 0, true);
+		assert.equal(target.viewState.blocks.length, initialBlockLength);
+
+		target.viewState.firstBlock = 1; // user has explicity selected a page, viewstate should not be updated
+		rpcConnection.blocks = [];
+		await target.onNewBlock(rpcConnection.blockchainInfo);
+
+		assert.equal(target.viewState.blocks.length, initialBlockLength);
 	});
 });
