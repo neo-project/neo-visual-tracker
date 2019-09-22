@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { INeoRpcConnection, INeoSubscription, BlockchainInfo, Block } from './neoRpcConnection';
+import { INeoRpcConnection, INeoSubscription, BlockchainInfo, Blocks } from './neoRpcConnection';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 
@@ -15,7 +15,7 @@ class ViewState {
     public blockChainInfo? : BlockchainInfo = undefined;
     public activeTab : ActiveTab = ActiveTab.Blocks;
     public firstBlock? : number = undefined;
-    public blocks : Block[] = [];
+    public blocks : Blocks = new Blocks();
 }
 
 export class NeoTrackerPanel implements INeoSubscription {
@@ -58,24 +58,31 @@ export class NeoTrackerPanel implements INeoSubscription {
 
     public async onNewBlock(blockchainInfo: BlockchainInfo) {
         this.viewState.blockChainInfo = blockchainInfo;
-        if (this.viewState.firstBlock === undefined) {
-            this.viewState.blocks = await this.rpcConnection.getBlocks();
-        }
-
+        await this.updateBlockList();
         this.panel.webview.postMessage(this.viewState);
+    }
+
+    private async updateBlockList(force?: boolean) {
+        if (force || (this.viewState.firstBlock === undefined)) {
+            this.viewState.blocks = await this.rpcConnection.getBlocks(this.viewState.firstBlock);
+        }
     }
 
     private onClose() {
         this.rpcConnection.unsubscribe(this);
     }
 
-    private async onMessage(message : any) {
+    private async onMessage(message: any) {
         if (this.onIncomingMessage) {
             this.onIncomingMessage();
         }
 
-        if (message.t === 'init') {
-            
+        if (message.e === 'previousBlocks') {
+            this.viewState.firstBlock = this.viewState.blocks.previous;
+            await this.updateBlockList(true);
+        } else if (message.e === 'nextBlocks') {
+            this.viewState.firstBlock = this.viewState.blocks.next;
+            await this.updateBlockList(true);
         } // else if ...
 
         this.panel.webview.postMessage(this.viewState);

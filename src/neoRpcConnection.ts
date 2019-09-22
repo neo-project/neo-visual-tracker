@@ -10,14 +10,15 @@ export class BlockchainInfo {
     }
 }
 
-export class Block {
-    constructor(public contents : object | string) {
-    }
+export class Blocks {
+    public blocks: any[] = [];
+    public previous?: number = undefined;
+    public next?: number = undefined;
 }
 
 export interface INeoRpcConnection {
     getBlockchainInfo() : Promise<BlockchainInfo> | BlockchainInfo;
-    getBlocks(startAt? : number) : Promise<Block[]>;
+    getBlocks(startAt? : number) : Promise<Blocks>;
     subscribe(subscriber: INeoSubscription) : void;
     unsubscribe(subscriber: INeoSubscription) : void;
 }
@@ -66,12 +67,22 @@ export class NeoRpcConnection implements INeoRpcConnection {
     }
 
     public async getBlocks(startAt? : number) {
-        startAt = startAt || (await this.getBlockchainInfo()).height - 1;
-        const result : Block[] = [];
+        const height = (await this.getBlockchainInfo()).height;
+        startAt = startAt || height - 1;
+        startAt = Math.max(startAt, BlocksPerPage - 1);
+        
+        const result = new Blocks();
+        result.previous = startAt + BlocksPerPage;
+        if (result.previous >= height) {
+            result.previous = undefined;
+        }
+
         for (let i = startAt; i > startAt - BlocksPerPage; i--) {
             if (i >= 0) {
                 try {
-                    result.push(new Block(await this.rpcClient.getBlock(i)));
+                    const block = await this.rpcClient.getBlock(i) as any;
+                    result.blocks.push(block);
+                    result.next = block.index - 1;
                 } catch(e) {
                     console.error('NeoRpcConnection could not retrieve block #' + i + ': ' + e);
                 }

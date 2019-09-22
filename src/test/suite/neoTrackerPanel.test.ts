@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 
 import { NeoTrackerPanel } from '../../neoTrackerPanel';
-import { INeoRpcConnection, BlockchainInfo, Block, INeoSubscription } from '../../neoRpcConnection';
+import { INeoRpcConnection, BlockchainInfo, Blocks, INeoSubscription } from '../../neoRpcConnection';
 
 const disposables : vscode.Disposable[] = [];
 const extensionRoot : string = __dirname + '/../../../';
@@ -11,19 +11,22 @@ class MockRpcConnection implements INeoRpcConnection {
 
 	public subscriptions : number = 0;
 
-	public blocks : Block[] = [
-		new Block("BLOCK_0"),
-		new Block("BLOCK_1"),
-		new Block("BLOCK_2"),
-	];
+	public blocks : Blocks;
 
 	public blockchainInfo : BlockchainInfo = new BlockchainInfo(1234);
+
+	constructor() {
+		this.blocks = new Blocks();
+		this.blocks.blocks.push("Block 0");
+		this.blocks.blocks.push("Block 1");
+		this.blocks.blocks.push("Block 2");
+	}
 
     public async getBlockchainInfo() {
         return this.blockchainInfo;
     }
 
-	public async getBlocks(startAt?: number | undefined): Promise<Block[]> {
+	public async getBlocks(startAt?: number | undefined): Promise<Blocks> {
 		return this.blocks;
 	}
 
@@ -79,27 +82,27 @@ suite('NEO Tracker Panel Test Suite', () => {
 		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
 		assert.equal(target.viewState.firstBlock, undefined);
 		assert.equal(target.viewState.blockChainInfo, undefined);
-		assert.equal(target.viewState.blocks.length, 0);
+		assert.equal(target.viewState.blocks.blocks.length, 0);
 		
 		await target.onNewBlock(rpcConnection.blockchainInfo);
 
 		assert.equal(target.viewState.firstBlock, undefined);
 		assert.notEqual(target.viewState.blockChainInfo, undefined);
-		assert.equal(target.viewState.blocks.length, rpcConnection.blocks.length);
+		assert.equal(target.viewState.blocks.blocks.length, rpcConnection.blocks.blocks.length);
 	});
 
 	test('New blocks do not reset pagination', async () => {
 		const rpcConnection = new MockRpcConnection();
 		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
 		await target.onNewBlock(rpcConnection.blockchainInfo);
-		const initialBlockLength = rpcConnection.blocks.length;
+		const initialBlockLength = rpcConnection.blocks.blocks.length;
 		assert.equal(initialBlockLength > 0, true);
-		assert.equal(target.viewState.blocks.length, initialBlockLength);
+		assert.equal(target.viewState.blocks.blocks.length, initialBlockLength);
 
 		target.viewState.firstBlock = 1; // user has explicity selected a page, viewstate should not be updated
-		rpcConnection.blocks = [];
+		rpcConnection.blocks = new Blocks();
 		await target.onNewBlock(rpcConnection.blockchainInfo);
 
-		assert.equal(target.viewState.blocks.length, initialBlockLength);
+		assert.equal(target.viewState.blocks.blocks.length, initialBlockLength);
 	});
 });
