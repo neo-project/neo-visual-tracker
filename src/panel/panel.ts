@@ -11,6 +11,7 @@ declare var acquireVsCodeApi: any;
 const selectors = {
     AllPages: '.page',
     BlockHeight: '#blockHeight',
+    RpcUrl: '#rpcUrl',
     BlocksTableBody: '#blocks tbody',
     BlocksPaginationNext: '#blocks .next',
     BlocksPaginationPrevious: '#blocks .previous',
@@ -89,6 +90,7 @@ const renderers = {
     renderBlockchainInfo: function(blockchainInfo: any) {
         if (blockchainInfo) {
             htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(blockchainInfo.height.toLocaleString()));
+            htmlHelpers.setPlaceholder(selectors.RpcUrl, htmlHelpers.text(blockchainInfo.url));
         }
     },
     renderBlock: function(block?: any) {

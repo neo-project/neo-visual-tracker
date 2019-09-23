@@ -13,7 +13,7 @@ class MockRpcConnection implements INeoRpcConnection {
 
 	public blocks : Blocks;
 
-	public blockchainInfo : BlockchainInfo = new BlockchainInfo(1234);
+	public blockchainInfo : BlockchainInfo = new BlockchainInfo(1234, 'http://foo');
 
 	constructor() {
 		this.blocks = new Blocks();

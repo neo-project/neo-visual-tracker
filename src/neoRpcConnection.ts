@@ -6,7 +6,9 @@ const BlocksPerPage = 20;
 const PollingInterval = 1000;
 
 export class BlockchainInfo {
-    constructor(public height : number) {
+    constructor(
+        public height: number,
+        public url: string) {
     }
 }
 
@@ -30,16 +32,17 @@ export interface INeoSubscription {
 
 export class NeoRpcConnection implements INeoRpcConnection {
     
-    private readonly rpcClient : RPCClient;
+    private readonly rpcClient: RPCClient;
+    private readonly rpcUrl: string = 'http://127.0.0.1:49154';
 
-    private lastKnownHeight : number;
+    private lastKnownHeight: number;
 
-    private subscriptions : INeoSubscription[];
+    private subscriptions: INeoSubscription[];
 
-    private timeout? : NodeJS.Timeout;
+    private timeout?: NodeJS.Timeout;
 
     constructor() {
-        this.rpcClient = new neon.rpc.RPCClient('http://127.0.0.1:49154');
+        this.rpcClient = new neon.rpc.RPCClient(this.rpcUrl);
         this.lastKnownHeight = 0;
         this.subscriptions = [];
         this.timeout = undefined;
@@ -64,7 +67,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     public async getBlockchainInfo() {
         const height = await this.rpcClient.getBlockCount();
-        return new BlockchainInfo(height);
+        return new BlockchainInfo(height, this.rpcUrl);
     }
 
     public async getBlock(index: number) {
