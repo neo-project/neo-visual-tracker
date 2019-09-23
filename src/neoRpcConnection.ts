@@ -8,7 +8,8 @@ const PollingInterval = 1000;
 export class BlockchainInfo {
     constructor(
         public height: number,
-        public url: string) {
+        public url: string,
+        public online: boolean) {
     }
 }
 
@@ -36,10 +37,9 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private readonly rpcUrl: string = 'http://127.0.0.1:49154';
 
     private lastKnownHeight: number;
-
     private subscriptions: INeoSubscription[];
-
     private timeout?: NodeJS.Timeout;
+    private online: boolean = true;
 
     constructor() {
         this.rpcClient = new neon.rpc.RPCClient(this.rpcUrl);
@@ -66,8 +66,16 @@ export class NeoRpcConnection implements INeoRpcConnection {
     }
 
     public async getBlockchainInfo() {
-        const height = await this.rpcClient.getBlockCount();
-        return new BlockchainInfo(height, this.rpcUrl);
+        let height = this.lastKnownHeight;
+        try {
+            height = await this.rpcClient.getBlockCount();
+            this.online = true;
+        } catch (e) {
+            console.error('NeoRpcConnection could not retrieve block height: ' + e);
+            this.online = false;
+        }
+
+        return new BlockchainInfo(height, this.rpcUrl, this.online);
     }
 
     public async getBlock(index: number) {
@@ -80,7 +88,8 @@ export class NeoRpcConnection implements INeoRpcConnection {
     }
 
     public async getBlocks(startAt? : number) {
-        const height = (await this.getBlockchainInfo()).height;
+        const blockchainInfo = await this.getBlockchainInfo();
+        const height = blockchainInfo.height;
         startAt = startAt || height - 1;
         startAt = Math.max(startAt, BlocksPerPage - 1);
 
@@ -117,7 +126,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private async poll() : Promise<void> {
         this.timeout = undefined;
         const blockchainInfo = await this.getBlockchainInfo();
-        if (blockchainInfo.height !== this.lastKnownHeight) {
+        if ((blockchainInfo.height !== this.lastKnownHeight) || !blockchainInfo.online) {
             this.lastKnownHeight = blockchainInfo.height;
             for (let i = 0; i < this.subscriptions.length; i++) {
                 try {

@@ -12,6 +12,7 @@ const selectors = {
     AllPages: '.page',
     BlockHeight: '#blockHeight',
     RpcUrl: '#rpcUrl',
+    RpcStatus: '#rpcStatus',
     BlocksTableBody: '#blocks tbody',
     BlocksPaginationNext: '#blocks .next',
     BlocksPaginationPrevious: '#blocks .previous',
@@ -91,6 +92,7 @@ const renderers = {
         if (blockchainInfo) {
             htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(blockchainInfo.height.toLocaleString()));
             htmlHelpers.setPlaceholder(selectors.RpcUrl, htmlHelpers.text(blockchainInfo.url));
+            htmlHelpers.setPlaceholder(selectors.RpcStatus, htmlHelpers.text(blockchainInfo.online ? 'Connected to' : 'Connecting to'));
         }
     },
     renderBlock: function(block?: any) {
