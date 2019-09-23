@@ -85,13 +85,13 @@ const htmlHelpers = {
 const renderers = {
     renderBlockchainInfo: function(blockchainInfo: any) {
         if (blockchainInfo) {
-            htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(blockchainInfo.height));
+            htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(blockchainInfo.height.toLocaleString()));
         }
     },
     renderBlock: function(block?: any) {
         if (block) {
             htmlHelpers.setPlaceholder(selectors.BlockDetailHash, htmlHelpers.text(block.hash));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(block.index));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(block.index.toLocaleString()));
             htmlHelpers.setPlaceholder(selectors.BlockDetailTime, htmlHelpers.text(block.time));
             htmlHelpers.setPlaceholder(selectors.BlockDetailValidator, htmlHelpers.text(block.nextconsensus));
             htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(block.size));
@@ -106,7 +106,7 @@ const renderers = {
             } else {
                 htmlHelpers.setPlaceholder(selectors.BlockDetailPreviousLink, htmlHelpers.text('None'));
             }
-            
+
             if (block.nextblockhash) {
                 htmlHelpers.setPlaceholder(
                     selectors.BlockDetailNextLink, 
@@ -124,7 +124,7 @@ const renderers = {
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.newEventLink(contents.index, panelEvents.ShowBlock, contents.index),
+                    htmlHelpers.newEventLink(contents.index.toLocaleString(), panelEvents.ShowBlock, contents.index),
                     htmlHelpers.text(contents.time),
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.text(contents.nextconsensus),
