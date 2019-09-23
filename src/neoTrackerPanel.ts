@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import { INeoRpcConnection, INeoSubscription, BlockchainInfo, Blocks } from './neoRpcConnection';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
+const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 enum ActivePage {
     Blocks = 'blocks',
@@ -53,9 +54,13 @@ export class NeoTrackerPanel implements INeoSubscription {
 
         const htmlFileContents = fs.readFileSync(
             path.join(extensionPath, 'src', 'panel', 'panel.html'), { encoding: 'utf8' });
-        const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panel', 'panel.js'))) + '';
-        this.panel.webview.html = htmlFileContents.replace(JavascriptHrefPlaceholder, javascriptHref);
+            const javascriptHref : string = this.panel.webview.asWebviewUri(
+                vscode.Uri.file(path.join(extensionPath, 'out', 'panel', 'panel.js'))) + '';
+            const cssHref : string = this.panel.webview.asWebviewUri(
+                vscode.Uri.file(path.join(extensionPath, 'out', 'panel', 'panel.css'))) + '';
+        this.panel.webview.html = htmlFileContents
+            .replace(JavascriptHrefPlaceholder, javascriptHref)
+            .replace(CssHrefPlaceholder, cssHref);
     }
 
     public async onNewBlock(blockchainInfo: BlockchainInfo) {

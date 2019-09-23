@@ -57,7 +57,7 @@ suite('NEO Tracker Panel Test Suite', () => {
 	});
 
 	test('Content security policy is correct', async () => {
-		const ExpectedCSP = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src vscode-resource:;">';
+		const ExpectedCSP = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src vscode-resource:; style-src vscode-resource:;">';
 		const target = new NeoTrackerPanel(extensionRoot, new MockRpcConnection(), disposables);
 		assert.notEqual(
 			target.panel.webview.html.indexOf(ExpectedCSP), 
