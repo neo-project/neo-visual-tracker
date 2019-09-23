@@ -23,6 +23,12 @@ const htmlHelpers = {
     
         return row;
     },
+    setEnabled: function(selector: string, isEnabled: boolean) {
+        const element = document.querySelector(selector);
+        if (element) {
+            (element as any).disabled = !isEnabled;
+        }
+    },
     setOnClickEvent: function(selector: string, event: string, postMessage: any) {
         const clickable = document.querySelector(selector);
         if (clickable) {
@@ -41,7 +47,8 @@ const renderers = {
     renderBlockchainInfo: function(blockchainInfo: any) {
         htmlHelpers.setPlaceholder('#blockHeight', blockchainInfo.height);
     },
-    renderBlocks: function (blocks: any[]) {
+    renderBlocks: function (blocks: any[], firstBlock?: number) {
+        htmlHelpers.setEnabled('#blocks .previous', firstBlock !== undefined);
         const tbody = document.querySelector('#blocks tbody');
         if (tbody) {
             htmlHelpers.clearChildren(tbody);   
@@ -62,7 +69,7 @@ const renderers = {
 function handleMessage(message: any) {
     console.log(message);
     renderers.renderBlockchainInfo(message.blockChainInfo);
-    renderers.renderBlocks(message.blocks.blocks);
+    renderers.renderBlocks(message.blocks.blocks, message.firstBlock);
 }
 
 function initializePanel() {
