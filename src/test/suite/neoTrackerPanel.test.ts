@@ -17,7 +17,7 @@ class MockRpcConnection implements INeoRpcConnection {
 
 	constructor() {
 		this.blocks = new Blocks();
-		this.blocks.blocks.push("Block 0");
+		this.blocks.blocks.push("Block 0.");
 		this.blocks.blocks.push("Block 1");
 		this.blocks.blocks.push("Block 2");
 	}
