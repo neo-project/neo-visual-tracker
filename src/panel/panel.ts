@@ -18,6 +18,7 @@ const panelEvents = {
     Init: 'init',
     PreviousBlocksPage: 'previousBlocks',
     NextBlocksPage: 'nextBlocks',
+    ShowBlock: 'showBlock',
 };
 
 const htmlHelpers = {
@@ -26,14 +27,20 @@ const htmlHelpers = {
             element.removeChild(element.firstChild);
         }
     },
-    newTableRow: function(...cells: string[]) {
+    newEventLink: function(text: string, event: string, context?: any) {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.appendChild(document.createTextNode(text));
+        this.setOnClickEvent(link, event, context);
+        return link;
+    },
+    newTableRow: function(...cells: Node[]) {
         const row = document.createElement('tr');
         for (let i = 0; i < cells.length; i++) {
             const cell = document.createElement('td');
-            cell.appendChild(document.createTextNode(cells[i]));
+            cell.appendChild(cells[i]);
             row.appendChild(cell);
         }
-    
         return row;
     },
     setEnabled: function(selector: string, isEnabled: boolean) {
@@ -42,10 +49,10 @@ const htmlHelpers = {
             (element as any).disabled = !isEnabled;
         }
     },
-    setOnClickEvent: function(selector: string, event: string, postMessage: any) {
-        const clickable = document.querySelector(selector);
+    setOnClickEvent: function(element: string | Element, event: string, context?: any) {
+        const clickable = (typeof element === 'string') ? document.querySelector(element) : element;
         if (clickable) {
-            clickable.addEventListener('click', () => postMessage({ e: event }));
+            clickable.addEventListener('click', () => vsCodePostMessage({ e: event, c: context }));
         }
     },
     setPlaceholder: function(selector: string, text: string) {
@@ -54,11 +61,16 @@ const htmlHelpers = {
             placeHolderElement.textContent = text;
         }
     },
+    text: function(content: string) {
+        return document.createTextNode(content);
+    }
 };
 
 const renderers = {
     renderBlockchainInfo: function(blockchainInfo: any) {
-        htmlHelpers.setPlaceholder(selectors.BlockHeight, blockchainInfo.height);
+        if (blockchainInfo) {
+            htmlHelpers.setPlaceholder(selectors.BlockHeight, blockchainInfo.height);
+        }
     },
     renderBlocks: function (blocks: any[], firstBlock?: number) {
         htmlHelpers.setEnabled(selectors.BlocksPaginationPrevious, firstBlock !== undefined);
@@ -68,11 +80,11 @@ const renderers = {
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
-                    contents.index,
-                    contents.time,
-                    contents.tx.length,
-                    contents.nextconsensus,
-                    contents.size);
+                    htmlHelpers.newEventLink(contents.index, panelEvents.ShowBlock, contents.index),
+                    htmlHelpers.text(contents.time),
+                    htmlHelpers.text(contents.tx.length),
+                    htmlHelpers.text(contents.nextconsensus),
+                    htmlHelpers.text(contents.size));
                 tbody.appendChild(row);
             }
         }
@@ -85,12 +97,15 @@ function handleMessage(message: any) {
     renderers.renderBlocks(message.blocks.blocks, message.firstBlock);
 }
 
+let vsCodePostMessage : Function;
+
 function initializePanel() {
     const vscode = acquireVsCodeApi();
+    vsCodePostMessage = vscode.postMessage;
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: panelEvents.Init });
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage, vscode.postMessage);
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage, vscode.postMessage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage);
 }
 
 window.onload = initializePanel;
