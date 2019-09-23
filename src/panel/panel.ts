@@ -7,6 +7,19 @@
 
 declare var acquireVsCodeApi: any;
 
+const selectors = {
+    BlockHeight: '#blockHeight',
+    BlocksTableBody: '#blocks tbody',
+    BlocksPaginationNext: '#blocks .next',
+    BlocksPaginationPrevious: '#blocks .previous',
+};
+
+const panelEvents = {
+    Init: 'init',
+    PreviousBlocksPage: 'previousBlocks',
+    NextBlocksPage: 'nextBlocks',
+};
+
 const htmlHelpers = {
     clearChildren: function(element: Element) {
         while (element.firstChild) {
@@ -45,11 +58,11 @@ const htmlHelpers = {
 
 const renderers = {
     renderBlockchainInfo: function(blockchainInfo: any) {
-        htmlHelpers.setPlaceholder('#blockHeight', blockchainInfo.height);
+        htmlHelpers.setPlaceholder(selectors.BlockHeight, blockchainInfo.height);
     },
     renderBlocks: function (blocks: any[], firstBlock?: number) {
-        htmlHelpers.setEnabled('#blocks .previous', firstBlock !== undefined);
-        const tbody = document.querySelector('#blocks tbody');
+        htmlHelpers.setEnabled(selectors.BlocksPaginationPrevious, firstBlock !== undefined);
+        const tbody = document.querySelector(selectors.BlocksTableBody);
         if (tbody) {
             htmlHelpers.clearChildren(tbody);   
             for (let i = 0; i < blocks.length; i++) {
@@ -75,9 +88,9 @@ function handleMessage(message: any) {
 function initializePanel() {
     const vscode = acquireVsCodeApi();
     window.addEventListener('message', msg => handleMessage(msg.data));
-    vscode.postMessage({ e: 'init' });
-    htmlHelpers.setOnClickEvent('#blocks .previous', 'previousBlocks', vscode.postMessage);
-    htmlHelpers.setOnClickEvent('#blocks .next', 'nextBlocks', vscode.postMessage);
+    vscode.postMessage({ e: panelEvents.Init });
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage, vscode.postMessage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage, vscode.postMessage);
 }
 
 window.onload = initializePanel;
