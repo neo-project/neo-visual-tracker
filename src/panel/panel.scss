@@ -1,3 +1,18 @@
-.foo {
-    color: red;
+.table {
+    text-align: center;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    width: 100%;
+    td,
+    th {
+        padding: 5px 10px;
+    }
+    tr:nth-child(even) {
+        background-color: var(--vscode-editor-background);
+        filter: contrast(0.90);
+    }
+    th {
+        background-color: var(--vscode-editor-background);
+        filter: contrast(0.75);
+    }
 }
