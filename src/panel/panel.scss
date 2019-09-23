@@ -1,18 +1,36 @@
-.table {
-    text-align: center;
-    border-collapse: collapse;
+table {
     margin-bottom: 15px;
-    width: 100%;
-    td,
+    border-collapse: collapse;
     th {
-        padding: 5px 10px;
+        background-color: var(--vscode-editor-background);
+        filter: contrast(0.75);
     }
     tr:nth-child(even) {
         background-color: var(--vscode-editor-background);
         filter: contrast(0.90);
     }
+}
+
+.table {
+    text-align: center;
+    width: 100%;
+    td,
+    th {
+        padding: 5px 10px;
+    }
     th {
         background-color: var(--vscode-editor-background);
         filter: contrast(0.75);
+    }
+}
+
+.data-table {
+    width: 100%;
+    td,
+    th {
+        padding: 5px 10px;
+    }
+    th {
+        text-align: right;
     }
 }
