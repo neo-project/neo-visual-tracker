@@ -25,6 +25,7 @@ const selectors = {
     BlockDetailVersion: '#blockdetail .version',
     BlockDetailMerkleRoot: '#blockdetail .merkleRoot',
     BlockDetailTransactions: '#blockdetail .transactions',
+    BlockDetailTransactionsTable: '#blockdetail .txs',
     BlockDetailPreviousLink: '#blockdetail .previous',
     BlockDetailNextLink: '#blockdetail .next',
 };
@@ -121,13 +122,28 @@ const renderers = {
             } else {
                 htmlHelpers.setPlaceholder(selectors.BlockDetailNextLink, htmlHelpers.text('None'));
             }
+
+            const txTbody = document.querySelector(selectors.BlockDetailTransactionsTable);
+            if (txTbody) {
+                htmlHelpers.clearChildren(txTbody);
+                for (let i = 0; i < block.tx.length; i++) {
+                    const tx = block.tx[i];
+                    const row = htmlHelpers.newTableRow(
+                        htmlHelpers.text(tx.type),
+                        htmlHelpers.text(tx.txid),
+                        htmlHelpers.text(tx.size.toLocaleString() + ' bytes'),
+                        htmlHelpers.text(tx.net_fee.toLocaleString() + ' GAS'),
+                        htmlHelpers.text(tx.sys_fee.toLocaleString() + ' GAS'));
+                        txTbody.appendChild(row);
+                }
+            }
         }
     },
     renderBlocks: function (blocks: any[], firstBlock?: number) {
         htmlHelpers.setEnabled(selectors.BlocksPaginationPrevious, firstBlock !== undefined);
         const tbody = document.querySelector(selectors.BlocksTableBody);
         if (tbody) {
-            htmlHelpers.clearChildren(tbody);   
+            htmlHelpers.clearChildren(tbody);
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
