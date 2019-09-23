@@ -34,3 +34,13 @@ table {
         text-align: right;
     }
 }
+
+.status-bar {
+    background-color: var(--vscode-statusBar-background);
+    color: var(--vscode-statusBar-foreground);
+    padding: 5px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
