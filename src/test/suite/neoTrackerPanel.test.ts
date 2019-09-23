@@ -26,6 +26,10 @@ class MockRpcConnection implements INeoRpcConnection {
         return this.blockchainInfo;
     }
 
+	public async getBlock(index: number): Promise<any> {
+		return this.blocks.blocks[0];
+	}
+
 	public async getBlocks(startAt?: number | undefined): Promise<Blocks> {
 		return this.blocks;
 	}

@@ -18,7 +18,8 @@ export class Blocks {
 
 export interface INeoRpcConnection {
     getBlockchainInfo() : Promise<BlockchainInfo> | BlockchainInfo;
-    getBlocks(startAt? : number) : Promise<Blocks>;
+    getBlock(index: number) : Promise<any>;
+    getBlocks(startAt?: number) : Promise<Blocks>;
     subscribe(subscriber: INeoSubscription) : void;
     unsubscribe(subscriber: INeoSubscription) : void;
 }
@@ -66,11 +67,20 @@ export class NeoRpcConnection implements INeoRpcConnection {
         return new BlockchainInfo(height);
     }
 
+    public async getBlock(index: number) {
+        try {
+            return await this.rpcClient.getBlock(index) as any;
+        } catch(e) {
+            console.error('NeoRpcConnection could not retrieve individual block #' + index + ': ' + e);
+            return undefined;
+        }
+    }
+
     public async getBlocks(startAt? : number) {
         const height = (await this.getBlockchainInfo()).height;
         startAt = startAt || height - 1;
         startAt = Math.max(startAt, BlocksPerPage - 1);
-        
+
         const result = new Blocks();
         result.previous = startAt + BlocksPerPage;
         if (result.previous >= height) {

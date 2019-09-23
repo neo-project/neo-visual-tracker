@@ -83,7 +83,7 @@ const renderers = {
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.newEventLink(contents.index, panelEvents.ShowBlock, i),
+                    htmlHelpers.newEventLink(contents.index, panelEvents.ShowBlock, contents.index),
                     htmlHelpers.text(contents.time),
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.text(contents.nextconsensus),
