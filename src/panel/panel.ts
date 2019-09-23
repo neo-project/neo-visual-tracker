@@ -79,7 +79,10 @@ const htmlHelpers = {
     },
     text: function(content: string) {
         return document.createTextNode(content);
-    }
+    },
+    time: function(unixTimestamp: number) {
+        return (new Date(unixTimestamp * 1000)).toLocaleString();
+    },
 };
 
 const renderers = {
@@ -92,9 +95,9 @@ const renderers = {
         if (block) {
             htmlHelpers.setPlaceholder(selectors.BlockDetailHash, htmlHelpers.text(block.hash));
             htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(block.index.toLocaleString()));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailTime, htmlHelpers.text(block.time));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailTime, htmlHelpers.text(htmlHelpers.time(block.time)));
             htmlHelpers.setPlaceholder(selectors.BlockDetailValidator, htmlHelpers.text(block.nextconsensus));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(block.size));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(block.size.toLocaleString() + ' bytes'));
             htmlHelpers.setPlaceholder(selectors.BlockDetailVersion, htmlHelpers.text(block.version));
             htmlHelpers.setPlaceholder(selectors.BlockDetailMerkleRoot, htmlHelpers.text(block.merkleroot));
             htmlHelpers.setPlaceholder(selectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
@@ -125,10 +128,10 @@ const renderers = {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
                     htmlHelpers.newEventLink(contents.index.toLocaleString(), panelEvents.ShowBlock, contents.index),
-                    htmlHelpers.text(contents.time),
+                    htmlHelpers.text(htmlHelpers.time(contents.time)),
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.text(contents.nextconsensus),
-                    htmlHelpers.text(contents.size));
+                    htmlHelpers.text(contents.size.toLocaleString() + ' bytes'));
                 tbody.appendChild(row);
             }
         }
