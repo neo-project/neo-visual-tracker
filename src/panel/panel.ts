@@ -7,6 +7,7 @@
 
 declare var acquireVsCodeApi: any;
 
+// DOM query selectors for various elements in the panel.html template:
 const selectors = {
     AllPages: '.page',
     BlockHeight: '#blockHeight',
@@ -14,8 +15,19 @@ const selectors = {
     BlocksPaginationNext: '#blocks .next',
     BlocksPaginationPrevious: '#blocks .previous',
     BlockDetailClose: '#blockdetail .close',
+    BlockDetailHash: '#blockdetail .hash',
+    BlockDetailIndex: '#blockdetail .index',
+    BlockDetailTime: '#blockdetail .time',
+    BlockDetailValidator: '#blockdetail .validator',
+    BlockDetailSize: '#blockdetail .size',
+    BlockDetailVersion: '#blockdetail .version',
+    BlockDetailMerkleRoot: '#blockdetail .merkleRoot',
+    BlockDetailTransactions: '#blockdetail .transactions',
+    BlockDetailPreviousLink: '#blockdetail .previous',
+    BlockDetailNextLink: '#blockdetail .next',
 };
 
+// Names of events expected by the code running in neoTrackerPanel.ts:
 const panelEvents = {
     Init: 'init',
     PreviousBlocksPage: 'previousBlocks',
@@ -58,10 +70,11 @@ const htmlHelpers = {
             clickable.addEventListener('click', () => vsCodePostMessage({ e: event, c: context }));
         }
     },
-    setPlaceholder: function(selector: string, text: string) {
+    setPlaceholder: function(selector: string, value: Node) {
         const placeHolderElement = document.querySelector(selector);
         if (placeHolderElement) {
-            placeHolderElement.textContent = text;
+            this.clearChildren(placeHolderElement);
+            placeHolderElement.appendChild(value);
         }
     },
     text: function(content: string) {
@@ -72,7 +85,35 @@ const htmlHelpers = {
 const renderers = {
     renderBlockchainInfo: function(blockchainInfo: any) {
         if (blockchainInfo) {
-            htmlHelpers.setPlaceholder(selectors.BlockHeight, blockchainInfo.height);
+            htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(blockchainInfo.height));
+        }
+    },
+    renderBlock: function(block?: any) {
+        if (block) {
+            htmlHelpers.setPlaceholder(selectors.BlockDetailHash, htmlHelpers.text(block.hash));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(block.index));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailTime, htmlHelpers.text(block.time));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailValidator, htmlHelpers.text(block.nextconsensus));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(block.size));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailVersion, htmlHelpers.text(block.version));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailMerkleRoot, htmlHelpers.text(block.merkleroot));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
+
+            if (block.previousblockhash) {
+                htmlHelpers.setPlaceholder(
+                    selectors.BlockDetailPreviousLink, 
+                    htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1));
+            } else {
+                htmlHelpers.setPlaceholder(selectors.BlockDetailPreviousLink, htmlHelpers.text('None'));
+            }
+            
+            if (block.nextblockhash) {
+                htmlHelpers.setPlaceholder(
+                    selectors.BlockDetailNextLink, 
+                    htmlHelpers.newEventLink(block.nextblockhash, panelEvents.ShowBlock, block.index + 1));
+            } else {
+                htmlHelpers.setPlaceholder(selectors.BlockDetailNextLink, htmlHelpers.text('None'));
+            }
         }
     },
     renderBlocks: function (blocks: any[], firstBlock?: number) {
@@ -105,6 +146,7 @@ function handleMessage(message: any) {
     console.log(message);
     renderers.renderBlockchainInfo(message.blockChainInfo);
     renderers.renderBlocks(message.blocks.blocks, message.firstBlock);
+    renderers.renderBlock(message.currentBlock);
     renderers.setPage(message.activePage);
 }
 
