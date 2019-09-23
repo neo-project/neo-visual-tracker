@@ -6,16 +6,18 @@ import { INeoRpcConnection, INeoSubscription, BlockchainInfo, Blocks } from './n
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 
-enum ActiveTab {
-    Blocks,
-    Transactions,
+enum ActivePage {
+    Blocks = 'blocks',
+    BlockDetail = 'blockdetail',
+    Transactions = 'transactions',
 }
 
 class ViewState {
     public blockChainInfo? : BlockchainInfo = undefined;
-    public activeTab : ActiveTab = ActiveTab.Blocks;
+    public activePage : ActivePage = ActivePage.Blocks;
     public firstBlock? : number = undefined;
-    public blocks : Blocks = new Blocks();
+    public blocks: Blocks = new Blocks();
+    public currentBlock: any = undefined;
 }
 
 export class NeoTrackerPanel implements INeoSubscription {
@@ -83,6 +85,12 @@ export class NeoTrackerPanel implements INeoSubscription {
         } else if (message.e === 'nextBlocks') {
             this.viewState.firstBlock = this.viewState.blocks.next;
             await this.updateBlockList(true);
+        } else if (message.e === 'showBlock') {
+            this.viewState.currentBlock = this.viewState.blocks.blocks[message.c];
+            this.viewState.activePage = ActivePage.BlockDetail;
+        } else if (message.e === 'showBlockList') {
+            this.viewState.currentBlock = undefined;
+            this.viewState.activePage = ActivePage.Blocks;
         } // else if ...
 
         this.panel.webview.postMessage(this.viewState);

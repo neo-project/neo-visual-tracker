@@ -8,10 +8,12 @@
 declare var acquireVsCodeApi: any;
 
 const selectors = {
+    AllPages: '.page',
     BlockHeight: '#blockHeight',
     BlocksTableBody: '#blocks tbody',
     BlocksPaginationNext: '#blocks .next',
     BlocksPaginationPrevious: '#blocks .previous',
+    BlockDetailClose: '#blockdetail .close',
 };
 
 const panelEvents = {
@@ -19,6 +21,7 @@ const panelEvents = {
     PreviousBlocksPage: 'previousBlocks',
     NextBlocksPage: 'nextBlocks',
     ShowBlock: 'showBlock',
+    ShowBlockList: 'showBlockList',
 };
 
 const htmlHelpers = {
@@ -80,7 +83,7 @@ const renderers = {
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.newEventLink(contents.index, panelEvents.ShowBlock, contents.index),
+                    htmlHelpers.newEventLink(contents.index, panelEvents.ShowBlock, i),
                     htmlHelpers.text(contents.time),
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.text(contents.nextconsensus),
@@ -89,12 +92,20 @@ const renderers = {
             }
         }
     },
+    setPage: function(activePage: string) {
+        const allPages = document.querySelectorAll(selectors.AllPages);
+        for (let i = 0; i < allPages.length; i++) {
+            const id = allPages[i].id;
+            (allPages[i] as any).style.display = id === activePage ? 'block' : 'none';
+        }
+    },
 };
 
 function handleMessage(message: any) {
     console.log(message);
     renderers.renderBlockchainInfo(message.blockChainInfo);
     renderers.renderBlocks(message.blocks.blocks, message.firstBlock);
+    renderers.setPage(message.activePage);
 }
 
 let vsCodePostMessage : Function;
@@ -106,6 +117,7 @@ function initializePanel() {
     vscode.postMessage({ e: panelEvents.Init });
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage);
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage);
+    htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.ShowBlockList);
 }
 
 window.onload = initializePanel;
