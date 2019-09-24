@@ -8,7 +8,7 @@ const disposables : vscode.Disposable[] = [];
 const extensionRoot : string = __dirname + '/../../../';
 
 class MockRpcConnection implements INeoRpcConnection {
-
+	
 	public subscriptions : number = 0;
 
 	public blocks : Blocks;
@@ -26,12 +26,16 @@ class MockRpcConnection implements INeoRpcConnection {
         return this.blockchainInfo;
     }
 
-	public async getBlock(index: number): Promise<any> {
+	public async getBlock(index: number) {
 		return this.blocks.blocks[0];
 	}
 
-	public async getBlocks(startAt?: number | undefined): Promise<Blocks> {
+	public async getBlocks(startAt?: number | undefined) {
 		return this.blocks;
+	}
+
+	public async getTransaction(txid: string) {
+		throw new Error("Method not implemented.");
 	}
 
 	public subscribe(subscriber: INeoSubscription): void {

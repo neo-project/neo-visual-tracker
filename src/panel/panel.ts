@@ -28,6 +28,7 @@ const selectors = {
     BlockDetailTransactionsTable: '#blockdetail .txs',
     BlockDetailPreviousLink: '#blockdetail .previous',
     BlockDetailNextLink: '#blockdetail .next',
+    TransactionDetailClose: '#transactiondetail .close',
 };
 
 // Names of events expected by the code running in neoTrackerPanel.ts:
@@ -37,6 +38,8 @@ const panelEvents = {
     NextBlocksPage: 'nextBlocks',
     ShowBlock: 'showBlock',
     ShowBlockList: 'showBlockList',
+    ShowTransaction: 'showTransaction',
+    CloseTransaction: 'closeTransaction',
 };
 
 const htmlHelpers = {
@@ -130,7 +133,7 @@ const renderers = {
                     const tx = block.tx[i];
                     const row = htmlHelpers.newTableRow(
                         htmlHelpers.text(tx.type),
-                        htmlHelpers.text(tx.txid),
+                        htmlHelpers.newEventLink(tx.txid, panelEvents.ShowTransaction, tx.txid),
                         htmlHelpers.text(tx.size.toLocaleString() + ' bytes'),
                         htmlHelpers.text(tx.net_fee.toLocaleString() + ' GAS'),
                         htmlHelpers.text(tx.sys_fee.toLocaleString() + ' GAS'));
@@ -183,6 +186,7 @@ function initializePanel() {
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage);
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage);
     htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.ShowBlockList);
+    htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction);
 }
 
 window.onload = initializePanel;

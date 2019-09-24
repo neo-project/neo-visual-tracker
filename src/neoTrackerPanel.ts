@@ -10,7 +10,7 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 enum ActivePage {
     Blocks = 'blocks',
     BlockDetail = 'blockdetail',
-    Transactions = 'transactions',
+    TransactionDetail = 'transactiondetail',
 }
 
 class ViewState {
@@ -19,6 +19,7 @@ class ViewState {
     public firstBlock? : number = undefined;
     public blocks: Blocks = new Blocks();
     public currentBlock: any = undefined;
+    public currentTransaction: any = undefined;
 }
 
 export class NeoTrackerPanel implements INeoSubscription {
@@ -96,7 +97,14 @@ export class NeoTrackerPanel implements INeoSubscription {
         } else if (message.e === 'showBlockList') {
             this.viewState.currentBlock = undefined;
             this.viewState.activePage = ActivePage.Blocks;
-        } // else if ...
+        } else if (message.e === 'showTransaction') {
+            this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c);
+            this.viewState.activePage = ActivePage.TransactionDetail;
+        } else if (message.e === 'closeTransaction') {
+            this.viewState.currentTransaction = undefined;
+            this.viewState.activePage = (this.viewState.currentBlock === undefined) ?
+                ActivePage.Blocks : ActivePage.BlockDetail;
+        }
 
         this.panel.webview.postMessage(this.viewState);
     }

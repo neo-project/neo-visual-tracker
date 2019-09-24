@@ -20,11 +20,12 @@ export class Blocks {
 }
 
 export interface INeoRpcConnection {
-    getBlockchainInfo() : Promise<BlockchainInfo> | BlockchainInfo;
-    getBlock(index: number) : Promise<any>;
-    getBlocks(startAt?: number) : Promise<Blocks>;
-    subscribe(subscriber: INeoSubscription) : void;
-    unsubscribe(subscriber: INeoSubscription) : void;
+    getBlockchainInfo(): Promise<BlockchainInfo> | BlockchainInfo;
+    getBlock(index: number): Promise<any>;
+    getBlocks(startAt?: number): Promise<Blocks>;
+    getTransaction(txid: string): Promise<any>;
+    subscribe(subscriber: INeoSubscription): void;
+    unsubscribe(subscriber: INeoSubscription): void;
 }
 
 export interface INeoSubscription {
@@ -112,6 +113,15 @@ export class NeoRpcConnection implements INeoRpcConnection {
         }
 
         return result;
+    }
+
+    public async getTransaction(txid: string) {
+        try {
+            return await this.rpcClient.getRawTransaction(txid) as any;
+        } catch(e) {
+            console.error('NeoRpcConnection could not retrieve transaction (id=' + txid + '): ' + e);
+            return undefined;
+        }
     }
 
     private ensurePolling() : void {
