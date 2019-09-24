@@ -126,10 +126,13 @@ export class NeoRpcConnection implements INeoRpcConnection {
     }
 
     private async augmentTransaction(transaction: any) {       
+        transaction.assets = {};
+        
         transaction.claimsAugmented = [];
         if (transaction.claims && transaction.claims.length) {
             for (let i = 0; i < transaction.claims.length; i++) {
                 const claim = transaction.claims[i];
+                transaction.assets[claim.asset] = {};
                 const voutTx = await this.rpcClient.getRawTransaction(claim.txid);
                 transaction.claimsAugmented.push(voutTx.vout[claim.vout]);
             }
@@ -139,9 +142,22 @@ export class NeoRpcConnection implements INeoRpcConnection {
         if (transaction.vin && transaction.vin.length) {
             for (let i = 0; i < transaction.vin.length; i++) {
                 const vin = transaction.vin[i];
+                transaction.assets[vin.asset] = {};
                 const voutTx = await this.rpcClient.getRawTransaction(vin.txid);
                 transaction.vinAugmented.push(voutTx.vout[vin.vout]);
             }
+        }
+
+        if (transaction.vout && transaction.vout.length) {
+            for (let i = 0; i < transaction.vout.length; i++) {
+                const vout = transaction.vout[i];
+                transaction.assets[vout.asset] = {};
+            }
+        }
+
+        for (let assetId in transaction.assets) {
+            // TODO: Let client know the names of all assets involved in the tx
+            // transaction.assets[assetId] = await this.rpcClient.getAssetState(assetId);
         }
 
         return transaction;
