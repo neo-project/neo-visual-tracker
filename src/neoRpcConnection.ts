@@ -35,7 +35,8 @@ export interface INeoSubscription {
 export class NeoRpcConnection implements INeoRpcConnection {
     
     private readonly rpcClient: RPCClient;
-    private readonly rpcUrl: string = 'http://127.0.0.1:49154';
+    // private readonly rpcUrl: string = 'http://127.0.0.1:49154';
+    private readonly rpcUrl: string = 'http://seed1.ngd.network:10332';
 
     private lastKnownHeight: number;
     private subscriptions: INeoSubscription[];
