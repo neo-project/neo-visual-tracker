@@ -36,6 +36,7 @@ const selectors = {
     TransactionDetailSystemFee: '#transactiondetail .systemFee',
     TransactionDetailSize: '#transactiondetail .size',
     TransactionDetailBlock: '#transactiondetail .block',
+    TransactionDetailOutputsTable: '#transactiondetail .outputs',
 };
 
 // Names of events expected by the code running in neoTrackerPanel.ts:
@@ -177,6 +178,19 @@ const renderers = {
             htmlHelpers.setPlaceholder(
                 selectors.TransactionDetailBlock, 
                 htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash));
+
+            const outputsTbody = document.querySelector(selectors.TransactionDetailOutputsTable);
+            if (outputsTbody) {
+                htmlHelpers.clearChildren(outputsTbody);
+                for (let i = 0; i < transaction.vout.length; i++) {
+                    const output = transaction.vout[i];
+                    const row = htmlHelpers.newTableRow(
+                        htmlHelpers.text(output.address),
+                        htmlHelpers.text(output.asset),
+                        htmlHelpers.text(output.value.toLocaleString()));
+                    outputsTbody.appendChild(row);
+                }
+            }
         }
     },
     setPage: function(activePage: string) {
