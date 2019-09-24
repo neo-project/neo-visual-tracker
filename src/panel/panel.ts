@@ -36,6 +36,8 @@ const selectors = {
     TransactionDetailSystemFee: '#transactiondetail .systemFee',
     TransactionDetailSize: '#transactiondetail .size',
     TransactionDetailBlock: '#transactiondetail .block',
+    TransactionDetailClaimsTable: '#transactiondetail .claims',
+    TransactionDetailInputsTable: '#transactiondetail .inputs',
     TransactionDetailOutputsTable: '#transactiondetail .outputs',
 };
 
@@ -167,6 +169,20 @@ const renderers = {
             }
         }
     },
+    renderInputsOutputs: function(tbodySelector: string, inputOutputList: any[]) {
+        const tbody = document.querySelector(tbodySelector);
+        if (tbody) {
+            htmlHelpers.clearChildren(tbody);
+            for (let i = 0; i < inputOutputList.length; i++) {
+                const inputOutput = inputOutputList[i];
+                const row = htmlHelpers.newTableRow(
+                    htmlHelpers.text(inputOutput.address),
+                    htmlHelpers.text(inputOutput.asset),
+                    htmlHelpers.text(inputOutput.value.toLocaleString()));
+                tbody.appendChild(row);
+            }
+        }
+    },
     renderTransaction: function(transaction?: any) {
         if (transaction) {
             htmlHelpers.setPlaceholder(selectors.TransactionDetailType, htmlHelpers.text(transaction.type));
@@ -178,19 +194,9 @@ const renderers = {
             htmlHelpers.setPlaceholder(
                 selectors.TransactionDetailBlock, 
                 htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash));
-
-            const outputsTbody = document.querySelector(selectors.TransactionDetailOutputsTable);
-            if (outputsTbody) {
-                htmlHelpers.clearChildren(outputsTbody);
-                for (let i = 0; i < transaction.vout.length; i++) {
-                    const output = transaction.vout[i];
-                    const row = htmlHelpers.newTableRow(
-                        htmlHelpers.text(output.address),
-                        htmlHelpers.text(output.asset),
-                        htmlHelpers.text(output.value.toLocaleString()));
-                    outputsTbody.appendChild(row);
-                }
-            }
+            this.renderInputsOutputs(selectors.TransactionDetailClaimsTable, transaction.claimsAugmented);
+            this.renderInputsOutputs(selectors.TransactionDetailInputsTable, transaction.vinAugmented);
+            this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout);
         }
     },
     setPage: function(activePage: string) {

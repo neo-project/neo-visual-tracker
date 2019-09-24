@@ -118,11 +118,33 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     public async getTransaction(txid: string) {
         try {
-            return await this.rpcClient.getRawTransaction(txid) as any;
+            return await this.augmentTransaction(await this.rpcClient.getRawTransaction(txid));
         } catch(e) {
             console.error('NeoRpcConnection could not retrieve transaction (id=' + txid + '): ' + e);
             return undefined;
         }
+    }
+
+    private async augmentTransaction(transaction: any) {       
+        transaction.claimsAugmented = [];
+        if (transaction.claims && transaction.claims.length) {
+            for (let i = 0; i < transaction.claims.length; i++) {
+                const claim = transaction.claims[i];
+                const voutTx = await this.rpcClient.getRawTransaction(claim.txid);
+                transaction.claimsAugmented.push(voutTx.vout[claim.vout]);
+            }
+        }
+
+        transaction.vinAugmented = [];
+        if (transaction.vin && transaction.vin.length) {
+            for (let i = 0; i < transaction.vin.length; i++) {
+                const vin = transaction.vin[i];
+                const voutTx = await this.rpcClient.getRawTransaction(vin.txid);
+                transaction.vinAugmented.push(voutTx.vout[vin.vout]);
+            }
+        }
+
+        return transaction;
     }
 
     private ensurePolling() : void {
