@@ -94,9 +94,10 @@ export class NeoTrackerPanel implements INeoSubscription {
         } else if (message.e === 'showBlock') {
             this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c);
             this.viewState.activePage = ActivePage.BlockDetail;
-        } else if (message.e === 'showBlockList') {
+        } else if (message.e === 'closeBlock') {
             this.viewState.currentBlock = undefined;
-            this.viewState.activePage = ActivePage.Blocks;
+            this.viewState.activePage = (this.viewState.currentTransaction === undefined) ?
+                ActivePage.Blocks : ActivePage.TransactionDetail;
         } else if (message.e === 'showTransaction') {
             this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c);
             this.viewState.activePage = ActivePage.TransactionDetail;

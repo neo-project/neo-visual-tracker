@@ -29,6 +29,13 @@ const selectors = {
     BlockDetailPreviousLink: '#blockdetail .previous',
     BlockDetailNextLink: '#blockdetail .next',
     TransactionDetailClose: '#transactiondetail .close',
+    TransactionDetailType: '#transactiondetail .type',
+    TransactionDetailHash: '#transactiondetail .hash',
+    TransactionDetailTime: '#transactiondetail .time',
+    TransactionDetailNetworkFee: '#transactiondetail .networkFee',
+    TransactionDetailSystemFee: '#transactiondetail .systemFee',
+    TransactionDetailSize: '#transactiondetail .size',
+    TransactionDetailBlock: '#transactiondetail .block',
 };
 
 // Names of events expected by the code running in neoTrackerPanel.ts:
@@ -37,7 +44,7 @@ const panelEvents = {
     PreviousBlocksPage: 'previousBlocks',
     NextBlocksPage: 'nextBlocks',
     ShowBlock: 'showBlock',
-    ShowBlockList: 'showBlockList',
+    CloseBlock: 'closeBlock',
     ShowTransaction: 'showTransaction',
     CloseTransaction: 'closeTransaction',
 };
@@ -159,6 +166,19 @@ const renderers = {
             }
         }
     },
+    renderTransaction: function(transaction?: any) {
+        if (transaction) {
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailType, htmlHelpers.text(transaction.type));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailTime, htmlHelpers.text(htmlHelpers.time(transaction.blocktime)));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailNetworkFee, htmlHelpers.text(transaction.net_fee.toLocaleString() + ' GAS'));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailSystemFee, htmlHelpers.text(transaction.sys_fee.toLocaleString() + ' GAS'));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailSize, htmlHelpers.text(transaction.size.toLocaleString() + ' bytes'));
+            htmlHelpers.setPlaceholder(
+                selectors.TransactionDetailBlock, 
+                htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash));
+        }
+    },
     setPage: function(activePage: string) {
         const allPages = document.querySelectorAll(selectors.AllPages);
         for (let i = 0; i < allPages.length; i++) {
@@ -173,6 +193,7 @@ function handleMessage(message: any) {
     renderers.renderBlockchainInfo(message.blockChainInfo);
     renderers.renderBlocks(message.blocks.blocks, message.firstBlock);
     renderers.renderBlock(message.currentBlock);
+    renderers.renderTransaction(message.currentTransaction);
     renderers.setPage(message.activePage);
 }
 
@@ -185,7 +206,7 @@ function initializePanel() {
     vscode.postMessage({ e: panelEvents.Init });
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage);
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage);
-    htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.ShowBlockList);
+    htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.CloseBlock);
     htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction);
 }
 
