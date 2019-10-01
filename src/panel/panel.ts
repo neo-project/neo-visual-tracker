@@ -41,6 +41,8 @@ const selectors = {
     TransactionDetailClaimsTable: '#transactiondetail .claims',
     TransactionDetailInputsTable: '#transactiondetail .inputs',
     TransactionDetailOutputsTable: '#transactiondetail .outputs',
+    LoadingIndicator: '#loading-indicator',
+    LoadingMessage: '#loading-indicator .message',
 };
 
 // Names of events expected by the code running in neoTrackerPanel.ts:
@@ -222,6 +224,9 @@ function handleMessage(message: any) {
         renderers.renderTransaction(message.viewState.currentTransaction);
         renderers.setPage(message.viewState.activePage);
     } else if (message.status) {
+        const loadingIndicator: any = document.querySelector(selectors.LoadingIndicator);
+        loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';
+        htmlHelpers.setPlaceholder(selectors.LoadingMessage, htmlHelpers.text(message.status.message));
         console.warn(new Date, 'status: ', message.status);
     }
 }

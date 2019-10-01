@@ -47,6 +47,18 @@ table {
     z-index: 100;
 }
 
+#loading-indicator {
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding-top: 10%;
+}
+
 body {
     /*more than the height of the status bar*/
     margin-bottom: 75px;
