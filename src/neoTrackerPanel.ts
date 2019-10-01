@@ -99,7 +99,9 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
 
             if (message.e === 'init') {
                 this.panel.webview.postMessage({ viewState: this.viewState });
-                await this.updateBlockList(true);
+                if (this.viewState.blocks.blocks.length === 0) {
+                    await this.updateBlockList(true);
+                }
             } else if (message.e === 'previousBlocks') {
                 this.viewState.firstBlock = this.viewState.blocks.previous;
                 await this.updateBlockList(true);
