@@ -17,6 +17,7 @@ export class Blocks {
     public blocks: any[] = [];
     public previous?: number = undefined;
     public next?: number = undefined;
+    public last?: number = undefined;
 }
 
 export interface INeoRpcConnection {
@@ -96,6 +97,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
         startAt = Math.max(startAt, BlocksPerPage - 1);
 
         const result = new Blocks();
+        result.last = BlocksPerPage - 1;
         result.previous = startAt + BlocksPerPage;
         if (result.previous >= height) {
             result.previous = undefined;

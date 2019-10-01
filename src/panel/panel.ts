@@ -14,8 +14,10 @@ const selectors = {
     RpcUrl: '#rpcUrl',
     RpcStatus: '#rpcStatus',
     BlocksTableBody: '#blocks tbody',
+    BlocksPaginationFirst: '#blocks .first',
     BlocksPaginationNext: '#blocks .next',
     BlocksPaginationPrevious: '#blocks .previous',
+    BlocksPaginationLast: '#blocks .last',
     BlockDetailClose: '#blockdetail .close',
     BlockDetailHash: '#blockdetail .hash',
     BlockDetailIndex: '#blockdetail .index',
@@ -46,6 +48,8 @@ const panelEvents = {
     Init: 'init',
     PreviousBlocksPage: 'previousBlocks',
     NextBlocksPage: 'nextBlocks',
+    FirstBlocksPage: 'firstBlocks',
+    LastBlocksPage: 'lastBlocks',
     ShowBlock: 'showBlock',
     CloseBlock: 'closeBlock',
     ShowTransaction: 'showTransaction',
@@ -154,6 +158,7 @@ const renderers = {
     },
     renderBlocks: function (blocks: any[], firstBlock?: number) {
         htmlHelpers.setEnabled(selectors.BlocksPaginationPrevious, firstBlock !== undefined);
+        htmlHelpers.setEnabled(selectors.BlocksPaginationFirst, firstBlock !== undefined);
         const tbody = document.querySelector(selectors.BlocksTableBody);
         if (tbody) {
             htmlHelpers.clearChildren(tbody);
@@ -226,6 +231,8 @@ function initializePanel() {
     vscode.postMessage({ e: panelEvents.Init });
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage);
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationFirst, panelEvents.FirstBlocksPage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationLast, panelEvents.LastBlocksPage);
     htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.CloseBlock);
     htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction);
 }

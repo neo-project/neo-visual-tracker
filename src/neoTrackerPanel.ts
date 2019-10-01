@@ -91,6 +91,12 @@ export class NeoTrackerPanel implements INeoSubscription {
         } else if (message.e === 'nextBlocks') {
             this.viewState.firstBlock = this.viewState.blocks.next;
             await this.updateBlockList(true);
+        } else if (message.e === 'firstBlocks') {
+            this.viewState.firstBlock = undefined;
+            await this.updateBlockList(true);
+        } else if (message.e === 'lastBlocks') {
+            this.viewState.firstBlock = this.viewState.blocks.last;
+            await this.updateBlockList(true);
         } else if (message.e === 'showBlock') {
             this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c);
             this.viewState.activePage = ActivePage.BlockDetail;
