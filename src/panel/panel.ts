@@ -198,8 +198,7 @@ const renderers = {
                 const inputOutput = inputOutputList[i];
                 const row = htmlHelpers.newTableRow(
                     htmlHelpers.text(inputOutput.address),
-                    htmlHelpers.text(this.assetName(inputOutput.asset, assets)),
-                    htmlHelpers.text(inputOutput.value.toLocaleString()));
+                    htmlHelpers.text(inputOutput.value.toLocaleString() + ' ' + this.assetName(inputOutput.asset, assets)));
                 tbody.appendChild(row);
             }
         }
