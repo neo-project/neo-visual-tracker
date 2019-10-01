@@ -156,10 +156,11 @@ export class NeoRpcConnection implements INeoRpcConnection {
         if (transaction.vin && transaction.vin.length) {
             for (let i = 0; i < transaction.vin.length; i++) {
                 const vin = transaction.vin[i];
-                transaction.assets[vin.asset] = {};
                 statusReceiver.updateStatus('Retrieving transaction ' + txid + ' (vin ' + (i + 1) + ')');
                 const voutTx = await this.rpcClient.getRawTransaction(vin.txid);
-                transaction.vinAugmented.push(voutTx.vout[vin.vout]);
+                const vinVout = voutTx.vout[vin.vout];
+                transaction.assets[vinVout.asset] = {};
+                transaction.vinAugmented.push(vinVout);
             }
         }
 
@@ -171,8 +172,8 @@ export class NeoRpcConnection implements INeoRpcConnection {
         }
 
         for (let assetId in transaction.assets) {
-            // TODO: Let client know the names of all assets involved in the tx
-            // transaction.assets[assetId] = await this.rpcClient.getAssetState(assetId);
+            statusReceiver.updateStatus('Retrieving transaction ' + txid + ' (asset ' + assetId + ')');
+            transaction.assets[assetId] = await this.rpcClient.getAssetState(assetId);
         }
 
         return transaction;

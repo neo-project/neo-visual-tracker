@@ -108,6 +108,20 @@ const htmlHelpers = {
 };
 
 const renderers = {
+    assetName: function(assetId: string, assets: any) {
+        const assetInfo = assets[assetId];
+        if (assetInfo) {
+            const assetNames = assetInfo.name;
+            if (assetNames && assetNames.length) {
+                for (let i = 0; i < assetNames.length; i++) {
+                    if (assetNames[i].lang === "en") {
+                        return assetNames[i].name || assetId;
+                    }
+                }
+            }
+        }
+        return assetId;
+    },
     renderBlockchainInfo: function(blockchainInfo: any) {
         if (blockchainInfo) {
             htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(blockchainInfo.height.toLocaleString()));
@@ -176,7 +190,7 @@ const renderers = {
             }
         }
     },
-    renderInputsOutputs: function(tbodySelector: string, inputOutputList: any[]) {
+    renderInputsOutputs: function(tbodySelector: string, inputOutputList: any[], assets: any) {
         const tbody = document.querySelector(tbodySelector);
         if (tbody) {
             htmlHelpers.clearChildren(tbody);
@@ -184,7 +198,7 @@ const renderers = {
                 const inputOutput = inputOutputList[i];
                 const row = htmlHelpers.newTableRow(
                     htmlHelpers.text(inputOutput.address),
-                    htmlHelpers.text(inputOutput.asset),
+                    htmlHelpers.text(this.assetName(inputOutput.asset, assets)),
                     htmlHelpers.text(inputOutput.value.toLocaleString()));
                 tbody.appendChild(row);
             }
@@ -201,9 +215,9 @@ const renderers = {
             htmlHelpers.setPlaceholder(
                 selectors.TransactionDetailBlock, 
                 htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash));
-            this.renderInputsOutputs(selectors.TransactionDetailClaimsTable, transaction.claimsAugmented);
-            this.renderInputsOutputs(selectors.TransactionDetailInputsTable, transaction.vinAugmented);
-            this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout);
+            this.renderInputsOutputs(selectors.TransactionDetailClaimsTable, transaction.claimsAugmented, transaction.assets);
+            this.renderInputsOutputs(selectors.TransactionDetailInputsTable, transaction.vinAugmented, transaction.assets);
+            this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets);
         }
     },
     setPage: function(activePage: string) {
