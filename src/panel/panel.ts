@@ -126,16 +126,10 @@ const renderers = {
             htmlHelpers.setPlaceholder(selectors.BlockDetailMerkleRoot, htmlHelpers.text(block.merkleroot));
             htmlHelpers.setPlaceholder(selectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
 
-            if (block.previousblockhash) {
-                if (block.index > 0) {
-                    htmlHelpers.setPlaceholder(
-                        selectors.BlockDetailPreviousLink, 
-                        htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1));
-                } else {
-                    htmlHelpers.setPlaceholder(
-                        selectors.BlockDetailPreviousLink, 
-                        htmlHelpers.text(block.previousblockhash));
-                }
+            if ((block.index > 0) && block.previousblockhash) {
+                htmlHelpers.setPlaceholder(
+                    selectors.BlockDetailPreviousLink, 
+                    htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1));
             } else {
                 htmlHelpers.setPlaceholder(selectors.BlockDetailPreviousLink, htmlHelpers.text('None'));
             }
