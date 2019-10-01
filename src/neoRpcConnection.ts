@@ -21,16 +21,20 @@ export class Blocks {
 }
 
 export interface INeoRpcConnection {
-    getBlockchainInfo(): Promise<BlockchainInfo> | BlockchainInfo;
-    getBlock(index: number): Promise<any>;
-    getBlocks(startAt?: number): Promise<Blocks>;
-    getTransaction(txid: string): Promise<any>;
+    getBlockchainInfo(statusReceiver?: INeoStatusReceiver): Promise<BlockchainInfo> | BlockchainInfo;
+    getBlock(index: number, statusReceiver: INeoStatusReceiver): Promise<any>;
+    getBlocks(startAt: number | undefined, statusReceiver: INeoStatusReceiver): Promise<Blocks>;
+    getTransaction(txid: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     subscribe(subscriber: INeoSubscription): void;
     unsubscribe(subscriber: INeoSubscription): void;
 }
 
 export interface INeoSubscription {
     onNewBlock(blockchainInfo: BlockchainInfo) : Promise<void>;
+}
+
+export interface INeoStatusReceiver {
+    updateStatus(status: string) : void;
 }
 
 export class NeoRpcConnection implements INeoRpcConnection {
@@ -68,9 +72,13 @@ export class NeoRpcConnection implements INeoRpcConnection {
         this.ensurePolling();
     }
 
-    public async getBlockchainInfo() {
+    public async getBlockchainInfo(statusReceiver?: INeoStatusReceiver) {
         let height = this.lastKnownHeight;
         try {
+            if (statusReceiver) {
+                statusReceiver.updateStatus('Determining current blockchain height');
+            }
+
             height = await this.rpcClient.getBlockCount();
             this.online = true;
         } catch (e) {
@@ -81,8 +89,9 @@ export class NeoRpcConnection implements INeoRpcConnection {
         return new BlockchainInfo(height, this.rpcUrl, this.online);
     }
 
-    public async getBlock(index: number) {
+    public async getBlock(index: number, statusReceiver: INeoStatusReceiver) {
         try {
+            statusReceiver.updateStatus('Retrieving block #' + index);
             return await this.rpcClient.getBlock(index) as any;
         } catch(e) {
             console.error('NeoRpcConnection could not retrieve individual block #' + index + ': ' + e);
@@ -90,8 +99,8 @@ export class NeoRpcConnection implements INeoRpcConnection {
         }
     }
 
-    public async getBlocks(startAt? : number) {
-        const blockchainInfo = await this.getBlockchainInfo();
+    public async getBlocks(startAt: number | undefined, statusReceiver: INeoStatusReceiver) {
+        const blockchainInfo = await this.getBlockchainInfo(statusReceiver);
         const height = blockchainInfo.height;
         startAt = startAt || height - 1;
         startAt = Math.max(startAt, BlocksPerPage - 1);
@@ -106,7 +115,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
         for (let i = startAt; i > startAt - BlocksPerPage; i--) {
             if (i >= 0) {
                 try {
-                    const block = await this.rpcClient.getBlock(i) as any;
+                    const block = await this.getBlock(i, statusReceiver);
                     result.blocks.push(block);
                     result.next = block.index - 1;
                 } catch(e) {
@@ -118,16 +127,18 @@ export class NeoRpcConnection implements INeoRpcConnection {
         return result;
     }
 
-    public async getTransaction(txid: string) {
+    public async getTransaction(txid: string, statusReceiver: INeoStatusReceiver) {
         try {
-            return await this.augmentTransaction(await this.rpcClient.getRawTransaction(txid));
+            statusReceiver.updateStatus('Retrieving transaction ' + txid);
+            const tx = await this.rpcClient.getRawTransaction(txid);
+            return await this.augmentTransaction(txid, tx, statusReceiver);
         } catch(e) {
             console.error('NeoRpcConnection could not retrieve transaction (id=' + txid + '): ' + e);
             return undefined;
         }
     }
 
-    private async augmentTransaction(transaction: any) {       
+    private async augmentTransaction(txid: string, transaction: any, statusReceiver: INeoStatusReceiver) {       
         transaction.assets = {};
         
         transaction.claimsAugmented = [];
@@ -135,6 +146,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
             for (let i = 0; i < transaction.claims.length; i++) {
                 const claim = transaction.claims[i];
                 transaction.assets[claim.asset] = {};
+                statusReceiver.updateStatus('Retrieving transaction ' + txid + ' (claim ' + (i + 1) + ')');
                 const voutTx = await this.rpcClient.getRawTransaction(claim.txid);
                 transaction.claimsAugmented.push(voutTx.vout[claim.vout]);
             }
@@ -145,6 +157,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
             for (let i = 0; i < transaction.vin.length; i++) {
                 const vin = transaction.vin[i];
                 transaction.assets[vin.asset] = {};
+                statusReceiver.updateStatus('Retrieving transaction ' + txid + ' (vin ' + (i + 1) + ')');
                 const voutTx = await this.rpcClient.getRawTransaction(vin.txid);
                 transaction.vinAugmented.push(voutTx.vout[vin.vout]);
             }

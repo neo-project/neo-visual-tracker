@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { INeoRpcConnection, INeoSubscription, BlockchainInfo, Blocks } from './neoRpcConnection';
+import { INeoRpcConnection, INeoSubscription, INeoStatusReceiver, BlockchainInfo, Blocks } from './neoRpcConnection';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -22,13 +22,14 @@ class ViewState {
     public currentTransaction: any = undefined;
 }
 
-export class NeoTrackerPanel implements INeoSubscription {
-    public readonly panel : vscode.WebviewPanel;
-    public readonly ready : Promise<void>;
-    public readonly viewState : ViewState;
+export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
+    public readonly panel: vscode.WebviewPanel;
+    public readonly ready: Promise<void>;
+    public readonly viewState: ViewState;
 
-    private onIncomingMessage? : () => void;
-    private rpcConnection : INeoRpcConnection;
+    private onIncomingMessage?: () => void;
+    private rpcConnection: INeoRpcConnection;
+    private isPageLoading: boolean;
 
     constructor(
         extensionPath : string,
@@ -43,6 +44,8 @@ export class NeoTrackerPanel implements INeoSubscription {
         this.ready = new Promise((resolve, reject) => {
             this.onIncomingMessage = resolve;
         });
+
+        this.isPageLoading = true;
 
         this.panel = vscode.window.createWebviewPanel(
             'newExpressTracker',
@@ -65,14 +68,20 @@ export class NeoTrackerPanel implements INeoSubscription {
     }
 
     public async onNewBlock(blockchainInfo: BlockchainInfo) {
-        this.viewState.blockChainInfo = blockchainInfo;
-        await this.updateBlockList();
-        this.panel.webview.postMessage(this.viewState);
+        if (!this.isPageLoading) {
+            this.viewState.blockChainInfo = blockchainInfo;
+            await this.updateBlockList();
+            this.panel.webview.postMessage({ viewState: this.viewState });
+        }
+    }
+
+    public updateStatus(status?: string) : void {
+        this.panel.webview.postMessage({ status: { message: status, isLoading: this.isPageLoading } });
     }
 
     private async updateBlockList(force?: boolean) {
         if (force || (this.viewState.firstBlock === undefined)) {
-            this.viewState.blocks = await this.rpcConnection.getBlocks(this.viewState.firstBlock);
+            this.viewState.blocks = await this.rpcConnection.getBlocks(this.viewState.firstBlock, this);
         }
     }
 
@@ -81,39 +90,49 @@ export class NeoTrackerPanel implements INeoSubscription {
     }
 
     private async onMessage(message: any) {
-        if (this.onIncomingMessage) {
-            this.onIncomingMessage();
-        }
+        try {
+            this.isPageLoading = true;
 
-        if (message.e === 'previousBlocks') {
-            this.viewState.firstBlock = this.viewState.blocks.previous;
-            await this.updateBlockList(true);
-        } else if (message.e === 'nextBlocks') {
-            this.viewState.firstBlock = this.viewState.blocks.next;
-            await this.updateBlockList(true);
-        } else if (message.e === 'firstBlocks') {
-            this.viewState.firstBlock = undefined;
-            await this.updateBlockList(true);
-        } else if (message.e === 'lastBlocks') {
-            this.viewState.firstBlock = this.viewState.blocks.last;
-            await this.updateBlockList(true);
-        } else if (message.e === 'showBlock') {
-            this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c);
-            this.viewState.activePage = ActivePage.BlockDetail;
-        } else if (message.e === 'closeBlock') {
-            this.viewState.currentBlock = undefined;
-            this.viewState.activePage = (this.viewState.currentTransaction === undefined) ?
-                ActivePage.Blocks : ActivePage.TransactionDetail;
-        } else if (message.e === 'showTransaction') {
-            this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c);
-            this.viewState.activePage = ActivePage.TransactionDetail;
-        } else if (message.e === 'closeTransaction') {
-            this.viewState.currentTransaction = undefined;
-            this.viewState.activePage = (this.viewState.currentBlock === undefined) ?
-                ActivePage.Blocks : ActivePage.BlockDetail;
-        }
+            if (this.onIncomingMessage) {
+                this.onIncomingMessage();
+            }
 
-        this.panel.webview.postMessage(this.viewState);
+            if (message.e === 'init') {
+                this.panel.webview.postMessage({ viewState: this.viewState });
+                await this.updateBlockList(true);
+            } else if (message.e === 'previousBlocks') {
+                this.viewState.firstBlock = this.viewState.blocks.previous;
+                await this.updateBlockList(true);
+            } else if (message.e === 'nextBlocks') {
+                this.viewState.firstBlock = this.viewState.blocks.next;
+                await this.updateBlockList(true);
+            } else if (message.e === 'firstBlocks') {
+                this.viewState.firstBlock = undefined;
+                await this.updateBlockList(true);
+            } else if (message.e === 'lastBlocks') {
+                this.viewState.firstBlock = this.viewState.blocks.last;
+                await this.updateBlockList(true);
+            } else if (message.e === 'showBlock') {
+                this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);
+                this.viewState.activePage = ActivePage.BlockDetail;
+            } else if (message.e === 'closeBlock') {
+                this.viewState.currentBlock = undefined;
+                this.viewState.activePage = (this.viewState.currentTransaction === undefined) ?
+                    ActivePage.Blocks : ActivePage.TransactionDetail;
+            } else if (message.e === 'showTransaction') {
+                this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c, this);
+                this.viewState.activePage = ActivePage.TransactionDetail;
+            } else if (message.e === 'closeTransaction') {
+                this.viewState.currentTransaction = undefined;
+                this.viewState.activePage = (this.viewState.currentBlock === undefined) ?
+                    ActivePage.Blocks : ActivePage.BlockDetail;
+            }
+
+            this.panel.webview.postMessage({ viewState: this.viewState });
+        } finally {
+            this.isPageLoading = false;
+            this.updateStatus();
+        }
     }
 
     dispose() {

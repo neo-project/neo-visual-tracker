@@ -214,12 +214,16 @@ const renderers = {
 };
 
 function handleMessage(message: any) {
-    console.log(message);
-    renderers.renderBlockchainInfo(message.blockChainInfo);
-    renderers.renderBlocks(message.blocks.blocks, message.firstBlock);
-    renderers.renderBlock(message.currentBlock);
-    renderers.renderTransaction(message.currentTransaction);
-    renderers.setPage(message.activePage);
+    if (message.viewState) {
+        console.log(message.viewState);
+        renderers.renderBlockchainInfo(message.viewState.blockChainInfo);
+        renderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock);
+        renderers.renderBlock(message.viewState.currentBlock);
+        renderers.renderTransaction(message.viewState.currentTransaction);
+        renderers.setPage(message.viewState.activePage);
+    } else if (message.status) {
+        console.warn(new Date, 'status: ', message.status);
+    }
 }
 
 let vsCodePostMessage : Function;
