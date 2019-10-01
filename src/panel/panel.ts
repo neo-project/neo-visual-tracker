@@ -80,6 +80,10 @@ const htmlHelpers = {
         }
         return row;
     },
+    number: function(n: number) {
+        // avoid rounding small values to 0:
+        return n.toLocaleString(undefined, { maximumFractionDigits: 20 });
+    },
     setEnabled: function(selector: string, isEnabled: boolean) {
         const element = document.querySelector(selector);
         if (element) {
@@ -124,7 +128,7 @@ const renderers = {
     },
     renderBlockchainInfo: function(blockchainInfo: any) {
         if (blockchainInfo) {
-            htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(blockchainInfo.height.toLocaleString()));
+            htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(htmlHelpers.number(blockchainInfo.height)));
             htmlHelpers.setPlaceholder(selectors.RpcUrl, htmlHelpers.text(blockchainInfo.url));
             htmlHelpers.setPlaceholder(selectors.RpcStatus, htmlHelpers.text(blockchainInfo.online ? 'Connected to' : 'Connecting to'));
         }
@@ -132,10 +136,10 @@ const renderers = {
     renderBlock: function(block?: any) {
         if (block) {
             htmlHelpers.setPlaceholder(selectors.BlockDetailHash, htmlHelpers.text(block.hash));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(block.index.toLocaleString()));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(htmlHelpers.number(block.index)));
             htmlHelpers.setPlaceholder(selectors.BlockDetailTime, htmlHelpers.text(htmlHelpers.time(block.time)));
             htmlHelpers.setPlaceholder(selectors.BlockDetailValidator, htmlHelpers.text(block.nextconsensus));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(block.size.toLocaleString() + ' bytes'));
+            htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(htmlHelpers.number(block.size) + ' bytes'));
             htmlHelpers.setPlaceholder(selectors.BlockDetailVersion, htmlHelpers.text(block.version));
             htmlHelpers.setPlaceholder(selectors.BlockDetailMerkleRoot, htmlHelpers.text(block.merkleroot));
             htmlHelpers.setPlaceholder(selectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
@@ -164,9 +168,9 @@ const renderers = {
                     const row = htmlHelpers.newTableRow(
                         htmlHelpers.text(tx.type),
                         htmlHelpers.newEventLink(tx.txid, panelEvents.ShowTransaction, tx.txid),
-                        htmlHelpers.text(tx.size.toLocaleString() + ' bytes'),
-                        htmlHelpers.text(tx.net_fee.toLocaleString() + ' GAS'),
-                        htmlHelpers.text(tx.sys_fee.toLocaleString() + ' GAS'));
+                        htmlHelpers.text(htmlHelpers.number(tx.size) + ' bytes'),
+                        htmlHelpers.text(htmlHelpers.number(tx.net_fee) + ' GAS'),
+                        htmlHelpers.text(htmlHelpers.number(tx.sys_fee) + ' GAS'));
                         txTbody.appendChild(row);
                 }
             }
@@ -181,11 +185,11 @@ const renderers = {
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.newEventLink(contents.index.toLocaleString(), panelEvents.ShowBlock, contents.index),
+                    htmlHelpers.newEventLink(htmlHelpers.number(contents.index), panelEvents.ShowBlock, contents.index),
                     htmlHelpers.text(htmlHelpers.time(contents.time)),
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.text(contents.nextconsensus),
-                    htmlHelpers.text(contents.size.toLocaleString() + ' bytes'));
+                    htmlHelpers.text(htmlHelpers.number(contents.size) + ' bytes'));
                 tbody.appendChild(row);
             }
         }
@@ -203,7 +207,7 @@ const renderers = {
                 }
                 const row = htmlHelpers.newTableRow(
                     htmlHelpers.text(inputOutput.address),
-                    htmlHelpers.text(inputOutput.value.toLocaleString() + ' ' + this.assetName(inputOutput.asset, assets)));
+                    htmlHelpers.text(htmlHelpers.number(inputOutput.value) + ' ' + this.assetName(inputOutput.asset, assets)));
                 tbody.appendChild(row);
             }
             return inputOutputList.length;
@@ -215,9 +219,9 @@ const renderers = {
             htmlHelpers.setPlaceholder(selectors.TransactionDetailType, htmlHelpers.text(transaction.type));
             htmlHelpers.setPlaceholder(selectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
             htmlHelpers.setPlaceholder(selectors.TransactionDetailTime, htmlHelpers.text(htmlHelpers.time(transaction.blocktime)));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailNetworkFee, htmlHelpers.text(transaction.net_fee.toLocaleString() + ' GAS'));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailSystemFee, htmlHelpers.text(transaction.sys_fee.toLocaleString() + ' GAS'));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailSize, htmlHelpers.text(transaction.size.toLocaleString() + ' bytes'));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailNetworkFee, htmlHelpers.text(htmlHelpers.number(transaction.net_fee) + ' GAS'));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailSystemFee, htmlHelpers.text(htmlHelpers.number(transaction.sys_fee) + ' GAS'));
+            htmlHelpers.setPlaceholder(selectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
             htmlHelpers.setPlaceholder(
                 selectors.TransactionDetailBlock, 
                 htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash));
