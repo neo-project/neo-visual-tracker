@@ -127,9 +127,15 @@ const renderers = {
             htmlHelpers.setPlaceholder(selectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
 
             if (block.previousblockhash) {
-                htmlHelpers.setPlaceholder(
-                    selectors.BlockDetailPreviousLink, 
-                    htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1));
+                if (block.index > 0) {
+                    htmlHelpers.setPlaceholder(
+                        selectors.BlockDetailPreviousLink, 
+                        htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1));
+                } else {
+                    htmlHelpers.setPlaceholder(
+                        selectors.BlockDetailPreviousLink, 
+                        htmlHelpers.text(block.previousblockhash));
+                }
             } else {
                 htmlHelpers.setPlaceholder(selectors.BlockDetailPreviousLink, htmlHelpers.text('None'));
             }
