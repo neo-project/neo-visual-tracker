@@ -145,10 +145,11 @@ export class NeoRpcConnection implements INeoRpcConnection {
         if (transaction.claims && transaction.claims.length) {
             for (let i = 0; i < transaction.claims.length; i++) {
                 const claim = transaction.claims[i];
-                transaction.assets[claim.asset] = {};
                 statusReceiver.updateStatus('Retrieving transaction ' + txid + ' (claim ' + (i + 1) + ')');
                 const voutTx = await this.rpcClient.getRawTransaction(claim.txid);
-                transaction.claimsAugmented.push(voutTx.vout[claim.vout]);
+                const vinVout = voutTx.vout[claim.vout];
+                transaction.assets[vinVout.asset] = {};
+                transaction.claimsAugmented.push(vinVout);
             }
         }
 
