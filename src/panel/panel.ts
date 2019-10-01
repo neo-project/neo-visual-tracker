@@ -38,8 +38,8 @@ const selectors = {
     TransactionDetailSystemFee: '#transactiondetail .systemFee',
     TransactionDetailSize: '#transactiondetail .size',
     TransactionDetailBlock: '#transactiondetail .block',
-    TransactionDetailClaimsTable: '#transactiondetail .claims',
-    TransactionDetailInputsTable: '#transactiondetail .inputs',
+    TransactionValueTransferTable: '#transactiondetail #value-transfer',
+    TransactionDetailInputsClaimsTable: '#transactiondetail .inputsClaims',
     TransactionDetailOutputsTable: '#transactiondetail .outputs',
     LoadingIndicator: '#loading-indicator',
     LoadingMessage: '#loading-indicator .message',
@@ -190,18 +190,25 @@ const renderers = {
             }
         }
     },
-    renderInputsOutputs: function(tbodySelector: string, inputOutputList: any[], assets: any) {
+    renderInputsOutputs: function(tbodySelector: string, inputOutputList: any[], assets: any, clear: boolean, negate: boolean) {
         const tbody = document.querySelector(tbodySelector);
         if (tbody) {
-            htmlHelpers.clearChildren(tbody);
+            if (clear) {
+                htmlHelpers.clearChildren(tbody);
+            }
             for (let i = 0; i < inputOutputList.length; i++) {
                 const inputOutput = inputOutputList[i];
+                if (negate) {
+                    inputOutput.value *= -1;
+                }
                 const row = htmlHelpers.newTableRow(
                     htmlHelpers.text(inputOutput.address),
                     htmlHelpers.text(inputOutput.value.toLocaleString() + ' ' + this.assetName(inputOutput.asset, assets)));
                 tbody.appendChild(row);
             }
+            return inputOutputList.length;
         }
+        return 0;
     },
     renderTransaction: function(transaction?: any) {
         if (transaction) {
@@ -214,9 +221,12 @@ const renderers = {
             htmlHelpers.setPlaceholder(
                 selectors.TransactionDetailBlock, 
                 htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash));
-            this.renderInputsOutputs(selectors.TransactionDetailClaimsTable, transaction.claimsAugmented, transaction.assets);
-            this.renderInputsOutputs(selectors.TransactionDetailInputsTable, transaction.vinAugmented, transaction.assets);
-            this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets);
+            let valueTransferCount = 0;
+            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false);
+            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true);
+            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false);
+            (document.querySelector(selectors.TransactionValueTransferTable) as any).style.display =
+                valueTransferCount > 0 ? 'table' : 'none';
         }
     },
     setPage: function(activePage: string) {
