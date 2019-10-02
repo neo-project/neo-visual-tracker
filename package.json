@@ -47,6 +47,7 @@
     },
     "dependencies": {
         "@cityofzion/neon-js": "^4.7.0",
+        "@types/memoizee": "^0.4.3",
         "memoizee": "^0.4.14"
     }
 }
