@@ -126,6 +126,9 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 this.viewState.firstBlock = 0;
                 this.viewState.forwards = false;
                 await this.updateBlockList(true);
+            } else if (message.e === 'changeHideEmpty') {
+                this.viewState.hideEmptyBlocks = !!message.c;
+                await this.updateBlockList(true);
             } else if (message.e === 'showBlock') {
                 this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);
                 this.viewState.activePage = ActivePage.BlockDetail;

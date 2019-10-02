@@ -13,6 +13,7 @@ const selectors = {
     BlockHeight: '#blockHeight',
     RpcUrl: '#rpcUrl',
     RpcStatus: '#rpcStatus',
+    HideEmptyBlocksCheckbox: '#hideEmpty',
     BlocksTableBody: '#blocks tbody',
     BlocksPaginationFirst: '#blocks .first',
     BlocksPaginationNext: '#blocks .next',
@@ -56,6 +57,7 @@ const panelEvents = {
     CloseBlock: 'closeBlock',
     ShowTransaction: 'showTransaction',
     CloseTransaction: 'closeTransaction',
+    ChangeHideEmpty: 'changeHideEmpty',
 };
 
 const htmlHelpers = {
@@ -271,6 +273,13 @@ function initializePanel() {
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationLast, panelEvents.LastBlocksPage);
     htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.CloseBlock);
     htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction);
+    
+    const checkbox = document.querySelector(selectors.HideEmptyBlocksCheckbox);
+    if (checkbox) {
+        checkbox.addEventListener(
+            'change', 
+            () => vsCodePostMessage({ e: panelEvents.ChangeHideEmpty, c: (checkbox as any).checked }));
+    }
 }
 
 window.onload = initializePanel;
