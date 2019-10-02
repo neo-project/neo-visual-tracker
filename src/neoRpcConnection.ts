@@ -1,5 +1,4 @@
-import * as neon from '@cityofzion/neon-js';
-import { RPCClient } from '@cityofzion/neon-core/lib/rpc';
+import { CachedRpcClient } from "./cachedRpcClient";
 
 const BlocksPerPage = 20;
 
@@ -39,7 +38,7 @@ export interface INeoStatusReceiver {
 
 export class NeoRpcConnection implements INeoRpcConnection {
     
-    private readonly rpcClient: RPCClient;
+    private readonly rpcClient: CachedRpcClient;
     // private readonly rpcUrl: string = 'http://127.0.0.1:49154';
     private readonly rpcUrl: string = 'http://seed1.ngd.network:10332';
 
@@ -49,7 +48,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private online: boolean = true;
 
     constructor() {
-        this.rpcClient = new neon.rpc.RPCClient(this.rpcUrl);
+        this.rpcClient = new CachedRpcClient(this.rpcUrl);
         this.lastKnownHeight = 0;
         this.subscriptions = [];
         this.timeout = undefined;

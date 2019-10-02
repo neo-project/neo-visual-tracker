@@ -15,11 +15,13 @@
     ],
     "main": "./out/extension.js",
     "contributes": {
-        "commands": [{
-            "command": "extension.openTracker",
-            "title": "Open NEO Express Tracker",
-            "category": "NEO Express"
-        }]
+        "commands": [
+            {
+                "command": "extension.openTracker",
+                "title": "Open NEO Express Tracker",
+                "category": "NEO Express"
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
@@ -44,6 +46,7 @@
         "vscode-test": "^1.2.0"
     },
     "dependencies": {
-        "@cityofzion/neon-js": "^4.7.0"
+        "@cityofzion/neon-js": "^4.7.0",
+        "memoizee": "^0.4.14"
     }
 }
