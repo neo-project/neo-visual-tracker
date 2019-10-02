@@ -90,8 +90,10 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     public async getBlock(index: number, statusReceiver: INeoStatusReceiver) {
         try {
-            statusReceiver.updateStatus('Retrieving block #' + index);
-            return await this.rpcClient.getBlock(index) as any;
+            statusReceiver.updateStatus('Retrieving block #' + index + '...');
+            const result = await this.rpcClient.getBlock(index) as any;
+            statusReceiver.updateStatus('Retrieved block #' + index);
+            return result;
         } catch(e) {
             console.error('NeoRpcConnection could not retrieve individual block #' + index + ': ' + e);
             return undefined;
@@ -111,17 +113,27 @@ export class NeoRpcConnection implements INeoRpcConnection {
             result.previous = undefined;
         }
 
+        const promises = [];
+
+        let j = 0;
         for (let i = startAt; i > startAt - BlocksPerPage; i--) {
             if (i >= 0) {
-                try {
-                    const block = await this.getBlock(i, statusReceiver);
-                    result.blocks.push(block);
-                    result.next = block.index - 1;
-                } catch(e) {
-                    console.error('NeoRpcConnection could not retrieve block #' + i + ': ' + e);
-                }
+                
+                const promise = (async (position) => {
+                    try {
+                        result.blocks[position] = await this.getBlock(i, statusReceiver);
+                    } catch(e) {
+                        console.error('NeoRpcConnection could not retrieve block #' + i + ': ' + e);
+                    }
+                })(j);
+                promises.push(promise);
+                
+                j++;
+                result.next = i - 1;
             }
         }
+
+        await Promise.all(promises);
 
         return result;
     }
