@@ -17,9 +17,11 @@ class ViewState {
     public blockChainInfo? : BlockchainInfo = undefined;
     public activePage : ActivePage = ActivePage.Blocks;
     public firstBlock? : number = undefined;
+    public forwards: boolean = true;
     public blocks: Blocks = new Blocks();
     public currentBlock: any = undefined;
     public currentTransaction: any = undefined;
+    public hideEmptyBlocks: boolean = false;
 }
 
 export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
@@ -83,7 +85,11 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
 
     private async updateBlockList(force?: boolean) {
         if (force || (this.viewState.firstBlock === undefined)) {
-            this.viewState.blocks = await this.rpcConnection.getBlocks(this.viewState.firstBlock, this);
+            this.viewState.blocks = await this.rpcConnection.getBlocks(
+                this.viewState.firstBlock, 
+                this.viewState.hideEmptyBlocks,
+                this.viewState.forwards,
+                this);
         }
     }
 
@@ -105,16 +111,20 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     await this.updateBlockList(true);
                 }
             } else if (message.e === 'previousBlocks') {
-                this.viewState.firstBlock = this.viewState.blocks.previous;
+                this.viewState.firstBlock = this.viewState.blocks.firstIndex + 1;
+                this.viewState.forwards = false;
                 await this.updateBlockList(true);
             } else if (message.e === 'nextBlocks') {
-                this.viewState.firstBlock = this.viewState.blocks.next;
+                this.viewState.firstBlock = this.viewState.blocks.lastIndex - 1;
+                this.viewState.forwards = true;
                 await this.updateBlockList(true);
             } else if (message.e === 'firstBlocks') {
                 this.viewState.firstBlock = undefined;
+                this.viewState.forwards = true;
                 await this.updateBlockList(true);
             } else if (message.e === 'lastBlocks') {
-                this.viewState.firstBlock = this.viewState.blocks.last;
+                this.viewState.firstBlock = 0;
+                this.viewState.forwards = false;
                 await this.updateBlockList(true);
             } else if (message.e === 'showBlock') {
                 this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);

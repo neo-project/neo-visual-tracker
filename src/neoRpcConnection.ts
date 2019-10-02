@@ -1,3 +1,5 @@
+import { BitSet } from 'bitset';
+
 import { CachedRpcClient } from "./cachedRpcClient";
 
 const BlocksPerPage = 20;
@@ -14,15 +16,14 @@ export class BlockchainInfo {
 
 export class Blocks {
     public blocks: any[] = [];
-    public previous?: number = undefined;
-    public next?: number = undefined;
-    public last?: number = undefined;
+    public firstIndex: number = 0;
+    public lastIndex: number = 0;
 }
 
 export interface INeoRpcConnection {
     getBlockchainInfo(statusReceiver?: INeoStatusReceiver): Promise<BlockchainInfo> | BlockchainInfo;
     getBlock(index: number, statusReceiver: INeoStatusReceiver): Promise<any>;
-    getBlocks(startAt: number | undefined, statusReceiver: INeoStatusReceiver): Promise<Blocks>;
+    getBlocks(index: number | undefined, hideEmptyBlocks: boolean, forwards: boolean, statusReceiver: INeoStatusReceiver): Promise<Blocks>;
     getTransaction(txid: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     subscribe(subscriber: INeoSubscription): void;
     unsubscribe(subscriber: INeoSubscription): void;
@@ -41,6 +42,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private readonly rpcClient: CachedRpcClient;
     // private readonly rpcUrl: string = 'http://127.0.0.1:49154';
     private readonly rpcUrl: string = 'http://seed1.ngd.network:10332';
+    private readonly knownEmptyBlocks: BitSet;
 
     private lastKnownHeight: number;
     private subscriptions: INeoSubscription[];
@@ -49,6 +51,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     constructor() {
         this.rpcClient = new CachedRpcClient(this.rpcUrl);
+        this.knownEmptyBlocks = new BitSet();
         this.lastKnownHeight = 0;
         this.subscriptions = [];
         this.timeout = undefined;
@@ -92,6 +95,10 @@ export class NeoRpcConnection implements INeoRpcConnection {
         try {
             statusReceiver.updateStatus('Retrieving block #' + index + '...');
             const result = await this.rpcClient.getBlock(index) as any;
+            if (result.tx && (result.tx.length <= 1)) {
+                this.knownEmptyBlocks.set(index);
+            }
+
             statusReceiver.updateStatus('Retrieved block #' + index);
             return result;
         } catch(e) {
@@ -100,42 +107,74 @@ export class NeoRpcConnection implements INeoRpcConnection {
         }
     }
 
-    public async getBlocks(startAt: number | undefined, statusReceiver: INeoStatusReceiver) {
+    public async getBlocks(
+        index: number | undefined, 
+        hideEmptyBlocks: boolean,
+        forwards: boolean,
+        statusReceiver: INeoStatusReceiver) : Promise<Blocks> {
+
         const blockchainInfo = await this.getBlockchainInfo(statusReceiver);
         const height = blockchainInfo.height;
-        startAt = startAt || height - 1;
-        startAt = Math.max(startAt, BlocksPerPage - 1);
-
-        const result = new Blocks();
-        result.last = BlocksPerPage - 1;
-        result.previous = startAt + BlocksPerPage;
-        if (result.previous >= height) {
-            result.previous = undefined;
+        if (index === undefined) {
+            index = height - 1;
+            forwards = true;
         }
 
-        const promises = [];
+        const result = new Blocks();
+        
+        while ((result.blocks.length < BlocksPerPage) && 
+            ((forwards && (index >= 0)) || (!forwards && (index < height)))) {
 
-        let j = 0;
-        for (let i = startAt; i > startAt - BlocksPerPage; i--) {
-            if (i >= 0) {
-                
-                const promise = (async (position) => {
-                    try {
-                        result.blocks[position] = await this.getBlock(i, statusReceiver);
-                    } catch(e) {
-                        console.error('NeoRpcConnection could not retrieve block #' + i + ': ' + e);
+            const blocksThisBatch : any[] = [];
+            const promises = [];
+            for (let i = 0; i < BlocksPerPage; i++) {
+                if ((index >= 0) && (index < height)) {
+                    if (!this.knownEmptyBlocks.get(index) || !hideEmptyBlocks) {
+                        const promise = (async (batchIndex, blockIndex) => {
+                            try {
+                                blocksThisBatch[batchIndex] = await this.getBlock(blockIndex, statusReceiver);
+                            } catch(e) {
+                                console.error('NeoRpcConnection could not retrieve block #' + blockIndex + ': ' + e);
+                            }
+                        })(i, index);
+                        promises.push(promise);
                     }
-                })(j);
-                promises.push(promise);
-                
-                j++;
-                result.next = i - 1;
+                }
+
+                if (forwards) {
+                    index--;
+                } else {
+                    index++;
+                }
+            }
+
+            await Promise.all(promises);
+
+            for (let i = 0; i < blocksThisBatch.length; i++) {
+                if ((result.blocks.length < BlocksPerPage) &&
+                    blocksThisBatch[i] && 
+                    (!this.knownEmptyBlocks.get(blocksThisBatch[i].index) || !hideEmptyBlocks)) {
+
+                    result.blocks.push(blocksThisBatch[i]);
+                }
             }
         }
 
-        await Promise.all(promises);
+        if (!forwards) {
+            result.blocks = result.blocks.reverse();
+        }
 
-        return result;
+        if (result.blocks.length === 0) {
+            if (forwards) {
+                return await this.getBlocks(0, hideEmptyBlocks, false, statusReceiver);
+            } else {
+                return await this.getBlocks(undefined, hideEmptyBlocks, true, statusReceiver);
+            }
+        } else {
+            result.firstIndex = result.blocks[0].index;
+            result.lastIndex = result.blocks[result.blocks.length - 1].index;
+            return result;
+        }
     }
 
     public async getTransaction(txid: string, statusReceiver: INeoStatusReceiver) {
