@@ -68,11 +68,13 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     }
 
     public async onNewBlock(blockchainInfo: BlockchainInfo) {
+        this.viewState.blockChainInfo = blockchainInfo;
+        
         if (!this.isPageLoading) {
-            this.viewState.blockChainInfo = blockchainInfo;
             await this.updateBlockList();
-            this.panel.webview.postMessage({ viewState: this.viewState });
         }
+
+        this.panel.webview.postMessage({ viewState: this.viewState });
     }
 
     public updateStatus(status?: string) : void {
