@@ -47,7 +47,9 @@
     },
     "dependencies": {
         "@cityofzion/neon-js": "^4.7.0",
+        "@neo-one/node-core": "^1.2.2",
         "@types/memoizee": "^0.4.3",
+        "@types/pouchdb-core": "^7.0.4",
         "bitset": "^5.0.5",
         "memoizee": "^0.4.14"
     }

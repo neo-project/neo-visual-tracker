@@ -1,4 +1,5 @@
 import { BitSet } from 'bitset';
+import { disassembleByteCode } from '@neo-one/node-core/disassembleByteCode';
 
 import { CachedRpcClient } from "./cachedRpcClient";
 
@@ -227,17 +228,12 @@ export class NeoRpcConnection implements INeoRpcConnection {
             transaction.assets[assetId] = await this.rpcClient.getAssetState(assetId);
         }
 
-        // TODO: Parse script hex into byte code
-        //       neo-blockchain package may be useful:
-        //       https://github.com/neotracker/neo-blockchain/blob/e746fa7940ec64dec295e35208fcebe0345b9a0f/packages/neo-blockchain-core/src/vm.js
-        //
-        // for (let i = 0; i < transaction.scripts.length; i++) {
-        //     const script = transaction.scripts[i];
-        //     for (let portion in { invocation: null, verification: null }) {
-        //         const scriptBuilder = new neon.sc.ScriptBuilder(script[portion]);
-        //         console.log(scriptBuilder.toScriptParams());
-        //     }
-        // }
+        for (let i = 0; i < transaction.scripts.length; i++) {
+            const script = transaction.scripts[i];
+            for (let portion in { invocation: null, verification: null }) {
+                script[portion + 'Disassembled'] = disassembleByteCode(Buffer.from(script[portion], 'hex'));
+            }
+        }
 
         return transaction;
     }
