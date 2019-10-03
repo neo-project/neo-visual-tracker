@@ -44,6 +44,8 @@ const selectors = {
     TransactionDetailOutputsTable: '#transactiondetail .outputs',
     TransactionScriptsTable: '#transactiondetail #scripts',
     TransactionScriptsTableBody: '#transactiondetail #scripts .script-rows',
+    TransactionMainScriptArea: '#transactiondetail #main-script',
+    TransactionMainScriptBody: '#transactiondetail #main-script .script-body',
     LoadingIndicator: '#loading-indicator',
     LoadingMessage: '#loading-indicator .message',
 };
@@ -236,6 +238,11 @@ const renderers = {
             (document.querySelector(selectors.TransactionValueTransferTable) as any).style.display =
                 valueTransferCount > 0 ? 'table' : 'none';
             const scriptsTbody = document.querySelector(selectors.TransactionScriptsTableBody);
+            (document.querySelector(selectors.TransactionMainScriptArea) as any).style.display =
+                transaction.scriptDisassembled ? 'table' : 'none';
+            htmlHelpers.setPlaceholder(
+                selectors.TransactionMainScriptBody, 
+                htmlHelpers.text(transaction.scriptDisassembled));
             (document.querySelector(selectors.TransactionScriptsTable) as any).style.display =
                 transaction.scripts.length > 0 ? 'table' : 'none';
             if (scriptsTbody) {
