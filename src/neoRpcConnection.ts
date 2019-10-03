@@ -237,6 +237,12 @@ export class NeoRpcConnection implements INeoRpcConnection {
             }
         }
 
+        if (transaction.script) {
+            transaction.scriptDisassembled = disassembleByteCode(Buffer.from(transaction.script, 'hex'))
+            .map( _ => _.value)
+            .join('\r\n');
+        }
+
         return transaction;
     }
 
