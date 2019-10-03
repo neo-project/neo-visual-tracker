@@ -42,6 +42,8 @@ const selectors = {
     TransactionValueTransferTable: '#transactiondetail #value-transfer',
     TransactionDetailInputsClaimsTable: '#transactiondetail .inputsClaims',
     TransactionDetailOutputsTable: '#transactiondetail .outputs',
+    TransactionScriptsTable: '#transactiondetail #scripts',
+    TransactionScriptsTableBody: '#transactiondetail #scripts .script-rows',
     LoadingIndicator: '#loading-indicator',
     LoadingMessage: '#loading-indicator .message',
 };
@@ -233,6 +235,19 @@ const renderers = {
             valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false);
             (document.querySelector(selectors.TransactionValueTransferTable) as any).style.display =
                 valueTransferCount > 0 ? 'table' : 'none';
+            const scriptsTbody = document.querySelector(selectors.TransactionScriptsTableBody);
+            (document.querySelector(selectors.TransactionScriptsTable) as any).style.display =
+                transaction.scripts.length > 0 ? 'table' : 'none';
+            if (scriptsTbody) {
+                htmlHelpers.clearChildren(scriptsTbody);
+                for (let i = 0; i < transaction.scripts.length; i++) {
+                    const script = transaction.scripts[i];
+                    scriptsTbody.appendChild(
+                        htmlHelpers.newTableRow(htmlHelpers.text('Invocation:'), htmlHelpers.text(script.invocationDisassembled)));
+                    scriptsTbody.appendChild(
+                        htmlHelpers.newTableRow(htmlHelpers.text('Verification:'), htmlHelpers.text(script.verificationDisassembled)));
+                }
+            }
         }
     },
     setPage: function(activePage: string) {

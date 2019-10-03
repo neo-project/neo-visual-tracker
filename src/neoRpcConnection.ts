@@ -231,7 +231,9 @@ export class NeoRpcConnection implements INeoRpcConnection {
         for (let i = 0; i < transaction.scripts.length; i++) {
             const script = transaction.scripts[i];
             for (let portion in { invocation: null, verification: null }) {
-                script[portion + 'Disassembled'] = disassembleByteCode(Buffer.from(script[portion], 'hex'));
+                script[portion + 'Disassembled'] = disassembleByteCode(Buffer.from(script[portion], 'hex'))
+                    .map( _ => _.value)
+                    .join('\r\n');
             }
         }
 

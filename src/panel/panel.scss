@@ -102,3 +102,17 @@ a {
 a:hover {
     color: var(--vscode-textLink-activeForeground);
 }
+
+.script-rows {
+    td:nth-child(1) {
+        font-weight: bold;
+        text-align: right;
+        background-color: var(--vscode-editor-background);
+        filter: contrast(0.75);
+    }
+    td:nth-child(2) {
+        font-family: monospace;
+        white-space: pre-wrap;
+        text-align: left;
+    }
+}
