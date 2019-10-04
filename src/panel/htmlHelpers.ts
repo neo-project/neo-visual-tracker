@@ -1,0 +1,54 @@
+const htmlHelpers = {
+    clearChildren: function(element: Element) {
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+    },
+    newEventLink: function(text: string, event: string, context: any | undefined, postMessage: any) {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.appendChild(document.createTextNode(text));
+        this.setOnClickEvent(link, event, context, postMessage);
+        return link;
+    },
+    newTableRow: function(...cells: Node[]) {
+        const row = document.createElement('tr');
+        for (let i = 0; i < cells.length; i++) {
+            const cell = document.createElement('td');
+            cell.appendChild(cells[i]);
+            row.appendChild(cell);
+        }
+        return row;
+    },
+    number: function(n: number) {
+        // avoid rounding small values to 0:
+        return n.toLocaleString(undefined, { maximumFractionDigits: 20 });
+    },
+    setEnabled: function(selector: string, isEnabled: boolean) {
+        const element = document.querySelector(selector);
+        if (element) {
+            (element as any).disabled = !isEnabled;
+        }
+    },
+    setOnClickEvent: function(element: string | Element, event: string, context: any | undefined, postMessage : any) {
+        const clickable = (typeof element === 'string') ? document.querySelector(element) : element;
+        if (clickable) {
+            clickable.addEventListener('click', () => postMessage({ e: event, c: context }));
+        }
+    },
+    setPlaceholder: function(selector: string, value: Node) {
+        const placeHolderElement = document.querySelector(selector);
+        if (placeHolderElement) {
+            this.clearChildren(placeHolderElement);
+            placeHolderElement.appendChild(value);
+        }
+    },
+    text: function(content: string) {
+        return document.createTextNode(content);
+    },
+    time: function(unixTimestamp: number) {
+        return (new Date(unixTimestamp * 1000)).toLocaleString();
+    },
+};
+
+export { htmlHelpers };
