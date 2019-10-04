@@ -1,3 +1,5 @@
+import { htmlHelpers } from "./htmlHelpers";
+
 /*
  * This code runs in the context of the WebView panel. It receives messages from the main extension 
  * containing blockchain information that should be rendered.  The browser instance running this code 
@@ -64,59 +66,6 @@ const panelEvents = {
     ChangeHideEmpty: 'changeHideEmpty',
 };
 
-const htmlHelpers = {
-    clearChildren: function(element: Element) {
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
-    },
-    newEventLink: function(text: string, event: string, context?: any) {
-        const link = document.createElement('a');
-        link.href = '#';
-        link.appendChild(document.createTextNode(text));
-        this.setOnClickEvent(link, event, context);
-        return link;
-    },
-    newTableRow: function(...cells: Node[]) {
-        const row = document.createElement('tr');
-        for (let i = 0; i < cells.length; i++) {
-            const cell = document.createElement('td');
-            cell.appendChild(cells[i]);
-            row.appendChild(cell);
-        }
-        return row;
-    },
-    number: function(n: number) {
-        // avoid rounding small values to 0:
-        return n.toLocaleString(undefined, { maximumFractionDigits: 20 });
-    },
-    setEnabled: function(selector: string, isEnabled: boolean) {
-        const element = document.querySelector(selector);
-        if (element) {
-            (element as any).disabled = !isEnabled;
-        }
-    },
-    setOnClickEvent: function(element: string | Element, event: string, context?: any) {
-        const clickable = (typeof element === 'string') ? document.querySelector(element) : element;
-        if (clickable) {
-            clickable.addEventListener('click', () => vsCodePostMessage({ e: event, c: context }));
-        }
-    },
-    setPlaceholder: function(selector: string, value: Node) {
-        const placeHolderElement = document.querySelector(selector);
-        if (placeHolderElement) {
-            this.clearChildren(placeHolderElement);
-            placeHolderElement.appendChild(value);
-        }
-    },
-    text: function(content: string) {
-        return document.createTextNode(content);
-    },
-    time: function(unixTimestamp: number) {
-        return (new Date(unixTimestamp * 1000)).toLocaleString();
-    },
-};
-
 const renderers = {
     assetName: function(assetId: string, assets: any) {
         const assetInfo = assets[assetId];
@@ -153,7 +102,7 @@ const renderers = {
             if ((block.index > 0) && block.previousblockhash) {
                 htmlHelpers.setPlaceholder(
                     selectors.BlockDetailPreviousLink, 
-                    htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1));
+                    htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1, vsCodePostMessage));
             } else {
                 htmlHelpers.setPlaceholder(selectors.BlockDetailPreviousLink, htmlHelpers.text('None'));
             }
@@ -161,7 +110,7 @@ const renderers = {
             if (block.nextblockhash) {
                 htmlHelpers.setPlaceholder(
                     selectors.BlockDetailNextLink, 
-                    htmlHelpers.newEventLink(block.nextblockhash, panelEvents.ShowBlock, block.index + 1));
+                    htmlHelpers.newEventLink(block.nextblockhash, panelEvents.ShowBlock, block.index + 1, vsCodePostMessage));
             } else {
                 htmlHelpers.setPlaceholder(selectors.BlockDetailNextLink, htmlHelpers.text('None'));
             }
@@ -173,7 +122,7 @@ const renderers = {
                     const tx = block.tx[i];
                     const row = htmlHelpers.newTableRow(
                         htmlHelpers.text(tx.type),
-                        htmlHelpers.newEventLink(tx.txid, panelEvents.ShowTransaction, tx.txid),
+                        htmlHelpers.newEventLink(tx.txid, panelEvents.ShowTransaction, tx.txid, vsCodePostMessage),
                         htmlHelpers.text(htmlHelpers.number(tx.size) + ' bytes'),
                         htmlHelpers.text(htmlHelpers.number(tx.net_fee) + ' GAS'),
                         htmlHelpers.text(htmlHelpers.number(tx.sys_fee) + ' GAS'));
@@ -191,7 +140,7 @@ const renderers = {
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.newEventLink(htmlHelpers.number(contents.index), panelEvents.ShowBlock, contents.index),
+                    htmlHelpers.newEventLink(htmlHelpers.number(contents.index), panelEvents.ShowBlock, contents.index, vsCodePostMessage),
                     htmlHelpers.text(htmlHelpers.time(contents.time)),
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.text(contents.nextconsensus),
@@ -230,7 +179,7 @@ const renderers = {
             htmlHelpers.setPlaceholder(selectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
             htmlHelpers.setPlaceholder(
                 selectors.TransactionDetailBlock, 
-                htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash));
+                htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash, vsCodePostMessage));
             let valueTransferCount = 0;
             valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false);
             valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true);
@@ -289,12 +238,12 @@ function initializePanel() {
     vsCodePostMessage = vscode.postMessage;
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: panelEvents.Init });
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage);
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage);
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationFirst, panelEvents.FirstBlocksPage);
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationLast, panelEvents.LastBlocksPage);
-    htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.CloseBlock);
-    htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationFirst, panelEvents.FirstBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationLast, panelEvents.LastBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.CloseBlock, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction, null, vsCodePostMessage);
     
     const checkbox = document.querySelector(selectors.HideEmptyBlocksCheckbox);
     if (checkbox) {

@@ -25,10 +25,11 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./ && node-sass src/panel/panel.scss -o out/panel",
+        "compile": "tsc -p ./ && node-sass src/panel/panel.scss -o out/panel && browserify out/panel/panel.js -o out/panel/bundle.js",
         "watch": "concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
         "watch-css": "node-sass src/panel/panel.scss -wo out/panel",
+        "watch-browserify": "watchify out/panel/panel.js -o out/panel/bundle.js",
         "pretest": "npm run compile",
         "test": "node ./out/test/runTest.js"
     },
@@ -43,7 +44,9 @@
         "node-sass": "^4.12.0",
         "tslint": "^5.12.1",
         "typescript": "^3.3.1",
-        "vscode-test": "^1.2.0"
+        "vscode-test": "^1.2.0",
+        "browserify": "^16.5.0",
+        "watchify": "^3.11.1"
     },
     "dependencies": {
         "@cityofzion/neon-js": "^4.7.0",
