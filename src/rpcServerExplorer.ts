@@ -85,6 +85,8 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
         this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
         this.rootItems = [];
         this.refresh();
+        vscode.workspace.onDidSaveTextDocument(this.refresh, this);
+        vscode.workspace.onDidChangeWorkspaceFolders(this.refresh, this);
     }
 
 	public async refresh() {
@@ -99,16 +101,13 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
             allRootPaths = vscode.workspace.workspaceFolders.map(_ => _.uri.fsPath);
         }
 
-        const rootPath = vscode.workspace.rootPath;
-        if (rootPath) {
-            const allJsonFiles = await vscode.workspace.findFiles('**/*.json');
-            for (let i = 0; i < allJsonFiles.length; i++) {
-                const rpcServerFromJson = RpcServerTreeItemIdentifier.fromJsonFile(
-                    allRootPaths,
-                    allJsonFiles[i].fsPath);
-                if (rpcServerFromJson) {
-                    this.rootItems.push(rpcServerFromJson);
-                }
+        const allJsonFiles = await vscode.workspace.findFiles('**/*.json');
+        for (let i = 0; i < allJsonFiles.length; i++) {
+            const rpcServerFromJson = RpcServerTreeItemIdentifier.fromJsonFile(
+                allRootPaths,
+                allJsonFiles[i].fsPath);
+            if (rpcServerFromJson) {
+                this.rootItems.push(rpcServerFromJson);
             }
         }
 
