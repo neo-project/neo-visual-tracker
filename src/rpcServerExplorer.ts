@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
 
 class RpcServerTreeItemIdentifier {
@@ -31,8 +30,8 @@ class RpcServerTreeItemIdentifier {
             if (neoExpressConfig['consensus-nodes'] && neoExpressConfig['consensus-nodes'].length) {
                 for (let i = 0; i < neoExpressConfig['consensus-nodes'].length; i++) {
                     const consensusNode = neoExpressConfig['consensus-nodes'][i];
-                    if (consensusNode["tcp-port"]) {
-                        const uri = 'http://127.0.0.1:' + consensusNode["tcp-port"];
+                    if (consensusNode["rpc-port"]) {
+                        const uri = 'http://127.0.0.1:' + consensusNode["rpc-port"];
                         const child = RpcServerTreeItemIdentifier.fromUri(uri, 'Node #' + (i + 1));
                         result.children.push(child);
                     }
@@ -68,6 +67,11 @@ class RpcServerTreeItemIdentifier {
             const result = new vscode.TreeItem(this.label || this.rpcUri);
             result.iconPath = vscode.ThemeIcon.File;
             result.description = this.rpcUri;
+            result.command = {
+                title: 'Open tracker',
+                command: 'extension.openTracker',
+                arguments: [ this.rpcUri ],
+            };
             return result;
         } else {
             const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);

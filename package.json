@@ -25,7 +25,8 @@
         "commands": [{
                 "command": "extension.openTracker",
                 "title": "Open NEO Express Tracker",
-                "category": "NEO Express"
+                "category": "NEO Express",
+                "when": false
             },
             {
                 "command": "extension.refreshServers",

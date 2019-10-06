@@ -51,7 +51,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
 
         this.panel = vscode.window.createWebviewPanel(
             'newExpressTracker',
-            'NEO Express Tracker',
+            rpcConnection.rpcUrl,
             vscode.ViewColumn.Active,
             { enableScripts: true });
 

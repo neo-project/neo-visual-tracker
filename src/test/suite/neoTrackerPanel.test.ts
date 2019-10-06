@@ -9,6 +9,8 @@ const extensionRoot : string = __dirname + '/../../../';
 
 class MockRpcConnection implements INeoRpcConnection {
 	
+	public readonly rpcUrl: string = 'http://mock-rpc-server';
+	
 	public subscriptions : number = 0;
 
 	public blocks : Blocks;
@@ -50,8 +52,9 @@ class MockRpcConnection implements INeoRpcConnection {
 suite('NEO Tracker Panel Test Suite', () => {
 
 	test('Webview can be opened', async () => {		
-		const target = new NeoTrackerPanel(extensionRoot, new MockRpcConnection(), disposables);
-		assert.equal('NEO Express Tracker', target.panel.title);
+		const mockConnection = new MockRpcConnection();
+		const target = new NeoTrackerPanel(extensionRoot, mockConnection, disposables);
+		assert.equal(mockConnection.rpcUrl, target.panel.title);
 		assert.equal(true, target.panel.visible);
 	});
 

@@ -22,6 +22,7 @@ export class Blocks {
 }
 
 export interface INeoRpcConnection {
+    readonly rpcUrl: string;
     getBlockchainInfo(statusReceiver?: INeoStatusReceiver): Promise<BlockchainInfo> | BlockchainInfo;
     getBlock(index: number, statusReceiver: INeoStatusReceiver): Promise<any>;
     getBlocks(index: number | undefined, hideEmptyBlocks: boolean, forwards: boolean, statusReceiver: INeoStatusReceiver): Promise<Blocks>;
@@ -40,9 +41,9 @@ export interface INeoStatusReceiver {
 
 export class NeoRpcConnection implements INeoRpcConnection {
     
+    public readonly rpcUrl: string;
+
     private readonly rpcClient: CachedRpcClient;
-    // private readonly rpcUrl: string = 'http://127.0.0.1:49154';
-    private readonly rpcUrl: string = 'http://seed1.ngd.network:10332';
     private readonly knownEmptyBlocks: BitSet;
 
     private lastKnownHeight: number;
@@ -50,7 +51,8 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private timeout?: NodeJS.Timeout;
     private online: boolean = true;
 
-    constructor() {
+    constructor(rpcUrl: string) {
+        this.rpcUrl = rpcUrl;
         this.rpcClient = new CachedRpcClient(this.rpcUrl);
         this.knownEmptyBlocks = new BitSet();
         this.lastKnownHeight = 0;

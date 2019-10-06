@@ -1,17 +1,22 @@
 import * as vscode from 'vscode';
 
 import { NeoTrackerPanel } from './neoTrackerPanel';
-import { NeoRpcConnection } from './neoRpcConnection';
 import { RpcServerExplorer } from './rpcServerExplorer';
+import { RpcConnectionPool } from './rpcConnectionPool';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	const rpcConnection = new NeoRpcConnection();
+	const rpcConnectionPool = new RpcConnectionPool();
 
 	const rpcServerExplorer = new RpcServerExplorer();
 
-	const openTrackerCommand = vscode.commands.registerCommand('extension.openTracker', (url: string) => {
-		const panel = new NeoTrackerPanel(context.extensionPath, rpcConnection, context.subscriptions);
+	const openTrackerCommand = vscode.commands.registerCommand('extension.openTracker', (url?: string) => {
+		if (url) {	
+			const panel = new NeoTrackerPanel(
+				context.extensionPath, 
+				rpcConnectionPool.getConnection(url), 
+				context.subscriptions);
+		}
 	});
 
 	const refreshServersCommand = vscode.commands.registerCommand('extension.refreshServers', () => {
