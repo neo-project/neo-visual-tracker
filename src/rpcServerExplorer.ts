@@ -6,22 +6,35 @@ class RpcServerTreeItemIdentifier {
 
     public readonly jsonFile?: string;
 
+    public readonly label?: string;
+
     public readonly rpcUri?: string;
 
     public readonly parent?: RpcServerTreeItemIdentifier;
 
     public readonly children: RpcServerTreeItemIdentifier[];
 
-    public static fromJsonFile(jsonFile: string) {
+    public static fromJsonFile(allRootPaths: string[], jsonFile: string) {
         try {
+            let label = jsonFile;
+            for (let i = 0; i < allRootPaths.length; i++) {
+                label = label.replace(allRootPaths[i], '');
+            }
+
+            if (label.startsWith('/') || label.startsWith('\\')) {
+                label = label.substr(1);
+            }
+
+            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label);
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
-            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined);
             if (neoExpressConfig['consensus-nodes'] && neoExpressConfig['consensus-nodes'].length) {
                 for (let i = 0; i < neoExpressConfig['consensus-nodes'].length; i++) {
                     const consensusNode = neoExpressConfig['consensus-nodes'][i];
                     if (consensusNode["tcp-port"]) {
-                        result.children.push(RpcServerTreeItemIdentifier.fromUri('http://127.0.0.1:' + consensusNode["tcp-port"]));
+                        const uri = 'http://127.0.0.1:' + consensusNode["tcp-port"];
+                        const child = RpcServerTreeItemIdentifier.fromUri(uri);
+                        result.children.push(child);
                     }
                 }
                 return result;
@@ -34,13 +47,19 @@ class RpcServerTreeItemIdentifier {
     }
 
     public static fromUri(rpcUri: string, parent?: RpcServerTreeItemIdentifier) {
-        return new RpcServerTreeItemIdentifier(undefined, rpcUri, parent);
+        return new RpcServerTreeItemIdentifier(undefined, rpcUri, parent, undefined);
     }
 
-    private constructor(jsonFile?: string, rpcUri?: string, parent?: RpcServerTreeItemIdentifier) {
+    private constructor(
+        jsonFile?: string, 
+        rpcUri?: string, 
+        parent?: RpcServerTreeItemIdentifier,
+        label?: string) {
+
         this.jsonFile = jsonFile;
         this.rpcUri = rpcUri;
         this.parent = parent;
+        this.label = label;
         this.children = [];
     }
 
@@ -48,7 +67,7 @@ class RpcServerTreeItemIdentifier {
         if (this.rpcUri) {
             return new vscode.TreeItem('Server: ' + this.rpcUri);
         } else {
-            return new vscode.TreeItem('Config: ' + this.jsonFile, vscode.TreeItemCollapsibleState.Expanded);
+            return new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
         }
     }
 }
@@ -68,26 +87,29 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
         this.refresh();
     }
 
-	public refresh(): any {
-
-        // ...
-        // vscode.workspace.rootPath
-        // ...
-
-        const json1 = RpcServerTreeItemIdentifier.fromJsonFile('/Users/david/HelloWorld/num3.json');
-        const json2 = RpcServerTreeItemIdentifier.fromJsonFile('/Users/david/HelloWorld/default.neo-express.json');
+	public async refresh() {
 
         this.rootItems = [
             RpcServerTreeItemIdentifier.fromUri('http://seed1.ngd.network:10332'),
             RpcServerTreeItemIdentifier.fromUri('http://seed2.ngd.network:10332')
         ];
 
-        if (json1) {
-            this.rootItems.push(json1);
+        let allRootPaths: string[] = [];
+        if (vscode.workspace.workspaceFolders) {
+            allRootPaths = vscode.workspace.workspaceFolders.map(_ => _.uri.fsPath);
         }
 
-        if (json2) {
-            this.rootItems.push(json2);
+        const rootPath = vscode.workspace.rootPath;
+        if (rootPath) {
+            const allJsonFiles = await vscode.workspace.findFiles('**/*.json');
+            for (let i = 0; i < allJsonFiles.length; i++) {
+                const rpcServerFromJson = RpcServerTreeItemIdentifier.fromJsonFile(
+                    allRootPaths,
+                    allJsonFiles[i].fsPath);
+                if (rpcServerFromJson) {
+                    this.rootItems.push(rpcServerFromJson);
+                }
+            }
         }
 
 		this.onDidChangeTreeDataEmitter.fire();
