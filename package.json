@@ -11,17 +11,22 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.openTracker"
+        "onCommand:extension.openTracker",
+        "onView:extension.rpcServerExplorer"
     ],
     "main": "./out/extension.js",
     "contributes": {
-        "commands": [
-            {
-                "command": "extension.openTracker",
-                "title": "Open NEO Express Tracker",
-                "category": "NEO Express"
-            }
-        ]
+        "views": {
+            "explorer": [{
+                "id": "extension.rpcServerExplorer",
+                "name": "NEO RPC Servers"
+            }]
+        },
+        "commands": [{
+            "command": "extension.openTracker",
+            "title": "Open NEO Express Tracker",
+            "category": "NEO Express"
+        }]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
