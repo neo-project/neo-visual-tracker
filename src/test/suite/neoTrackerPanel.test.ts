@@ -88,6 +88,7 @@ suite('NEO Tracker Panel Test Suite', () => {
 	test('Panel responds to first blockchain update', async () => {
 		const rpcConnection = new MockRpcConnection();
 		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		await target.ready;
 		assert.equal(target.viewState.firstBlock, undefined);
 		assert.equal(target.viewState.blockChainInfo, undefined);
 		assert.equal(target.viewState.blocks.blocks.length, 0);
@@ -102,6 +103,7 @@ suite('NEO Tracker Panel Test Suite', () => {
 	test('New blocks do not reset pagination', async () => {
 		const rpcConnection = new MockRpcConnection();
 		const target = new NeoTrackerPanel(extensionRoot, rpcConnection, disposables);
+		await target.ready;
 		await target.onNewBlock(rpcConnection.blockchainInfo);
 		const initialBlockLength = rpcConnection.blocks.blocks.length;
 		assert.equal(initialBlockLength > 0, true);
