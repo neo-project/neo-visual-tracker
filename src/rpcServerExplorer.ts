@@ -33,7 +33,7 @@ class RpcServerTreeItemIdentifier {
                     const consensusNode = neoExpressConfig['consensus-nodes'][i];
                     if (consensusNode["tcp-port"]) {
                         const uri = 'http://127.0.0.1:' + consensusNode["tcp-port"];
-                        const child = RpcServerTreeItemIdentifier.fromUri(uri);
+                        const child = RpcServerTreeItemIdentifier.fromUri(uri, 'Node #' + (i + 1));
                         result.children.push(child);
                     }
                 }
@@ -46,8 +46,8 @@ class RpcServerTreeItemIdentifier {
         }
     }
 
-    public static fromUri(rpcUri: string, parent?: RpcServerTreeItemIdentifier) {
-        return new RpcServerTreeItemIdentifier(undefined, rpcUri, parent, undefined);
+    public static fromUri(rpcUri: string, label: string, parent?: RpcServerTreeItemIdentifier) {
+        return new RpcServerTreeItemIdentifier(undefined, rpcUri, parent, label);
     }
 
     private constructor(
@@ -65,9 +65,16 @@ class RpcServerTreeItemIdentifier {
 
     public asTreeItem() : vscode.TreeItem {
         if (this.rpcUri) {
-            return new vscode.TreeItem('Server: ' + this.rpcUri);
+            const result = new vscode.TreeItem(this.label || this.rpcUri);
+            result.iconPath = vscode.ThemeIcon.File;
+            result.description = this.rpcUri;
+            return result;
         } else {
-            return new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
+            const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
+            result.iconPath = vscode.ThemeIcon.Folder;
+            result.description = 'NEO Express Instance';
+            result.tooltip = 'NEO Express configuration loaded from: ' + this.jsonFile;
+            return result;
         }
     }
 }
@@ -92,8 +99,8 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 	public async refresh() {
 
         this.rootItems = [
-            RpcServerTreeItemIdentifier.fromUri('http://seed1.ngd.network:10332'),
-            RpcServerTreeItemIdentifier.fromUri('http://seed2.ngd.network:10332')
+            RpcServerTreeItemIdentifier.fromUri('http://seed1.ngd.network:10332', 'NGD'),
+            RpcServerTreeItemIdentifier.fromUri('https://seed1.cityofzion.io:443', 'City of Zion')
         ];
 
         let allRootPaths: string[] = [];
