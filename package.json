@@ -23,10 +23,27 @@
             }]
         },
         "commands": [{
-            "command": "extension.openTracker",
-            "title": "Open NEO Express Tracker",
-            "category": "NEO Express"
-        }]
+                "command": "extension.openTracker",
+                "title": "Open NEO Express Tracker",
+                "category": "NEO Express"
+            },
+            {
+                "command": "extension.refreshServers",
+                "title": "Refresh NEO RPC Server list",
+                "category": "NEO Express",
+                "icon": {
+                    "light": "resources/light/refresh.svg",
+                    "dark": "resources/dark/refresh.svg"
+                }
+            }
+        ],
+        "menus": {
+            "view/title": [{
+                "command": "extension.refreshServers",
+                "when": "view == extension.rpcServerExplorer",
+                "group": "navigation"
+            }]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
