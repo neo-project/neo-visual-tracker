@@ -17,12 +17,15 @@
     "main": "./out/extension.js",
     "contributes": {
         "views": {
-            "explorer": [{
-                "id": "extension.rpcServerExplorer",
-                "name": "NEO RPC Servers"
-            }]
+            "explorer": [
+                {
+                    "id": "extension.rpcServerExplorer",
+                    "name": "NEO RPC Servers"
+                }
+            ]
         },
-        "commands": [{
+        "commands": [
+            {
                 "command": "extension.openTracker",
                 "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
@@ -39,17 +42,19 @@
             }
         ],
         "menus": {
-            "view/title": [{
-                "command": "extension.refreshServers",
-                "when": "view == extension.rpcServerExplorer",
-                "group": "navigation"
-            }]
+            "view/title": [
+                {
+                    "command": "extension.refreshServers",
+                    "when": "view == extension.rpcServerExplorer",
+                    "group": "navigation"
+                }
+            ]
         }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "npm install && tsc -p ./ && node-sass src/panel/panel.scss -o out/panel && browserify out/panel/panel.js -o out/panel/bundle.js",
-        "watch": "npm install && concurrently -r npm:watch-*",
+        "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
         "watch-css": "node-sass src/panel/panel.scss -wo out/panel",
         "watch-browserify": "watchify out/panel/panel.js -o out/panel/bundle.js",
