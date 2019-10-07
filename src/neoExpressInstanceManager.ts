@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
 
-const shellescape = require('shell-escape');
-
 class InstanceIdentifier {
     constructor(
         public readonly jsonFile: string,
@@ -25,14 +23,17 @@ export class NeoExpressInstanceManager {
         const key = new InstanceIdentifier(jsonFile, index);
         let terminal = this.terminals.get(key.asString());
         if (!terminal) {
-            terminal = vscode.window.createTerminal('NEO: ' + label + ':' + index);
+            terminal = vscode.window.createTerminal(
+                'NEO: ' + label + ':' + index,
+                'neo-express',
+                ['run', '-i', jsonFile, '' + index]);
             this.terminals.set(key.asString(), terminal);
         }
 
         terminal.show();
-        terminal.sendText(
-            shellescape(['neo-express', 'run', '-i', jsonFile, index]),
-            true);
+        // terminal.sendText(
+        //     shellescape(['neo-express', 'run', '-i', jsonFile, index]),
+        //     true);
     }
 
 }
