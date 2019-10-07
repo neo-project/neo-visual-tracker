@@ -11,7 +11,13 @@ const renderers = {
             if (assetNames && assetNames.length) {
                 for (let i = 0; i < assetNames.length; i++) {
                     if (assetNames[i].lang === "en") {
-                        return assetNames[i].name || assetId;
+                        let result = assetNames[i].name || assetId;
+                        if (result === 'AntCoin') {
+                            result = 'GAS';
+                        } else if (result === 'AntShare') {
+                            result = 'NEO';
+                        }
+                        return result;
                     }
                 }
             }
