@@ -19,15 +19,18 @@ const labeledCacheOptions = (label: string) => {
     return result;
 };
 
-// Periodically print cache statistics to the console:
-const PrintCacheStatisticsIntervalInMilliseconds = 10000;
-const memProfile = require('memoizee/profile');
-setInterval(
-    () => {
-        console.log('CachedRpcClient statistics: \r\n' + memProfile.log());
-    }, 
-    PrintCacheStatisticsIntervalInMilliseconds
-);
+//
+// Uncomment the below code to periodically print cache statistics to the console:
+//
+
+// const PrintCacheStatisticsIntervalInMilliseconds = 10000;
+// const memProfile = require('memoizee/profile');
+// setInterval(
+//     () => {
+//         console.log('CachedRpcClient statistics: \r\n' + memProfile.log());
+//     }, 
+//     PrintCacheStatisticsIntervalInMilliseconds
+// );
 
 // Provides a wrapper around neon.rpc.RPCClient that uses an in-memory cache for results.
 export class CachedRpcClient {
