@@ -1,7 +1,7 @@
 {
     "publisher": "ngdseattle",
-    "name": "neo-express-tracker",
-    "displayName": "NEO Express Tracker",
+    "name": "neo-visual-devtracker",
+    "displayName": "NEO Visual DevTracker",
     "description": "A NEO Express blockchain explorer that is directly available within Visual Studio Code",
     "version": "0.0.1",
     "engines": {
@@ -17,14 +17,17 @@
     "main": "./out/extension.js",
     "contributes": {
         "views": {
-            "explorer": [{
-                "id": "extension.rpcServerExplorer",
-                "name": "NEO RPC Servers"
-            }]
+            "explorer": [
+                {
+                    "id": "extension.rpcServerExplorer",
+                    "name": "NEO RPC Servers"
+                }
+            ]
         },
-        "commands": [{
+        "commands": [
+            {
                 "command": "extension.openTracker",
-                "title": "Open NEO Express Tracker",
+                "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
                 "when": false
             },
@@ -39,11 +42,13 @@
             }
         ],
         "menus": {
-            "view/title": [{
-                "command": "extension.refreshServers",
-                "when": "view == extension.rpcServerExplorer",
-                "group": "navigation"
-            }]
+            "view/title": [
+                {
+                    "command": "extension.refreshServers",
+                    "when": "view == extension.rpcServerExplorer",
+                    "group": "navigation"
+                }
+            ]
         }
     },
     "scripts": {
