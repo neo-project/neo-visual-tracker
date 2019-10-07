@@ -24,7 +24,7 @@ function handleMessage(message: any) {
         const loadingIndicator: any = document.querySelector(selectors.LoadingIndicator);
         loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';
         htmlHelpers.setPlaceholder(selectors.LoadingMessage, htmlHelpers.text(message.status.message));
-        console.warn(new Date, 'status: ', message.status);
+        // console.warn(new Date, 'status: ', message.status);
     }
 }
 
