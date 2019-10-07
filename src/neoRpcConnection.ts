@@ -1,5 +1,6 @@
 import { BitSet } from 'bitset';
 import { disassembleByteCode } from '@neo-one/node-core/disassembleByteCode';
+import { Memento } from 'vscode';
 
 import { CachedRpcClient } from "./cachedRpcClient";
 
@@ -45,18 +46,22 @@ export class NeoRpcConnection implements INeoRpcConnection {
     public readonly rpcUrl: string;
 
     private readonly rpcClient: CachedRpcClient;
+    private readonly globalState: Memento;
     
     private knownEmptyBlocks: BitSet;
+    private knownEmptyBlocksDirty: boolean;
     private lastKnownChainIdentifier?: string;
     private lastKnownHeight: number;
     private subscriptions: INeoSubscription[];
     private timeout?: NodeJS.Timeout;
     private online: boolean = true;
 
-    constructor(rpcUrl: string) {
+    constructor(rpcUrl: string, globalState: Memento) {
         this.rpcUrl = rpcUrl;
+        this.globalState = globalState;
         this.rpcClient = new CachedRpcClient(this.rpcUrl);
         this.knownEmptyBlocks = new BitSet();
+        this.knownEmptyBlocksDirty = false;
         this.lastKnownHeight = 0;
         this.lastKnownChainIdentifier = undefined;
         this.subscriptions = [];
@@ -110,8 +115,9 @@ export class NeoRpcConnection implements INeoRpcConnection {
         try {
             statusReceiver.updateStatus('Retrieving block #' + index + '...');
             const result = await this.rpcClient.getBlock(index) as any;
-            if (result.tx && (result.tx.length <= 1)) {
+            if (result.tx && (result.tx.length <= 1) && !this.knownEmptyBlocks.get(index)) {
                 this.knownEmptyBlocks.set(index);
+                this.knownEmptyBlocksDirty = true;
             }
             statusReceiver.updateStatus('Retrieved block #' + index);
             return result;
@@ -278,9 +284,23 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     private async poll() : Promise<void> {
         this.timeout = undefined;
+
+        if (this.knownEmptyBlocksDirty && this.lastKnownChainIdentifier) {
+            await this.globalState.update(
+                'knownEmptyBlocks_' + this.lastKnownChainIdentifier,
+                this.knownEmptyBlocks.toString(16));
+            this.knownEmptyBlocksDirty = false;
+        }
+
         const blockchainInfo = await this.getBlockchainInfo();
         if (blockchainInfo.chainIdentifier !== this.lastKnownChainIdentifier) {
-            this.knownEmptyBlocks = new BitSet();
+            const persistedKnownEmptyBlocks: string | undefined = this.globalState.get(
+                'knownEmptyBlocks_' + blockchainInfo.chainIdentifier);
+            if (persistedKnownEmptyBlocks) {
+                this.knownEmptyBlocks = BitSet.fromHexString(persistedKnownEmptyBlocks);
+            } else {
+                this.knownEmptyBlocks = new BitSet();
+            }
         }
 
         this.lastKnownChainIdentifier = blockchainInfo.chainIdentifier;

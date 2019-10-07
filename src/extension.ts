@@ -6,7 +6,7 @@ import { RpcConnectionPool } from './rpcConnectionPool';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	const rpcConnectionPool = new RpcConnectionPool();
+	const rpcConnectionPool = new RpcConnectionPool(context.globalState);
 
 	const rpcServerExplorer = new RpcServerExplorer();
 
