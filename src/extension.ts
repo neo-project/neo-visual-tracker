@@ -23,10 +23,15 @@ export function activate(context: vscode.ExtensionContext) {
 		rpcServerExplorer.refresh();
 	});
 
+	const startServerCommand = vscode.commands.registerCommand('extension.startServer', (server) => {
+		console.log('User requested to start ', server);
+	});
+
 	const serverExplorer = vscode.window.registerTreeDataProvider('extension.rpcServerExplorer', rpcServerExplorer);
 
 	context.subscriptions.push(openTrackerCommand);
 	context.subscriptions.push(refreshServersCommand);
+	context.subscriptions.push(startServerCommand);
 	context.subscriptions.push(serverExplorer);
 }
 

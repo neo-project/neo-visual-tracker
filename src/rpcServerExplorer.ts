@@ -11,6 +11,8 @@ class RpcServerTreeItemIdentifier {
 
     public readonly parent?: RpcServerTreeItemIdentifier;
 
+    public readonly index?: number;
+
     public readonly children: RpcServerTreeItemIdentifier[];
 
     public static fromJsonFile(allRootPaths: string[], jsonFile: string) {
@@ -24,7 +26,7 @@ class RpcServerTreeItemIdentifier {
                 label = label.substr(1);
             }
 
-            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label);
+            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, undefined);
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
             if (neoExpressConfig['consensus-nodes'] && neoExpressConfig['consensus-nodes'].length) {
@@ -32,7 +34,7 @@ class RpcServerTreeItemIdentifier {
                     const consensusNode = neoExpressConfig['consensus-nodes'][i];
                     if (consensusNode["rpc-port"]) {
                         const uri = 'http://127.0.0.1:' + consensusNode["rpc-port"];
-                        const child = RpcServerTreeItemIdentifier.fromUri(uri, 'Node #' + (i + 1));
+                        const child = RpcServerTreeItemIdentifier.fromUri(uri, 'Node #' + (i + 1), result, jsonFile, i);
                         result.children.push(child);
                     }
                 }
@@ -45,20 +47,28 @@ class RpcServerTreeItemIdentifier {
         }
     }
 
-    public static fromUri(rpcUri: string, label: string, parent?: RpcServerTreeItemIdentifier) {
-        return new RpcServerTreeItemIdentifier(undefined, rpcUri, parent, label);
+    public static fromUri(
+        rpcUri: string, 
+        label: string, 
+        parent?: RpcServerTreeItemIdentifier,
+        jsonFile?: string,
+        index?: number) {
+
+        return new RpcServerTreeItemIdentifier(jsonFile, rpcUri, parent, label, index);
     }
 
     private constructor(
         jsonFile?: string, 
         rpcUri?: string, 
         parent?: RpcServerTreeItemIdentifier,
-        label?: string) {
+        label?: string,
+        index?: number) {
 
         this.jsonFile = jsonFile;
         this.rpcUri = rpcUri;
         this.parent = parent;
         this.label = label;
+        this.index = index;
         this.children = [];
     }
 
@@ -72,6 +82,9 @@ class RpcServerTreeItemIdentifier {
                 command: 'extension.openTracker',
                 arguments: [ this.rpcUri ],
             };
+            if (this.rpcUri.startsWith('http://127.0.0.1:')) {
+                result.contextValue = 'startable';
+            }
             return result;
         } else {
             const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);

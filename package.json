@@ -17,15 +17,12 @@
     "main": "./out/extension.js",
     "contributes": {
         "views": {
-            "explorer": [
-                {
-                    "id": "extension.rpcServerExplorer",
-                    "name": "NEO RPC Servers"
-                }
-            ]
+            "explorer": [{
+                "id": "extension.rpcServerExplorer",
+                "name": "NEO RPC Servers"
+            }]
         },
-        "commands": [
-            {
+        "commands": [{
                 "command": "extension.openTracker",
                 "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
@@ -39,16 +36,25 @@
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
                 }
+            },
+            {
+                "command": "extension.startServer",
+                "title": "Start",
+                "category": "NEO Express",
+                "when": false
             }
         ],
         "menus": {
-            "view/title": [
-                {
-                    "command": "extension.refreshServers",
-                    "when": "view == extension.rpcServerExplorer",
-                    "group": "navigation"
-                }
-            ]
+            "view/title": [{
+                "command": "extension.refreshServers",
+                "when": "view == extension.rpcServerExplorer",
+                "group": "navigation"
+            }],
+            "view/item/context": [{
+                "command": "extension.startServer",
+                "when": "view == extension.rpcServerExplorer && viewItem == startable",
+                "group": "inline"
+            }]
         }
     },
     "scripts": {
