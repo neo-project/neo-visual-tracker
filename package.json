@@ -17,12 +17,15 @@
     "main": "./out/extension.js",
     "contributes": {
         "views": {
-            "explorer": [{
-                "id": "extension.rpcServerExplorer",
-                "name": "NEO RPC Servers"
-            }]
+            "explorer": [
+                {
+                    "id": "extension.rpcServerExplorer",
+                    "name": "NEO RPC Servers"
+                }
+            ]
         },
-        "commands": [{
+        "commands": [
+            {
                 "command": "extension.openTracker",
                 "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
@@ -45,16 +48,20 @@
             }
         ],
         "menus": {
-            "view/title": [{
-                "command": "extension.refreshServers",
-                "when": "view == extension.rpcServerExplorer",
-                "group": "navigation"
-            }],
-            "view/item/context": [{
-                "command": "extension.startServer",
-                "when": "view == extension.rpcServerExplorer && viewItem == startable",
-                "group": "inline"
-            }]
+            "view/title": [
+                {
+                    "command": "extension.refreshServers",
+                    "when": "view == extension.rpcServerExplorer",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "extension.startServer",
+                    "when": "view == extension.rpcServerExplorer && viewItem == startable",
+                    "group": "inline"
+                }
+            ]
         }
     },
     "scripts": {
@@ -88,6 +95,7 @@
         "@types/memoizee": "^0.4.3",
         "@types/pouchdb-core": "^7.0.4",
         "bitset": "^5.0.5",
-        "memoizee": "^0.4.14"
+        "memoizee": "^0.4.14",
+        "shell-escape": "^0.2.0"
     }
 }
