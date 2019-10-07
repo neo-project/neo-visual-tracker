@@ -11,7 +11,8 @@ export class BlockchainInfo {
     constructor(
         public height: number,
         public url: string,
-        public online: boolean) {
+        public online: boolean,
+        public chainIdentifier?: string) {
     }
 }
 
@@ -44,8 +45,9 @@ export class NeoRpcConnection implements INeoRpcConnection {
     public readonly rpcUrl: string;
 
     private readonly rpcClient: CachedRpcClient;
-    private readonly knownEmptyBlocks: BitSet;
-
+    
+    private knownEmptyBlocks: BitSet;
+    private lastKnownChainIdentifier?: string;
     private lastKnownHeight: number;
     private subscriptions: INeoSubscription[];
     private timeout?: NodeJS.Timeout;
@@ -56,6 +58,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
         this.rpcClient = new CachedRpcClient(this.rpcUrl);
         this.knownEmptyBlocks = new BitSet();
         this.lastKnownHeight = 0;
+        this.lastKnownChainIdentifier = undefined;
         this.subscriptions = [];
         this.timeout = undefined;
     }
@@ -83,7 +86,6 @@ export class NeoRpcConnection implements INeoRpcConnection {
             if (statusReceiver) {
                 statusReceiver.updateStatus('Determining current blockchain height');
             }
-
             height = await this.rpcClient.getBlockCount();
             this.online = true;
         } catch (e) {
@@ -91,7 +93,17 @@ export class NeoRpcConnection implements INeoRpcConnection {
             this.online = false;
         }
 
-        return new BlockchainInfo(height, this.rpcUrl, this.online);
+        let chainIdentifier = this.lastKnownChainIdentifier;
+        try {
+            if (statusReceiver) {
+                statusReceiver.updateStatus('Determining blockchain identifier');
+            }
+            chainIdentifier = await this.rpcClient.getBlockChainId();
+        } catch (e) {
+            console.error('NeoRpcConnection could not retrieve block 0 hash: ' + e);
+        }
+
+        return new BlockchainInfo(height, this.rpcUrl, this.online, chainIdentifier);
     }
 
     public async getBlock(index: number, statusReceiver: INeoStatusReceiver) {
@@ -101,7 +113,6 @@ export class NeoRpcConnection implements INeoRpcConnection {
             if (result.tx && (result.tx.length <= 1)) {
                 this.knownEmptyBlocks.set(index);
             }
-
             statusReceiver.updateStatus('Retrieved block #' + index);
             return result;
         } catch(e) {
@@ -268,6 +279,11 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private async poll() : Promise<void> {
         this.timeout = undefined;
         const blockchainInfo = await this.getBlockchainInfo();
+        if (blockchainInfo.chainIdentifier !== this.lastKnownChainIdentifier) {
+            this.knownEmptyBlocks = new BitSet();
+        }
+
+        this.lastKnownChainIdentifier = blockchainInfo.chainIdentifier;
         if ((blockchainInfo.height !== this.lastKnownHeight) || !blockchainInfo.online) {
             this.lastKnownHeight = blockchainInfo.height;
             for (let i = 0; i < this.subscriptions.length; i++) {

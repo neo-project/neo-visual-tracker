@@ -75,6 +75,14 @@ export class CachedRpcClient {
         return result;
     }
 
+    public async getBlockChainId() : Promise<string> {
+        // Note that this method is not cached. We should detect as soon as possible if one
+        // instance of neo-express has been terminated and then another one started using
+        // the same URL
+        
+        return await this.rpcClient.getBlockHash(0);
+    }
+
     public getBlock(indexOrHash: string | number, verbose?: number): Promise<object | string> {
         // Note that the result is not cached if the most recent block is being retrieved.
         // The pointer to the next block will initially be null, so the block must be 
