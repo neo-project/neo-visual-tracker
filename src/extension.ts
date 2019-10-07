@@ -32,8 +32,12 @@ export function activate(context: vscode.ExtensionContext) {
 		if (server.parent) {
 			label = server.parent.label;
 		}
-
 		neoExpressInstanceManager.start(server.jsonFile, server.index, label);
+	});
+
+	const stopServerCommand = vscode.commands.registerCommand('extension.stopServer', (server) => {
+		console.log('User requested to stop ', server);
+		neoExpressInstanceManager.stop(server.jsonFile, server.index);
 	});
 
 	const serverExplorer = vscode.window.registerTreeDataProvider('extension.rpcServerExplorer', rpcServerExplorer);
@@ -41,6 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(openTrackerCommand);
 	context.subscriptions.push(refreshServersCommand);
 	context.subscriptions.push(startServerCommand);
+	context.subscriptions.push(stopServerCommand);
 	context.subscriptions.push(serverExplorer);
 }
 
