@@ -15,10 +15,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const openTrackerCommand = vscode.commands.registerCommand('extension.openTracker', (url?: string) => {
 		if (url) {	
-			const panel = new NeoTrackerPanel(
-				context.extensionPath, 
-				rpcConnectionPool.getConnection(url), 
-				context.subscriptions);
+			try {
+				const panel = new NeoTrackerPanel(
+					context.extensionPath, 
+					rpcConnectionPool.getConnection(url), 
+					context.subscriptions);
+			} catch (e) {
+				console.error('Error opening NEO tracker panel ', e);
+			}
+		} else {
+			console.warn('Attempted to open NEO tracker without providing RPC URL');
 		}
 	});
 
