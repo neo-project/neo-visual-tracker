@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 class RpcServerTreeItemIdentifier {
@@ -72,10 +73,10 @@ class RpcServerTreeItemIdentifier {
         this.children = [];
     }
 
-    public asTreeItem() : vscode.TreeItem {
+    public asTreeItem(extensionPath: string) : vscode.TreeItem {
         if (this.rpcUri) {
             const result = new vscode.TreeItem(this.label || this.rpcUri);
-            result.iconPath = vscode.ThemeIcon.File;
+            result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
             result.description = this.rpcUri;
             result.command = {
                 title: 'Open tracker',
@@ -104,7 +105,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
     private rootItems: RpcServerTreeItemIdentifier[];
 
-	constructor() { 
+	constructor(private readonly extensionPath: string) { 
         this.onDidChangeTreeDataEmitter = new vscode.EventEmitter<any>();
         this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
         this.rootItems = [];
@@ -139,7 +140,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 	}
 
 	public getTreeItem(element: RpcServerTreeItemIdentifier): vscode.TreeItem {
-        return element.asTreeItem();
+        return element.asTreeItem(this.extensionPath);
 	}
 
 	public getChildren(element?: RpcServerTreeItemIdentifier): RpcServerTreeItemIdentifier[] {

@@ -9,7 +9,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const rpcConnectionPool = new RpcConnectionPool(context.globalState);
 
-	const rpcServerExplorer = new RpcServerExplorer();
+	const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
 
 	const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
