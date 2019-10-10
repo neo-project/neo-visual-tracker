@@ -25,10 +25,19 @@ export class NeoExpressInstanceManager {
         const key = new InstanceIdentifier(jsonFile, index);
         let terminal = this.terminals.get(key.asString());
         if (!terminal) {
-            terminal = vscode.window.createTerminal(
-                'NEO: ' + label + ':' + index,
-                'neo-express',
-                ['run', '-i', jsonFile, '' + index]);
+            if (process.platform === 'win32') {
+                // On Windows vscode fails to launch a terminal using neo-express as the shell
+                terminal = vscode.window.createTerminal(
+                    'NEO: ' + label + ':' + index,
+                    'cmd.exe',
+                    ['/c', 'neo-express', 'run', '-i', jsonFile, '' + index]);
+            } else {
+                terminal = vscode.window.createTerminal(
+                    'NEO: ' + label + ':' + index,
+                    'neo-express',
+                    ['run', '-i', jsonFile, '' + index]);
+            }
+
             this.terminals.set(key.asString(), terminal);
         }
 
