@@ -29,7 +29,7 @@
                 "command": "extension.openTracker",
                 "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
-                "when": false
+                "when": "false"
             },
             {
                 "command": "extension.refreshServers",
@@ -42,15 +42,23 @@
             },
             {
                 "command": "extension.startServer",
-                "title": "Start",
+                "title": "Start NEO Express",
                 "category": "NEO Express",
-                "when": false
+                "icon": {
+                    "light": "resources/light/play.svg",
+                    "dark": "resources/dark/play.svg"
+                },
+                "when": "view == extension.rpcServerExplorer && viewItem == startable"
             },
             {
                 "command": "extension.stopServer",
-                "title": "Stop",
+                "title": "Stop NEO Express",
                 "category": "NEO Express",
-                "when": false
+                "icon": {
+                    "light": "resources/light/stop.svg",
+                    "dark": "resources/dark/stop.svg"
+                },
+                "when": "view == extension.rpcServerExplorer && viewItem == startable"
             }
         ],
         "menus": {
@@ -71,6 +79,14 @@
                     "command": "extension.stopServer",
                     "when": "view == extension.rpcServerExplorer && viewItem == startable",
                     "group": "inline"
+                },
+                {
+                    "command": "extension.startServer",
+                    "when": "view == extension.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "extension.stopServer",
+                    "when": "view == extension.rpcServerExplorer && viewItem == startable"
                 }
             ]
         }
