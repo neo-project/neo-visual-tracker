@@ -55,6 +55,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
             vscode.ViewColumn.Active,
             { enableScripts: true });
 
+        this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
+
         this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);
 
