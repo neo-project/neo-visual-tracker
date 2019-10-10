@@ -20,13 +20,11 @@ function handleMessage(message: any) {
         renderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
         renderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
         renderers.setPage(message.viewState.activePage);
+        const openingIndicator: any = document.querySelector(selectors.OpeningIndicator);
+        openingIndicator.style.display = message.viewState.blockChainInfo.online ? 'none' : 'block';
     } else if (message.status) {
         const loadingIndicator: any = document.querySelector(selectors.LoadingIndicator);
-        const openingIndicator: any = document.querySelector(selectors.OpeningIndicator);
         loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';
-        if (!message.status.isLoading) {
-            openingIndicator.style.display = 'none';
-        }
         htmlHelpers.setPlaceholder(selectors.LoadingMessage, htmlHelpers.text(message.status.message));
         // console.warn(new Date, 'status: ', message.status);
     }
