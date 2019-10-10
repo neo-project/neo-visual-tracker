@@ -40,6 +40,7 @@ const selectors = {
     TransactionMainScriptBody: '#transactiondetail #main-script .script-body',
     LoadingIndicator: '#loading-indicator',
     LoadingMessage: '#loading-indicator .message',
+    OpeningIndicator: '#opening-indicator',
 };
 
 export { selectors };
