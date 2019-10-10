@@ -80,6 +80,11 @@ const renderers = {
     renderBlocks: function (blocks: any[], firstBlock: number | undefined, postMessage: any) {
         htmlHelpers.setEnabled(selectors.BlocksPaginationPrevious, firstBlock !== undefined);
         htmlHelpers.setEnabled(selectors.BlocksPaginationFirst, firstBlock !== undefined);
+        if (blocks.length) {
+            htmlHelpers.setEnabled(selectors.BlocksPaginationNext, blocks[blocks.length - 1].index !== 0);
+            htmlHelpers.setEnabled(selectors.BlocksPaginationLast, blocks[blocks.length - 1].index !== 0);
+        }
+
         const tbody = document.querySelector(selectors.BlocksTableBody);
         if (tbody) {
             htmlHelpers.clearChildren(tbody);
