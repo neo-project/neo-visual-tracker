@@ -4,6 +4,7 @@
     "displayName": "NEO Visual DevTracker",
     "description": "A NEO Express blockchain explorer that is directly available within Visual Studio Code",
     "version": "0.0.1",
+    "repository": "https://github.com/devhawk/visual-devtracker",
     "engines": {
         "vscode": "^1.38.0"
     },
@@ -98,6 +99,7 @@
         "watch-ts": "tsc -watch -p ./",
         "watch-css": "node-sass src/panel/panel.scss -wo out/panel",
         "watch-browserify": "watchify out/panel/panel.js -o out/panel/bundle.js",
+        "package": "npm install && vsce package",
         "pretest": "npm run compile",
         "test": "node ./out/test/runTest.js"
     },
@@ -106,14 +108,15 @@
         "@types/mocha": "^5.2.6",
         "@types/node": "^10.12.21",
         "@types/vscode": "^1.38.0",
+        "browserify": "^16.5.0",
         "concurrently": "^4.1.2",
         "glob": "^7.1.4",
         "mocha": "^6.1.4",
         "node-sass": "^4.12.0",
         "tslint": "^5.12.1",
         "typescript": "^3.3.1",
+        "vsce": "^1.67.1",
         "vscode-test": "^1.2.0",
-        "browserify": "^16.5.0",
         "watchify": "^3.11.1"
     },
     "dependencies": {
