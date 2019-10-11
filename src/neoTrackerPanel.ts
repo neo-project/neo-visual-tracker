@@ -88,7 +88,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     }
 
     private async updateBlockList(force?: boolean) {
-        if (force || (this.viewState.firstBlock === undefined)) {
+        if (force || ((this.viewState.firstBlock === undefined) && this.viewState.blockChainInfo && this.viewState.blockChainInfo.online)) {
             this.viewState.blocks = await this.rpcConnection.getBlocks(
                 this.viewState.firstBlock, 
                 this.viewState.hideEmptyBlocks,
