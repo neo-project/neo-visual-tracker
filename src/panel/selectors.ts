@@ -2,6 +2,7 @@
 
 const selectors = {
     AllPages: '.page',
+    StatusBar: '.status-bar',
     BlockHeight: '#blockHeight',
     RpcUrl: '#rpcUrl',
     RpcStatus: '#rpcStatus',

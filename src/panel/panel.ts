@@ -21,8 +21,9 @@ function handleMessage(message: any) {
         renderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
         renderers.renderAddress(message.viewState.currentAddress);
         renderers.setPage(message.viewState.activePage);
+        htmlHelpers.showHide(selectors.StatusBar, !!message.viewState.blockChainInfo);
         const openingIndicator: any = document.querySelector(selectors.OpeningIndicator);
-        openingIndicator.style.display = message.viewState.blockChainInfo.online ? 'none' : 'block';
+        openingIndicator.style.display = (!message.viewState.blockChainInfo || !message.viewState.blockChainInfo.online) ? 'block' : 'none';
     } else if (message.status) {
         const loadingIndicator: any = document.querySelector(selectors.LoadingIndicator);
         loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';
