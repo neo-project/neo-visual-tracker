@@ -29,6 +29,7 @@ export interface INeoRpcConnection {
     getBlock(index: number, statusReceiver: INeoStatusReceiver): Promise<any>;
     getBlocks(index: number | undefined, hideEmptyBlocks: boolean, forwards: boolean, statusReceiver: INeoStatusReceiver): Promise<Blocks>;
     getTransaction(txid: string, statusReceiver: INeoStatusReceiver): Promise<any>;
+    getUnspents(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     subscribe(subscriber: INeoSubscription): void;
     unsubscribe(subscriber: INeoSubscription): void;
 }
@@ -206,6 +207,23 @@ export class NeoRpcConnection implements INeoRpcConnection {
             console.error('NeoRpcConnection could not retrieve transaction (id=' + txid + '): ' + e);
             return undefined;
         }
+    }
+
+    public async getUnspents(address: string, statusReceiver: INeoStatusReceiver) {
+        try {
+            statusReceiver.updateStatus('Getting unspent outputs for address ' + address);
+            const result = await this.rpcClient.getUnspents(address);
+            result.getUnspentsSupport = true;
+            return result;
+        } catch(e) {
+            if (e.message.toLowerCase().indexOf('method not found') !== -1) {
+                console.warn('NeoRpcConnection: getUnspents unsupported by ' + this.rpcUrl + ' (address=' + address + '): ' + e);
+                return { address: address, getUnspentsSupport: false };
+            } else {
+                console.error('NeoRpcConnection could not retrieve unspents (address=' + address + '): ' + e);
+                return undefined;
+            }
+        }        
     }
 
     private async augmentTransaction(txid: string, transaction: any, statusReceiver: INeoStatusReceiver) {       

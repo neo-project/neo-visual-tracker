@@ -25,6 +25,32 @@ const renderers = {
         return assetId;
     },
 
+    renderAddress: function(address: any | undefined) {
+        if (address) {
+            htmlHelpers.setPlaceholder(selectors.AddressDetailHash, htmlHelpers.text(address.address));
+            htmlHelpers.showHide(selectors.AddressDetailsGetUnspentsNotSupported, !address.getUnspentsSupport);
+            htmlHelpers.showHide(selectors.AddressDetailsGetUnspentsSupported, !!address.getUnspentsSupport);
+            if (address.getUnspentsSupport) {
+                const unspentAssetsTbody = document.querySelector(selectors.AddressUnspentAssetsTableBody);
+                if (unspentAssetsTbody) {
+                    htmlHelpers.clearChildren(unspentAssetsTbody);
+                    for (let assetName in address.assets) {
+                        let assetBalance = 0;
+                        if (address.assets[assetName].unspent) {
+                            for (let i = 0; i < address.assets[assetName].unspent.length; i++) {
+                                assetBalance += parseFloat(address.assets[assetName].unspent[i].value);
+                            }
+                        }
+                        const row = htmlHelpers.newTableRow(htmlHelpers.text(assetName), htmlHelpers.text(htmlHelpers.number(assetBalance)));
+                        unspentAssetsTbody.appendChild(row);
+                    }
+                }
+            } else {
+
+            }
+        }
+    },
+
     renderBlockchainInfo: function(blockchainInfo: any) {
         if (blockchainInfo) {
             htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(htmlHelpers.number(blockchainInfo.height)));
@@ -38,11 +64,13 @@ const renderers = {
             htmlHelpers.setPlaceholder(selectors.BlockDetailHash, htmlHelpers.text(block.hash));
             htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(htmlHelpers.number(block.index)));
             htmlHelpers.setPlaceholder(selectors.BlockDetailTime, htmlHelpers.text(htmlHelpers.time(block.time)));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailValidator, htmlHelpers.text(block.nextconsensus));
             htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(htmlHelpers.number(block.size) + ' bytes'));
             htmlHelpers.setPlaceholder(selectors.BlockDetailVersion, htmlHelpers.text(block.version));
             htmlHelpers.setPlaceholder(selectors.BlockDetailMerkleRoot, htmlHelpers.text(block.merkleroot));
             htmlHelpers.setPlaceholder(selectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
+            htmlHelpers.setPlaceholder(
+                selectors.BlockDetailValidator, 
+                htmlHelpers.newEventLink(block.nextconsensus, panelEvents.ShowAddress, block.nextconsensus, postMessage));
 
             if ((block.index > 0) && block.previousblockhash) {
                 htmlHelpers.setPlaceholder(
@@ -94,14 +122,14 @@ const renderers = {
                     htmlHelpers.newEventLink(htmlHelpers.number(contents.index), panelEvents.ShowBlock, contents.index, postMessage),
                     htmlHelpers.text(htmlHelpers.time(contents.time)),
                     htmlHelpers.text(contents.tx.length),
-                    htmlHelpers.text(contents.nextconsensus),
+                    htmlHelpers.newEventLink(contents.nextconsensus, panelEvents.ShowAddress, contents.nextconsensus, postMessage),
                     htmlHelpers.text(htmlHelpers.number(contents.size) + ' bytes'));
                 tbody.appendChild(row);
             }
         }
     },
 
-    renderInputsOutputs: function(tbodySelector: string, inputOutputList: any[], assets: any, clear: boolean, negate: boolean) {
+    renderInputsOutputs: function(tbodySelector: string, inputOutputList: any[], assets: any, clear: boolean, negate: boolean, postMessage: any) {
         const tbody = document.querySelector(tbodySelector);
         if (tbody) {
             if (clear) {
@@ -113,7 +141,7 @@ const renderers = {
                     inputOutput.value *= -1;
                 }
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.text(inputOutput.address),
+                    htmlHelpers.newEventLink(inputOutput.address, panelEvents.ShowAddress, inputOutput.address, postMessage),
                     htmlHelpers.text(htmlHelpers.number(inputOutput.value) + ' ' + this.assetName(inputOutput.asset, assets)));
                 tbody.appendChild(row);
             }
@@ -134,9 +162,9 @@ const renderers = {
                 selectors.TransactionDetailBlock, 
                 htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash, postMessage));
             let valueTransferCount = 0;
-            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false);
-            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true);
-            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false);
+            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
+            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);
+            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false, postMessage);
             (document.querySelector(selectors.TransactionValueTransferTable) as any).style.display =
                 valueTransferCount > 0 ? 'table' : 'none';
             const scriptsTbody = document.querySelector(selectors.TransactionScriptsTableBody);

@@ -10,6 +10,8 @@ const panelEvents = {
     CloseBlock: 'closeBlock',
     ShowTransaction: 'showTransaction',
     CloseTransaction: 'closeTransaction',
+    ShowAddress: 'showAddress',
+    CloseAddress: 'closeAddress',
     ChangeHideEmpty: 'changeHideEmpty',
 };
 

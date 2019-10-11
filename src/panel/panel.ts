@@ -19,6 +19,7 @@ function handleMessage(message: any) {
         renderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, vsCodePostMessage);
         renderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
         renderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
+        renderers.renderAddress(message.viewState.currentAddress);
         renderers.setPage(message.viewState.activePage);
         const openingIndicator: any = document.querySelector(selectors.OpeningIndicator);
         openingIndicator.style.display = message.viewState.blockChainInfo.online ? 'none' : 'block';
@@ -43,6 +44,7 @@ function initializePanel() {
     htmlHelpers.setOnClickEvent(selectors.BlocksPaginationLast, panelEvents.LastBlocksPage, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.CloseBlock, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(selectors.AddressDetailClose, panelEvents.CloseAddress, null, vsCodePostMessage);
     
     const checkbox = document.querySelector(selectors.HideEmptyBlocksCheckbox);
     if (checkbox) {

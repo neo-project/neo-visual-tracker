@@ -11,6 +11,7 @@ enum ActivePage {
     Blocks = 'blocks',
     BlockDetail = 'blockdetail',
     TransactionDetail = 'transactiondetail',
+    AddressDetail = 'addressdetail',
 }
 
 class ViewState {
@@ -21,6 +22,7 @@ class ViewState {
     public blocks: Blocks = new Blocks();
     public currentBlock: any = undefined;
     public currentTransaction: any = undefined;
+    public currentAddress: any = undefined;
     public hideEmptyBlocks: boolean = false;
 }
 
@@ -145,6 +147,14 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 this.viewState.currentTransaction = undefined;
                 this.viewState.activePage = (this.viewState.currentBlock === undefined) ?
                     ActivePage.Blocks : ActivePage.BlockDetail;
+            } else if (message.e === 'showAddress') {
+                this.viewState.currentAddress = await this.rpcConnection.getUnspents(message.c, this);
+                this.viewState.activePage = ActivePage.AddressDetail;
+            } else if (message.e === 'closeAddress') {
+                this.viewState.currentAddress = undefined;
+                this.viewState.activePage = (this.viewState.currentTransaction !== undefined) ?
+                    ActivePage.TransactionDetail : 
+                    ((this.viewState.currentBlock !== undefined) ? ActivePage.BlockDetail : ActivePage.Blocks );
             }
 
             this.panel.webview.postMessage({ viewState: this.viewState });

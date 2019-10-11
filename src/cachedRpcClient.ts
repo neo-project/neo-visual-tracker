@@ -46,13 +46,16 @@ export class CachedRpcClient {
     private readonly memoizedGetAssetState: 
         ((assetId: string) => Promise<any>) & memoize.Memoized<(assetId: string) => Promise<any>>;
 
+    private readonly memoizedGetUnspents: 
+        ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
+
     private lastKnownBlockCount: number;
     
     public constructor(rpcUrl: string) {
         this.rpcClient = new neon.rpc.RPCClient(rpcUrl);
 
         this.lastKnownBlockCount = -1;
-        
+
         this.memoizedGetBlock = 
             memoize(
                 (indexOrHash: string | number, verbose?: number) => this.rpcClient.getBlock(indexOrHash, verbose),
@@ -67,6 +70,11 @@ export class CachedRpcClient {
             memoize(
                 (assetId: string) => this.rpcClient.getAssetState(assetId),
                 labeledCacheOptions('getAssetState'));
+
+        this.memoizedGetUnspents =
+            memoize(
+                (address: string) => this.rpcClient.getUnspents(address),
+                labeledCacheOptions('getUnspents'));
     }
 
     public async getBlockCount() : Promise<number> {
@@ -105,6 +113,10 @@ export class CachedRpcClient {
 
     public getAssetState(assetId: string): Promise<any> {
         return this.memoizedGetAssetState(assetId);
+    }
+
+    public getUnspents(address: string): Promise<any> {
+        return this.memoizedGetUnspents(address);
     }
 
 }

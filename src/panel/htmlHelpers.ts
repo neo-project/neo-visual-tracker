@@ -51,6 +51,13 @@ const htmlHelpers = {
         }
     },
 
+    showHide: function(selector: string, show: boolean) {
+        const element: any = document.querySelector(selector);
+        if (element) {
+            element.style.display = show ? 'block' : 'none';
+        }
+    },
+
     text: function(content: string) {
         return document.createTextNode(content);
     },
