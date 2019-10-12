@@ -18,15 +18,12 @@
     "main": "./out/extension.js",
     "contributes": {
         "views": {
-            "explorer": [
-                {
-                    "id": "extension.rpcServerExplorer",
-                    "name": "NEO RPC Servers"
-                }
-            ]
+            "explorer": [{
+                "id": "extension.rpcServerExplorer",
+                "name": "NEO RPC Servers"
+            }]
         },
-        "commands": [
-            {
+        "commands": [{
                 "command": "extension.openTracker",
                 "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
@@ -60,18 +57,21 @@
                     "dark": "resources/dark/stop.svg"
                 },
                 "when": "view == extension.rpcServerExplorer && viewItem == startable"
+            },
+            {
+                "command": "extension.invokeContract",
+                "title": "EXPERIMENTAL -- Invoke contract",
+                "category": "NEO Express",
+                "when": "view == extension.rpcServerExplorer && viewItem == startable"
             }
         ],
         "menus": {
-            "view/title": [
-                {
-                    "command": "extension.refreshServers",
-                    "when": "view == extension.rpcServerExplorer",
-                    "group": "navigation"
-                }
-            ],
-            "view/item/context": [
-                {
+            "view/title": [{
+                "command": "extension.refreshServers",
+                "when": "view == extension.rpcServerExplorer",
+                "group": "navigation"
+            }],
+            "view/item/context": [{
                     "command": "extension.startServer",
                     "when": "view == extension.rpcServerExplorer && viewItem == startable",
                     "group": "inline"
@@ -87,6 +87,10 @@
                 },
                 {
                     "command": "extension.stopServer",
+                    "when": "view == extension.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "extension.invokeContract",
                     "when": "view == extension.rpcServerExplorer && viewItem == startable"
                 }
             ]

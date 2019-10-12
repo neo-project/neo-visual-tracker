@@ -4,6 +4,7 @@ import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
+import { sampleInvocation } from './contractInvocation';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -46,12 +47,18 @@ export function activate(context: vscode.ExtensionContext) {
 		neoExpressInstanceManager.stop(server.jsonFile, server.index);
 	});
 
+	const invokeContractCommand = vscode.commands.registerCommand('extension.invokeContract', (server) => {
+		console.log('User requested to invoke a contract ', server);
+		sampleInvocation(server.rpcUri);
+	});
+
 	const serverExplorer = vscode.window.registerTreeDataProvider('extension.rpcServerExplorer', rpcServerExplorer);
 
 	context.subscriptions.push(openTrackerCommand);
 	context.subscriptions.push(refreshServersCommand);
 	context.subscriptions.push(startServerCommand);
 	context.subscriptions.push(stopServerCommand);
+	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(serverExplorer);
 }
 
