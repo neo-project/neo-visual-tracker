@@ -100,7 +100,7 @@ export class CachedRpcClient {
         // re-retrieved later to get a version with the next pointer populated.
         
         if ((typeof indexOrHash === 'number') && (indexOrHash >= (this.lastKnownBlockCount - 1))) {
-            console.log('Not caching retrieval of block #' + indexOrHash);
+            // console.log('Not caching retrieval of block #' + indexOrHash);
             return this.rpcClient.getBlock(indexOrHash, verbose);    
         }
 
