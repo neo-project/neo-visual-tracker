@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as util from 'util';
 import * as vscode from 'vscode';
+
+const request = util.promisify(require('request'));
 
 class RpcServerTreeItemIdentifier {
 
@@ -116,10 +119,23 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
 	public async refresh() {
 
-        this.rootItems = [
-            RpcServerTreeItemIdentifier.fromUri('http://seed1.ngd.network:10332', 'NGD'),
-            RpcServerTreeItemIdentifier.fromUri('https://seed1.cityofzion.io:443', 'City of Zion')
-        ];
+        const mainNetRpcServer = await RpcServerExplorer.getBestRpcServer(
+            'https://api.neoscan.io/api/main_net/v1/get_all_nodes', 
+            'NEO Main Net');
+
+        const testNetRpcServer = await RpcServerExplorer.getBestRpcServer(
+            'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes', 
+            'NEO Test Net');
+
+        this.rootItems = [];
+
+        if (mainNetRpcServer) {
+            this.rootItems.push(mainNetRpcServer);
+        }
+
+        if (testNetRpcServer) {
+            this.rootItems.push(testNetRpcServer);
+        }
 
         let allRootPaths: string[] = [];
         if (vscode.workspace.workspaceFolders) {
@@ -153,6 +169,36 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
 	public getParent(element: RpcServerTreeItemIdentifier) {
 		return element.parent;
-	}
+    }
+    
+    private static async getBestRpcServer(apiUrl: string, label: string): Promise<RpcServerTreeItemIdentifier | undefined> {
+        try {
+            const apiResponse = JSON.parse((await request(apiUrl)).body);
+            let maxHeight = -1;
+            for (let i = 0; i < apiResponse.length; i++) {
+                const datum = apiResponse[i];
+                if (datum.height > maxHeight) {
+                    maxHeight = datum.height;
+                }
+            }
+
+            const candidates: string[] = [];
+            for (let i = 0; i < apiResponse.length; i++) {
+                const datum = apiResponse[i];
+                if (datum.height === maxHeight) {
+                    candidates.push(datum.url);
+                }
+            }
+
+            if (candidates.length > 0) {
+                return RpcServerTreeItemIdentifier.fromUri(candidates[Math.floor(Math.random() * candidates.length)], label);
+            } else {
+                throw new Error('API server result provide any RPC servers');
+            }
+        } catch(e) {
+            console.error('Could not get an example RPC server from ', apiUrl, e);
+            return undefined;
+        }
+    }
 
 }
