@@ -103,13 +103,13 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile && npm run setversion",
+        "vscode:prepublish": "npm run compile",
         "compile": "npm install && tsc -p ./ && node-sass src/panel/panel.scss -o out/panel && browserify out/panel/panel.js -o out/panel/bundle.js",
         "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
         "watch-css": "node-sass src/panel/panel.scss -wo out/panel",
         "watch-browserify": "watchify out/panel/panel.js -o out/panel/bundle.js",
-        "package": "npm install && vsce package",
+        "package": "npm install && npm run setversion && vsce package",
         "pretest": "npm run compile",
         "setversion": "gulp setversion",
         "test": "node ./out/test/runTest.js"
