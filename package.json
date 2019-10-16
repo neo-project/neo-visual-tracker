@@ -1,33 +1,33 @@
 {
     "name": "neo-visual-devtracker",
-	"publisher": "ngd-seattle",
+    "publisher": "ngd-seattle",
     "displayName": "NEO Visual DevTracker",
     "description": "A NEO Express blockchain explorer that is directly available within Visual Studio Code",
     "version": "0.0.0",
-	"icon": "neo-logo-256.png",
+    "icon": "neo-logo-256.png",
     "galleryBanner": {
         "color": "#000000",
         "theme": "dark"
     },
-	"author": "NEO Global Development Seattle",
+    "author": "NEO Global Development Seattle",
     "engines": {
         "vscode": "^1.37.0"
     },
     "categories": [
         "Other"
     ],
-	"bugs": {
-		"url": "https://github.com/ngdseattle/visual-devtracker/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/ngdseattle/visual-devtracker.git"
-	},
-	"keywords": [
-		"NEO",
-		"Blockchain",
-		"Tracker"
-	],
+    "bugs": {
+        "url": "https://github.com/ngdseattle/visual-devtracker/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ngdseattle/visual-devtracker.git"
+    },
+    "keywords": [
+        "NEO",
+        "Blockchain",
+        "Tracker"
+    ],
     "activationEvents": [
         "onCommand:extension.openTracker",
         "onView:extension.rpcServerExplorer"
@@ -126,7 +126,7 @@
         "watch-ts": "tsc -watch -p ./",
         "watch-css": "node-sass src/panel/panel.scss -wo out/panel",
         "watch-browserify": "watchify out/panel/panel.js -o out/panel/bundle.js",
-        "package": "npm install && npm run setversion && vsce package",
+        "package": "npm run setversion && vsce package",
         "pretest": "npm run compile",
         "setversion": "gulp setversion",
         "test": "node ./out/test/runTest.js"
@@ -136,7 +136,7 @@
         "@types/gulp": "^4.0.6",
         "@types/mocha": "^5.2.6",
         "@types/node": "^10.12.21",
-        "@types/vscode": "^1.38.0",
+        "@types/vscode": "^1.37.0",
         "browserify": "^16.5.0",
         "concurrently": "^4.1.2",
         "glob": "^7.1.4",

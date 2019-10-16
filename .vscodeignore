@@ -4,8 +4,11 @@ out/test/**
 src/**
 !src/**/*.html
 .gitignore
-vsc-extension-quickstart.md
 **/tsconfig.json
 **/tslint.json
 **/*.map
 **/*.ts
+gulpfile.ts
+azure-ci.yml
+version.json
+sample-workspace/**
