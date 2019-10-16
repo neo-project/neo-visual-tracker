@@ -3,8 +3,12 @@
 	"publisher": "ngd-seattle",
     "displayName": "NEO Visual DevTracker",
     "description": "A NEO Express blockchain explorer that is directly available within Visual Studio Code",
-    "version": "0.0.1",
+    "version": "0.0.0",
 	"icon": "neo-logo-256.png",
+    "galleryBanner": {
+        "color": "#000000",
+        "theme": "dark"
+    },
 	"author": "NEO Global Development Seattle",
     "engines": {
         "vscode": "^1.37.0"
