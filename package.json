@@ -103,7 +103,7 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
+        "vscode:prepublish": "npm run compile && npm run setversion",
         "compile": "npm install && tsc -p ./ && node-sass src/panel/panel.scss -o out/panel && browserify out/panel/panel.js -o out/panel/bundle.js",
         "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
@@ -130,7 +130,7 @@
         "ts-node": "^8.3.0",
         "tslint": "^5.12.1",
         "typescript": "^3.3.1",
-        "vsce": "^1.67.1",
+        "vsce": "^1.68.0",
         "vscode-test": "^1.2.0",
         "watchify": "^3.11.1"
     },
