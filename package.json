@@ -1,16 +1,29 @@
 {
-    "publisher": "ngdseattle",
     "name": "neo-visual-devtracker",
+	"publisher": "ngd-seattle",
     "displayName": "NEO Visual DevTracker",
     "description": "A NEO Express blockchain explorer that is directly available within Visual Studio Code",
     "version": "0.0.1",
-    "repository": "https://github.com/devhawk/visual-devtracker",
+	"icon": "neo-logo-256.png",
+	"author": "NEO Global Development Seattle",
     "engines": {
-        "vscode": "^1.38.0"
+        "vscode": "^1.37.0"
     },
     "categories": [
         "Other"
     ],
+	"bugs": {
+		"url": "https://github.com/ngdseattle/visual-devtracker/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ngdseattle/visual-devtracker.git"
+	},
+	"keywords": [
+		"NEO",
+		"Blockchain",
+		"Tracker"
+	],
     "activationEvents": [
         "onCommand:extension.openTracker",
         "onView:extension.rpcServerExplorer"
