@@ -1,5 +1,7 @@
 # NEO-Express Visual DevTracker
 
+[![Build Status](https://dev.azure.com/NGDSeattle/Public/_apis/build/status/ngdseattle.neo-visual-devtracker?branchName=master)](https://dev.azure.com/NGDSeattle/Public/_build/latest?definitionId=19&branchName=master)
+
 This is a Visual Studio Code extension that supports running and interacting with NEO-Express instances from within
 vscode. Please see the
 [NEO Blockchain Toolkit for .NET Quickstart](https://github.com/ngdseattle/neo-blockchain-toolkit/blob/master/quickstart.md)
