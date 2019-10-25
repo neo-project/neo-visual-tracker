@@ -13,6 +13,7 @@ const panelEvents = {
     ShowAddress: 'showAddress',
     CloseAddress: 'closeAddress',
     ChangeHideEmpty: 'changeHideEmpty',
+    Copy: 'copy',
 };
 
 export { panelEvents };

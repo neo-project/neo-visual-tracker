@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { INeoRpcConnection, INeoSubscription, INeoStatusReceiver, BlockchainInfo, Blocks } from './neoRpcConnection';
+import { panelEvents } from './panel/panelEvents';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -109,52 +110,55 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 this.onIncomingMessage();
             }
 
-            if (message.e === 'init') {
+            if (message.e === panelEvents.Init) {
                 this.panel.webview.postMessage({ viewState: this.viewState });
                 if (this.viewState.blocks.blocks.length === 0) {
                     await this.updateBlockList(true);
                 }
-            } else if (message.e === 'previousBlocks') {
+            } else if (message.e === panelEvents.PreviousBlocksPage) {
                 this.viewState.firstBlock = this.viewState.blocks.firstIndex + 1;
                 this.viewState.forwards = false;
                 await this.updateBlockList(true);
-            } else if (message.e === 'nextBlocks') {
+            } else if (message.e === panelEvents.NextBlocksPage) {
                 this.viewState.firstBlock = this.viewState.blocks.lastIndex - 1;
                 this.viewState.forwards = true;
                 await this.updateBlockList(true);
-            } else if (message.e === 'firstBlocks') {
+            } else if (message.e === panelEvents.FirstBlocksPage) {
                 this.viewState.firstBlock = undefined;
                 this.viewState.forwards = true;
                 await this.updateBlockList(true);
-            } else if (message.e === 'lastBlocks') {
+            } else if (message.e === panelEvents.LastBlocksPage) {
                 this.viewState.firstBlock = 0;
                 this.viewState.forwards = false;
                 await this.updateBlockList(true);
-            } else if (message.e === 'changeHideEmpty') {
+            } else if (message.e === panelEvents.ChangeHideEmpty) {
                 this.viewState.hideEmptyBlocks = !!message.c;
                 await this.updateBlockList(true);
-            } else if (message.e === 'showBlock') {
+            } else if (message.e === panelEvents.ShowBlock) {
                 this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);
                 this.viewState.activePage = ActivePage.BlockDetail;
-            } else if (message.e === 'closeBlock') {
+            } else if (message.e === panelEvents.CloseBlock) {
                 this.viewState.currentBlock = undefined;
                 this.viewState.activePage = (this.viewState.currentTransaction === undefined) ?
                     ActivePage.Blocks : ActivePage.TransactionDetail;
-            } else if (message.e === 'showTransaction') {
+            } else if (message.e === panelEvents.ShowTransaction) {
                 this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c, this);
                 this.viewState.activePage = ActivePage.TransactionDetail;
-            } else if (message.e === 'closeTransaction') {
+            } else if (message.e === panelEvents.CloseTransaction) {
                 this.viewState.currentTransaction = undefined;
-                this.viewState.activePage = (this.viewState.currentBlock === undefined) ?
-                    ActivePage.Blocks : ActivePage.BlockDetail;
-            } else if (message.e === 'showAddress') {
+                this.viewState.activePage = (this.viewState.currentAddress !== undefined) ?
+                    ActivePage.AddressDetail : 
+                    ((this.viewState.currentBlock === undefined) ? ActivePage.Blocks : ActivePage.BlockDetail);
+            } else if (message.e === panelEvents.ShowAddress) {
                 this.viewState.currentAddress = await this.rpcConnection.getUnspents(message.c, this);
                 this.viewState.activePage = ActivePage.AddressDetail;
-            } else if (message.e === 'closeAddress') {
+            } else if (message.e === panelEvents.CloseAddress) {
                 this.viewState.currentAddress = undefined;
                 this.viewState.activePage = (this.viewState.currentTransaction !== undefined) ?
                     ActivePage.TransactionDetail : 
                     ((this.viewState.currentBlock !== undefined) ? ActivePage.BlockDetail : ActivePage.Blocks );
+            } else if (message.e === panelEvents.Copy) {
+                await vscode.env.clipboard.writeText(message.c);
             }
 
             this.panel.webview.postMessage({ viewState: this.viewState });

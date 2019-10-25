@@ -25,29 +25,47 @@ const renderers = {
         return assetId;
     },
 
-    renderAddress: function(address: any | undefined) {
+    renderAddress: function(address: any | undefined, postMessage: any) {
         if (address) {
-            htmlHelpers.setPlaceholder(selectors.AddressDetailHash, htmlHelpers.text(address.address));
+            htmlHelpers.setPlaceholder(selectors.AddressDetailsHash, htmlHelpers.text(address.address));
             htmlHelpers.showHide(selectors.AddressDetailsGetUnspentsNotSupported, !address.getUnspentsSupport);
             htmlHelpers.showHide(selectors.AddressDetailsGetUnspentsSupported, !!address.getUnspentsSupport);
             if (address.getUnspentsSupport) {
-                const unspentAssetsTbody = document.querySelector(selectors.AddressUnspentAssetsTableBody);
-                if (unspentAssetsTbody) {
-                    htmlHelpers.clearChildren(unspentAssetsTbody);
+                const unspentAssetTemplate = document.querySelector(selectors.AddressDetailsUnspentAssetTemplate);
+                const placeholderArea = document.querySelector(selectors.AddressDetailsGetUnspentsSupported);
+                if (unspentAssetTemplate && placeholderArea) {
+                    htmlHelpers.clearChildren(placeholderArea);
                     for (let assetName in address.assets) {
-                        let assetBalance = 0;
-                        if (address.assets[assetName].unspent) {
-                            for (let i = 0; i < address.assets[assetName].unspent.length; i++) {
-                                assetBalance += parseFloat(address.assets[assetName].unspent[i].value);
+                        const unspentAsset = document.createElement('div');
+                        unspentAsset.innerHTML = unspentAssetTemplate.innerHTML;
+                        const assetNameElement = unspentAsset.querySelector(selectors.AddressDetailsUnspentAssetName);
+                        const tbody = unspentAsset.querySelector('tbody');
+                        if (assetNameElement && tbody) {
+                            let assetBalance = 0;
+                            if (address.assets[assetName].unspent) {
+                                for (let i = 0; i < address.assets[assetName].unspent.length; i++) {
+                                    const txid = address.assets[assetName].unspent[i].txid;
+                                    const value = parseFloat(address.assets[assetName].unspent[i].value);
+                                    assetBalance += value;
+                                    const row = htmlHelpers.newTableRow(
+                                        htmlHelpers.newEventLink(txid, panelEvents.ShowTransaction, txid, postMessage),
+                                        htmlHelpers.text(htmlHelpers.number(value) + ' ' + assetName),
+                                        htmlHelpers.newCopyLink(JSON.stringify(address.assets[assetName].unspent[i]), postMessage));
+                                    tbody.appendChild(row);
+                                }
+                                tbody.appendChild(
+                                    htmlHelpers.newTableHead(
+                                        htmlHelpers.text('Total'), 
+                                        htmlHelpers.text(htmlHelpers.number(assetBalance) + ' ' + assetName),
+                                        htmlHelpers.text(' ')));
                             }
+                            htmlHelpers.clearChildren(assetNameElement);
+                            assetNameElement.appendChild(htmlHelpers.text(assetName));
+                            placeholderArea.appendChild(unspentAsset);
                         }
-                        const row = htmlHelpers.newTableRow(htmlHelpers.text(assetName), htmlHelpers.text(htmlHelpers.number(assetBalance)));
-                        unspentAssetsTbody.appendChild(row);
                     }
                 }
-            } else {
-
-            }
+            } 
         }
     },
 

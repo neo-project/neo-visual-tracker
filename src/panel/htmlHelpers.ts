@@ -1,9 +1,15 @@
+import { panelEvents } from "./panelEvents";
+
 const htmlHelpers = {
 
     clearChildren: function(element: Element) {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         }
+    },
+
+    newCopyLink: function(text: string, postMessage: any) { 
+        return this.newEventLink('Copy', panelEvents.Copy, text, postMessage);
     },
 
     newEventLink: function(text: string, event: string, context: any | undefined, postMessage: any) {
@@ -14,10 +20,18 @@ const htmlHelpers = {
         return link;
     },
 
+    newTableHead: function(...cells: Node[]) {
+        return this.newTableRowHelper('th', cells);
+    },
+
     newTableRow: function(...cells: Node[]) {
+        return this.newTableRowHelper('td', cells);
+    },
+
+    newTableRowHelper: function(cellType: string, cells: Node[]) {
         const row = document.createElement('tr');
         for (let i = 0; i < cells.length; i++) {
-            const cell = document.createElement('td');
+            const cell = document.createElement(cellType);
             cell.appendChild(cells[i]);
             row.appendChild(cell);
         }
