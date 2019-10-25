@@ -29,28 +29,25 @@
         "Tracker"
     ],
     "activationEvents": [
-        "onCommand:extension.openTracker",
-        "onView:extension.rpcServerExplorer"
+        "onCommand:neo-visual-devtracker.openTracker",
+        "onView:neo-visual-devtracker.rpcServerExplorer"
     ],
     "main": "./out/extension.js",
     "contributes": {
         "views": {
-            "explorer": [
-                {
-                    "id": "extension.rpcServerExplorer",
-                    "name": "NEO RPC Servers"
-                }
-            ]
+            "explorer": [{
+                "id": "neo-visual-devtracker.rpcServerExplorer",
+                "name": "NEO RPC Servers"
+            }]
         },
-        "commands": [
-            {
-                "command": "extension.openTracker",
+        "commands": [{
+                "command": "neo-visual-devtracker.openTracker",
                 "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
                 "when": "false"
             },
             {
-                "command": "extension.refreshObjectExplorerNode",
+                "command": "neo-visual-devtracker.refreshObjectExplorerNode",
                 "title": "Refresh NEO RPC Server list",
                 "category": "NEO Express",
                 "icon": {
@@ -59,52 +56,49 @@
                 }
             },
             {
-                "command": "extension.startServer",
+                "command": "neo-visual-devtracker.startServer",
                 "title": "Start NEO Express",
                 "category": "NEO Express",
                 "icon": {
                     "light": "resources/light/play.svg",
                     "dark": "resources/dark/play.svg"
                 },
-                "when": "view == extension.rpcServerExplorer && viewItem == startable"
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
             {
-                "command": "extension.stopServer",
+                "command": "neo-visual-devtracker.stopServer",
                 "title": "Stop NEO Express",
                 "category": "NEO Express",
                 "icon": {
                     "light": "resources/light/stop.svg",
                     "dark": "resources/dark/stop.svg"
                 },
-                "when": "view == extension.rpcServerExplorer && viewItem == startable"
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             }
         ],
         "menus": {
-            "view/title": [
-                {
-                    "command": "extension.refreshObjectExplorerNode",
-                    "when": "view == extension.rpcServerExplorer",
-                    "group": "navigation"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "extension.startServer",
-                    "when": "view == extension.rpcServerExplorer && viewItem == startable",
+            "view/title": [{
+                "command": "neo-visual-devtracker.refreshObjectExplorerNode",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer",
+                "group": "navigation"
+            }],
+            "view/item/context": [{
+                    "command": "neo-visual-devtracker.startServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable",
                     "group": "inline"
                 },
                 {
-                    "command": "extension.stopServer",
-                    "when": "view == extension.rpcServerExplorer && viewItem == startable",
+                    "command": "neo-visual-devtracker.stopServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable",
                     "group": "inline"
                 },
                 {
-                    "command": "extension.startServer",
-                    "when": "view == extension.rpcServerExplorer && viewItem == startable"
+                    "command": "neo-visual-devtracker.startServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {
-                    "command": "extension.stopServer",
-                    "when": "view == extension.rpcServerExplorer && viewItem == startable"
+                    "command": "neo-visual-devtracker.stopServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 }
             ]
         }

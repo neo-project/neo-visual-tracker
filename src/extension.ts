@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
-	const openTrackerCommand = vscode.commands.registerCommand('extension.openTracker', (url?: string) => {
+	const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', (url?: string) => {
 		if (url) {	
 			try {
 				const panel = new NeoTrackerPanel(
@@ -29,11 +29,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const refreshServersCommand = vscode.commands.registerCommand('extension.refreshObjectExplorerNode', () => {
+	const refreshServersCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshObjectExplorerNode', () => {
 		rpcServerExplorer.refresh();
 	});
 
-	const startServerCommand = vscode.commands.registerCommand('extension.startServer', (server) => {
+	const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', (server) => {
 		console.log('User requested to start ', server);
 		let label = undefined;
 		if (server.parent) {
@@ -42,17 +42,17 @@ export function activate(context: vscode.ExtensionContext) {
 		neoExpressInstanceManager.start(server.jsonFile, server.index, label);
 	});
 
-	const stopServerCommand = vscode.commands.registerCommand('extension.stopServer', (server) => {
+	const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', (server) => {
 		console.log('User requested to stop ', server);
 		neoExpressInstanceManager.stop(server.jsonFile, server.index);
 	});
 
-	const invokeContractCommand = vscode.commands.registerCommand('extension.invokeContract', (server) => {
+	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
 		console.log('User requested to invoke a contract ', server);
 		sampleInvocation(server.rpcUri);
 	});
 
-	const serverExplorer = vscode.window.registerTreeDataProvider('extension.rpcServerExplorer', rpcServerExplorer);
+	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
 	context.subscriptions.push(openTrackerCommand);
 	context.subscriptions.push(refreshServersCommand);
