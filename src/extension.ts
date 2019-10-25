@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const refreshServersCommand = vscode.commands.registerCommand('extension.refreshServers', () => {
+	const refreshServersCommand = vscode.commands.registerCommand('extension.refreshObjectExplorerNode', () => {
 		rpcServerExplorer.refresh();
 	});
 
