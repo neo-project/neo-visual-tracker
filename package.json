@@ -74,12 +74,6 @@
                     "dark": "resources/dark/stop.svg"
                 },
                 "when": "view == extension.rpcServerExplorer && viewItem == startable"
-            },
-            {
-                "command": "extension.invokeContract",
-                "title": "EXPERIMENTAL -- Invoke contract",
-                "category": "NEO Express",
-                "when": "view == extension.rpcServerExplorer && viewItem == startable"
             }
         ],
         "menus": {
@@ -104,10 +98,6 @@
                 },
                 {
                     "command": "extension.stopServer",
-                    "when": "view == extension.rpcServerExplorer && viewItem == startable"
-                },
-                {
-                    "command": "extension.invokeContract",
                     "when": "view == extension.rpcServerExplorer && viewItem == startable"
                 }
             ]
