@@ -7,6 +7,22 @@ const invokeRenderers = {
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFileName, htmlHelpers.text(viewState.neoExpressJsonFileName));
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFilePath, htmlHelpers.text(viewState.neoExpressJsonFullPath));
         this.renderWallets(viewState.wallets, viewState.selectedWallet);
+        this.renderContracts(viewState.contracts);
+    },
+
+    renderContracts: function(contracts: any[]) {
+        const placeholder = document.querySelector(invokeSelectors.ContractsPlaceholder);
+        const contractTemplate = document.querySelector(invokeSelectors.ContractTemplate);
+        if (placeholder && contractTemplate) {
+            htmlHelpers.clearChildren(placeholder);
+            for (let i = 0; i < contracts.length; i++) {
+                const contractData = contracts[i];
+                const thisContract = document.createElement('div');
+                thisContract.innerHTML = contractTemplate.innerHTML;
+                htmlHelpers.setInnerPlaceholder(thisContract, invokeSelectors.ContractName, htmlHelpers.text(contractData.name));
+                placeholder.appendChild(thisContract);
+            }
+        }
     },
 
     renderWallets: function(wallets: any[], selectedWallet: string) {

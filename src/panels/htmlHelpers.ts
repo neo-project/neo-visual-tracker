@@ -50,6 +50,14 @@ const htmlHelpers = {
         }
     },
 
+    setInnerPlaceholder: function(element: ParentNode, selector: string, value: Node) {
+        const placeHolderElement = element.querySelector(selector);
+        if (placeHolderElement) {
+            this.clearChildren(placeHolderElement);
+            placeHolderElement.appendChild(value);
+        }
+    },
+
     setOnClickEvent: function(element: string | Element, event: string, context: any | undefined, postMessage : any) {
         const clickable = (typeof element === 'string') ? document.querySelector(element) : element;
         if (clickable) {
@@ -58,11 +66,7 @@ const htmlHelpers = {
     },
 
     setPlaceholder: function(selector: string, value: Node) {
-        const placeHolderElement = document.querySelector(selector);
-        if (placeHolderElement) {
-            this.clearChildren(placeHolderElement);
-            placeHolderElement.appendChild(value);
-        }
+        this.setInnerPlaceholder(document, selector, value);
     },
 
     showHide: function(selector: string, show: boolean) {

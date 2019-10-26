@@ -4,6 +4,9 @@ const invokeSelectors = {
     JsonFileName: '#neoExpressJsonFileName',
     JsonFilePath: '#neoExpressJsonFullPath',
     WalletDropdown: '#walletDropdown',
+    ContractsPlaceholder: '#contractsPlaceholder',
+    ContractTemplate: '#contractTemplate',
+    ContractName: '.contractName',
 };
 
 export { invokeSelectors };
