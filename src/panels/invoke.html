@@ -14,25 +14,30 @@
 
     <h1>Smart Contract Invocation: <span id="neoExpressJsonFileName"></span></h1>
 
-    <h2>Wallets</h2>
-    <div><select id="walletDropdown"></select></div>
+    <div class="card">
+        <h2>Wallet selection</h2>
+        <div><select id="walletDropdown"></select></div>
+    </div>
 
-    <h2>Contracts</h2>
     <div id="contractsPlaceholder"></div>
 
     <div id="templates">
 
         <div id="contractTemplate">
-            <h3 class="clickable">Contract: <span class="contractName"></span></h3>
-            <div class="contractDetail">
-                <div class="methodsPlaceholder"></div>
+            <div class="card">
+                <h2 class="clickable">Contract: <span class="contractName"></span></h2>
+                <div class="contractDetail">
+                    <div class="methodsPlaceholder"></div>
+                </div>
             </div>
         </div>
 
         <div id="methodTemplate">
-            <h4 class="clickable">Method: <span class="methodName"></span></h4>
-            <div class="methodDetail">
-                TODO
+            <div class="card">
+                <h3 class="clickable">Method: <span class="methodName"></span></h3>
+                <div class="methodDetail">
+                    TODO
+                </div>
             </div>
         </div>
 
