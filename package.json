@@ -77,6 +77,12 @@
                     "dark": "resources/dark/stop.svg"
                 },
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
+                "command": "neo-visual-devtracker.invokeContract",
+                "title": "Invoke contract",
+                "category": "NEO Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             }
         ],
         "menus": {
@@ -104,6 +110,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.stopServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "neo-visual-devtracker.invokeContract",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 }
             ]
