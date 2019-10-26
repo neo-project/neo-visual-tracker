@@ -8,32 +8,31 @@ const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ViewState {
-    jsonFile?: string;
+    neoExpressJsonFullPath?: string;
+    neoExpressJsonFileName?: string;
 }
 
 export class InvocationPanel {
+
     public readonly panel: vscode.WebviewPanel;
-    public readonly ready: Promise<void>;
     public readonly viewState: ViewState;
 
-    private onIncomingMessage?: () => void;
+    private jsonParsed: boolean;
 
     constructor(
         extensionPath: string,
-        jsonFile: string,
+        neoExpressJsonFullPath: string,
         disposables: vscode.Disposable[]) {
 
+        this.jsonParsed = false;
+
         this.viewState = new ViewState();
-
-        this.viewState.jsonFile = jsonFile;
-
-        this.ready = new Promise((resolve, reject) => {
-            this.onIncomingMessage = resolve;
-        });
+        this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
+        this.viewState.neoExpressJsonFileName = path.basename(neoExpressJsonFullPath);
 
         this.panel = vscode.window.createWebviewPanel(
             'invocationPanel',
-            'Invoke Smart Contract',
+            this.viewState.neoExpressJsonFileName,
             vscode.ViewColumn.Active,
             { enableScripts: true });
 
@@ -53,13 +52,21 @@ export class InvocationPanel {
             .replace(CssHrefPlaceholder, cssHref);
     }
 
+    private async reload() {
+        console.log('InvocationPanel is parsing ', this.viewState.neoExpressJsonFullPath);
+
+        // TODO: Parse NEO Express JSON file into ViewState.
+        
+        this.jsonParsed = true;
+    }
+
     private onClose() {
 
     }
 
     private async onMessage(message: any) {
-        if (this.onIncomingMessage) {
-            this.onIncomingMessage();
+        if (!this.jsonParsed) {
+            await this.reload();
         }
 
         if (message.e === invokeEvents.Init) {
