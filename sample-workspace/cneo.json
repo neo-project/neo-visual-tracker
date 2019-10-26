@@ -53,6 +53,23 @@
           }
         }
       ]
+    },
+    {
+      "name": "wallet2",
+      "accounts": [
+        {
+          "private-key": "539eaa6c095e23739132be923464fab0614fbf965fb8e2bf8ac5975066464a6e",
+          "script-hash": "AR4TyxDpy2zaiSMMiVNe12p6o58gWtfdzu",
+          "label": null,
+          "is-default": true,
+          "contract": {
+            "script": "210394389f6cdabcf121ea74f8b56712b5a4a5a5470aba6e10b4a1e76f110e27d995ac",
+            "parameters": [
+              "Signature"
+            ]
+          }
+        }
+      ]
     }
   ],
   "contracts": [
