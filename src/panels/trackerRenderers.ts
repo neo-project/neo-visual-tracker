@@ -1,8 +1,8 @@
 import { htmlHelpers } from "./htmlHelpers";
-import { panelEvents } from "./panelEvents";
-import { selectors } from "./selectors";
+import { trackerEvents } from "./trackerEvents";
+import { trackerSelectors } from "./trackerSelectors";
 
-const renderers = {
+const trackerRenderers = {
     
     assetName: function(assetId: string, assets: any) {
         const assetInfo = assets[assetId];
@@ -27,18 +27,18 @@ const renderers = {
 
     renderAddress: function(address: any | undefined, postMessage: any) {
         if (address) {
-            htmlHelpers.setPlaceholder(selectors.AddressDetailsHash, htmlHelpers.text(address.address));
-            htmlHelpers.showHide(selectors.AddressDetailsGetUnspentsNotSupported, !address.getUnspentsSupport);
-            htmlHelpers.showHide(selectors.AddressDetailsGetUnspentsSupported, !!address.getUnspentsSupport);
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(address.address));
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !address.getUnspentsSupport);
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsSupported, !!address.getUnspentsSupport);
             if (address.getUnspentsSupport) {
-                const unspentAssetTemplate = document.querySelector(selectors.AddressDetailsUnspentAssetTemplate);
-                const placeholderArea = document.querySelector(selectors.AddressDetailsGetUnspentsSupported);
+                const unspentAssetTemplate = document.querySelector(trackerSelectors.AddressDetailsUnspentAssetTemplate);
+                const placeholderArea = document.querySelector(trackerSelectors.AddressDetailsGetUnspentsSupported);
                 if (unspentAssetTemplate && placeholderArea) {
                     htmlHelpers.clearChildren(placeholderArea);
                     for (let assetName in address.assets) {
                         const unspentAsset = document.createElement('div');
                         unspentAsset.innerHTML = unspentAssetTemplate.innerHTML;
-                        const assetNameElement = unspentAsset.querySelector(selectors.AddressDetailsUnspentAssetName);
+                        const assetNameElement = unspentAsset.querySelector(trackerSelectors.AddressDetailsUnspentAssetName);
                         const tbody = unspentAsset.querySelector('tbody');
                         if (assetNameElement && tbody) {
                             let assetBalance = 0;
@@ -48,7 +48,7 @@ const renderers = {
                                     const value = parseFloat(address.assets[assetName].unspent[i].value);
                                     assetBalance += value;
                                     const row = htmlHelpers.newTableRow(
-                                        htmlHelpers.newEventLink(txid, panelEvents.ShowTransaction, txid, postMessage),
+                                        htmlHelpers.newEventLink(txid, trackerEvents.ShowTransaction, txid, postMessage),
                                         htmlHelpers.text(htmlHelpers.number(value) + ' ' + assetName),
                                         htmlHelpers.newCopyLink(JSON.stringify(address.assets[assetName].unspent[i]), postMessage));
                                     tbody.appendChild(row);
@@ -71,49 +71,49 @@ const renderers = {
 
     renderBlockchainInfo: function(blockchainInfo: any) {
         if (blockchainInfo) {
-            htmlHelpers.setPlaceholder(selectors.BlockHeight, htmlHelpers.text(htmlHelpers.number(blockchainInfo.height)));
-            htmlHelpers.setPlaceholder(selectors.RpcUrl, htmlHelpers.text(blockchainInfo.url));
-            htmlHelpers.setPlaceholder(selectors.RpcStatus, htmlHelpers.text(blockchainInfo.online ? 'Connected to' : 'Connecting to'));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockHeight, htmlHelpers.text(htmlHelpers.number(blockchainInfo.height)));
+            htmlHelpers.setPlaceholder(trackerSelectors.RpcUrl, htmlHelpers.text(blockchainInfo.url));
+            htmlHelpers.setPlaceholder(trackerSelectors.RpcStatus, htmlHelpers.text(blockchainInfo.online ? 'Connected to' : 'Connecting to'));
         }
     },
 
     renderBlock: function(block: any | undefined, postMessage : any) {
         if (block) {
-            htmlHelpers.setPlaceholder(selectors.BlockDetailHash, htmlHelpers.text(block.hash));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailIndex, htmlHelpers.text(htmlHelpers.number(block.index)));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailTime, htmlHelpers.text(htmlHelpers.time(block.time)));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailSize, htmlHelpers.text(htmlHelpers.number(block.size) + ' bytes'));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailVersion, htmlHelpers.text(block.version));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailMerkleRoot, htmlHelpers.text(block.merkleroot));
-            htmlHelpers.setPlaceholder(selectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailHash, htmlHelpers.text(block.hash));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailIndex, htmlHelpers.text(htmlHelpers.number(block.index)));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailTime, htmlHelpers.text(htmlHelpers.time(block.time)));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailSize, htmlHelpers.text(htmlHelpers.number(block.size) + ' bytes'));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailVersion, htmlHelpers.text(block.version));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailMerkleRoot, htmlHelpers.text(block.merkleroot));
+            htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailTransactions, htmlHelpers.text(block.tx.length));
             htmlHelpers.setPlaceholder(
-                selectors.BlockDetailValidator, 
-                htmlHelpers.newEventLink(block.nextconsensus, panelEvents.ShowAddress, block.nextconsensus, postMessage));
+                trackerSelectors.BlockDetailValidator, 
+                htmlHelpers.newEventLink(block.nextconsensus, trackerEvents.ShowAddress, block.nextconsensus, postMessage));
 
             if ((block.index > 0) && block.previousblockhash) {
                 htmlHelpers.setPlaceholder(
-                    selectors.BlockDetailPreviousLink, 
-                    htmlHelpers.newEventLink(block.previousblockhash, panelEvents.ShowBlock, block.index - 1, postMessage));
+                    trackerSelectors.BlockDetailPreviousLink, 
+                    htmlHelpers.newEventLink(block.previousblockhash, trackerEvents.ShowBlock, block.index - 1, postMessage));
             } else {
-                htmlHelpers.setPlaceholder(selectors.BlockDetailPreviousLink, htmlHelpers.text('None'));
+                htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailPreviousLink, htmlHelpers.text('None'));
             }
 
             if (block.nextblockhash) {
                 htmlHelpers.setPlaceholder(
-                    selectors.BlockDetailNextLink, 
-                    htmlHelpers.newEventLink(block.nextblockhash, panelEvents.ShowBlock, block.index + 1, postMessage));
+                    trackerSelectors.BlockDetailNextLink, 
+                    htmlHelpers.newEventLink(block.nextblockhash, trackerEvents.ShowBlock, block.index + 1, postMessage));
             } else {
-                htmlHelpers.setPlaceholder(selectors.BlockDetailNextLink, htmlHelpers.text('None'));
+                htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailNextLink, htmlHelpers.text('None'));
             }
 
-            const txTbody = document.querySelector(selectors.BlockDetailTransactionsTable);
+            const txTbody = document.querySelector(trackerSelectors.BlockDetailTransactionsTable);
             if (txTbody) {
                 htmlHelpers.clearChildren(txTbody);
                 for (let i = 0; i < block.tx.length; i++) {
                     const tx = block.tx[i];
                     const row = htmlHelpers.newTableRow(
                         htmlHelpers.text(tx.type),
-                        htmlHelpers.newEventLink(tx.txid, panelEvents.ShowTransaction, tx.txid, postMessage),
+                        htmlHelpers.newEventLink(tx.txid, trackerEvents.ShowTransaction, tx.txid, postMessage),
                         htmlHelpers.text(htmlHelpers.number(tx.size) + ' bytes'),
                         htmlHelpers.text(htmlHelpers.number(tx.net_fee) + ' GAS'),
                         htmlHelpers.text(htmlHelpers.number(tx.sys_fee) + ' GAS'));
@@ -124,23 +124,23 @@ const renderers = {
     },
 
     renderBlocks: function (blocks: any[], firstBlock: number | undefined, postMessage: any) {
-        htmlHelpers.setEnabled(selectors.BlocksPaginationPrevious, firstBlock !== undefined);
-        htmlHelpers.setEnabled(selectors.BlocksPaginationFirst, firstBlock !== undefined);
+        htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationPrevious, firstBlock !== undefined);
+        htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationFirst, firstBlock !== undefined);
         if (blocks.length) {
-            htmlHelpers.setEnabled(selectors.BlocksPaginationNext, blocks[blocks.length - 1].index !== 0);
-            htmlHelpers.setEnabled(selectors.BlocksPaginationLast, blocks[blocks.length - 1].index !== 0);
+            htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationNext, blocks[blocks.length - 1].index !== 0);
+            htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationLast, blocks[blocks.length - 1].index !== 0);
         }
 
-        const tbody = document.querySelector(selectors.BlocksTableBody);
+        const tbody = document.querySelector(trackerSelectors.BlocksTableBody);
         if (tbody) {
             htmlHelpers.clearChildren(tbody);
             for (let i = 0; i < blocks.length; i++) {
                 const contents = blocks[i];
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.newEventLink(htmlHelpers.number(contents.index), panelEvents.ShowBlock, contents.index, postMessage),
+                    htmlHelpers.newEventLink(htmlHelpers.number(contents.index), trackerEvents.ShowBlock, contents.index, postMessage),
                     htmlHelpers.text(htmlHelpers.time(contents.time)),
                     htmlHelpers.text(contents.tx.length),
-                    htmlHelpers.newEventLink(contents.nextconsensus, panelEvents.ShowAddress, contents.nextconsensus, postMessage),
+                    htmlHelpers.newEventLink(contents.nextconsensus, trackerEvents.ShowAddress, contents.nextconsensus, postMessage),
                     htmlHelpers.text(htmlHelpers.number(contents.size) + ' bytes'));
                 tbody.appendChild(row);
             }
@@ -159,7 +159,7 @@ const renderers = {
                     inputOutput.value *= -1;
                 }
                 const row = htmlHelpers.newTableRow(
-                    htmlHelpers.newEventLink(inputOutput.address, panelEvents.ShowAddress, inputOutput.address, postMessage),
+                    htmlHelpers.newEventLink(inputOutput.address, trackerEvents.ShowAddress, inputOutput.address, postMessage),
                     htmlHelpers.text(htmlHelpers.number(inputOutput.value) + ' ' + this.assetName(inputOutput.asset, assets)));
                 tbody.appendChild(row);
             }
@@ -170,28 +170,28 @@ const renderers = {
 
     renderTransaction: function(transaction: any | undefined, postMessage: any) {
         if (transaction) {
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailType, htmlHelpers.text(transaction.type));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailTime, htmlHelpers.text(htmlHelpers.time(transaction.blocktime)));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailNetworkFee, htmlHelpers.text(htmlHelpers.number(transaction.net_fee) + ' GAS'));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailSystemFee, htmlHelpers.text(htmlHelpers.number(transaction.sys_fee) + ' GAS'));
-            htmlHelpers.setPlaceholder(selectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailType, htmlHelpers.text(transaction.type));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, htmlHelpers.text(htmlHelpers.time(transaction.blocktime)));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailNetworkFee, htmlHelpers.text(htmlHelpers.number(transaction.net_fee) + ' GAS'));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSystemFee, htmlHelpers.text(htmlHelpers.number(transaction.sys_fee) + ' GAS'));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
             htmlHelpers.setPlaceholder(
-                selectors.TransactionDetailBlock, 
-                htmlHelpers.newEventLink(transaction.blockhash, panelEvents.ShowBlock, transaction.blockhash, postMessage));
+                trackerSelectors.TransactionDetailBlock, 
+                htmlHelpers.newEventLink(transaction.blockhash, trackerEvents.ShowBlock, transaction.blockhash, postMessage));
             let valueTransferCount = 0;
-            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
-            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);
-            valueTransferCount += this.renderInputsOutputs(selectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false, postMessage);
-            (document.querySelector(selectors.TransactionValueTransferTable) as any).style.display =
+            valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
+            valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);
+            valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false, postMessage);
+            (document.querySelector(trackerSelectors.TransactionValueTransferTable) as any).style.display =
                 valueTransferCount > 0 ? 'table' : 'none';
-            const scriptsTbody = document.querySelector(selectors.TransactionScriptsTableBody);
-            (document.querySelector(selectors.TransactionMainScriptArea) as any).style.display =
+            const scriptsTbody = document.querySelector(trackerSelectors.TransactionScriptsTableBody);
+            (document.querySelector(trackerSelectors.TransactionMainScriptArea) as any).style.display =
                 transaction.scriptDisassembled ? 'table' : 'none';
             htmlHelpers.setPlaceholder(
-                selectors.TransactionMainScriptBody, 
+                trackerSelectors.TransactionMainScriptBody, 
                 htmlHelpers.text(transaction.scriptDisassembled));
-            (document.querySelector(selectors.TransactionScriptsTable) as any).style.display =
+            (document.querySelector(trackerSelectors.TransactionScriptsTable) as any).style.display =
                 transaction.scripts.length > 0 ? 'table' : 'none';
             if (scriptsTbody) {
                 htmlHelpers.clearChildren(scriptsTbody);
@@ -207,7 +207,7 @@ const renderers = {
     },
 
     setPage: function(activePage: string) {
-        const allPages = document.querySelectorAll(selectors.AllPages);
+        const allPages = document.querySelectorAll(trackerSelectors.AllPages);
         for (let i = 0; i < allPages.length; i++) {
             const id = allPages[i].id;
             (allPages[i] as any).style.display = id === activePage ? 'block' : 'none';
@@ -215,4 +215,4 @@ const renderers = {
     },
 };
 
-export { renderers };
+export { trackerRenderers };

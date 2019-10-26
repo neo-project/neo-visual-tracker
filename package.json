@@ -35,12 +35,15 @@
     "main": "./out/extension.js",
     "contributes": {
         "views": {
-            "explorer": [{
-                "id": "neo-visual-devtracker.rpcServerExplorer",
-                "name": "NEO RPC Servers"
-            }]
+            "explorer": [
+                {
+                    "id": "neo-visual-devtracker.rpcServerExplorer",
+                    "name": "NEO RPC Servers"
+                }
+            ]
         },
-        "commands": [{
+        "commands": [
+            {
                 "command": "neo-visual-devtracker.openTracker",
                 "title": "Open NEO Visual DevTracker",
                 "category": "NEO Express",
@@ -77,12 +80,15 @@
             }
         ],
         "menus": {
-            "view/title": [{
-                "command": "neo-visual-devtracker.refreshObjectExplorerNode",
-                "when": "view == neo-visual-devtracker.rpcServerExplorer",
-                "group": "navigation"
-            }],
-            "view/item/context": [{
+            "view/title": [
+                {
+                    "command": "neo-visual-devtracker.refreshObjectExplorerNode",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
                     "command": "neo-visual-devtracker.startServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable",
                     "group": "inline"
@@ -105,11 +111,11 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "npm install && tsc -p ./ && node-sass src/panel/panel.scss -o out/panel && browserify out/panel/panel.js -o out/panel/bundle.js",
+        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js",
         "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
-        "watch-css": "node-sass src/panel/panel.scss -wo out/panel",
-        "watch-browserify": "watchify out/panel/panel.js -o out/panel/bundle.js",
+        "watch-css": "node-sass src/panels/tracker.scss -wo out/panels",
+        "watch-browserify": "watchify out/panels/tracker.js -o out/panels/trackerBundle.js",
         "package": "npm run setversion && vsce package",
         "pretest": "npm run compile",
         "setversion": "gulp setversion",

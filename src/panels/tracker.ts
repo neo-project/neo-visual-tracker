@@ -1,7 +1,7 @@
 import { htmlHelpers } from "./htmlHelpers";
-import { panelEvents } from "./panelEvents";
-import { renderers } from "./renderers";
-import { selectors } from "./selectors";
+import { trackerEvents } from "./trackerEvents";
+import { trackerRenderers } from "./trackerRenderers";
+import { trackerSelectors } from "./trackerSelectors";
 
 /*
  * This code runs in the context of the WebView panel. It receives messages from the main extension 
@@ -15,21 +15,21 @@ declare var acquireVsCodeApi: any;
 function handleMessage(message: any) {
     if (message.viewState) {
         console.log(message.viewState);
-        renderers.renderBlockchainInfo(message.viewState.blockChainInfo);
-        renderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, vsCodePostMessage);
-        renderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
-        renderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
-        renderers.renderAddress(message.viewState.currentAddress, vsCodePostMessage);
-        renderers.setPage(message.viewState.activePage);
-        htmlHelpers.showHide(selectors.StatusBar, !!message.viewState.blockChainInfo);
-        const openingIndicator: any = document.querySelector(selectors.OpeningIndicator);
+        trackerRenderers.renderBlockchainInfo(message.viewState.blockChainInfo);
+        trackerRenderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, vsCodePostMessage);
+        trackerRenderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
+        trackerRenderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
+        trackerRenderers.renderAddress(message.viewState.currentAddress, vsCodePostMessage);
+        trackerRenderers.setPage(message.viewState.activePage);
+        htmlHelpers.showHide(trackerSelectors.StatusBar, !!message.viewState.blockChainInfo);
+        const openingIndicator: any = document.querySelector(trackerSelectors.OpeningIndicator);
         openingIndicator.style.display = (!message.viewState.blockChainInfo || !message.viewState.blockChainInfo.online) ? 'block' : 'none';
-        const checkbox: any = document.querySelector(selectors.HideEmptyBlocksCheckbox);
+        const checkbox: any = document.querySelector(trackerSelectors.HideEmptyBlocksCheckbox);
         checkbox.checked = message.viewState.hideEmptyBlocks;
     } else if (message.status) {
-        const loadingIndicator: any = document.querySelector(selectors.LoadingIndicator);
+        const loadingIndicator: any = document.querySelector(trackerSelectors.LoadingIndicator);
         loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';
-        htmlHelpers.setPlaceholder(selectors.LoadingMessage, htmlHelpers.text(message.status.message));
+        htmlHelpers.setPlaceholder(trackerSelectors.LoadingMessage, htmlHelpers.text(message.status.message));
         // console.warn(new Date, 'status: ', message.status);
     }
 }
@@ -40,20 +40,20 @@ function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
     window.addEventListener('message', msg => handleMessage(msg.data));
-    vscode.postMessage({ e: panelEvents.Init });
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationPrevious, panelEvents.PreviousBlocksPage, null, vsCodePostMessage);
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationNext, panelEvents.NextBlocksPage, null, vsCodePostMessage);
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationFirst, panelEvents.FirstBlocksPage, null, vsCodePostMessage);
-    htmlHelpers.setOnClickEvent(selectors.BlocksPaginationLast, panelEvents.LastBlocksPage, null, vsCodePostMessage);
-    htmlHelpers.setOnClickEvent(selectors.BlockDetailClose, panelEvents.CloseBlock, null, vsCodePostMessage);
-    htmlHelpers.setOnClickEvent(selectors.TransactionDetailClose, panelEvents.CloseTransaction, null, vsCodePostMessage);
-    htmlHelpers.setOnClickEvent(selectors.AddressDetailsClose, panelEvents.CloseAddress, null, vsCodePostMessage);
+    vscode.postMessage({ e: trackerEvents.Init });
+    htmlHelpers.setOnClickEvent(trackerSelectors.BlocksPaginationPrevious, trackerEvents.PreviousBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(trackerSelectors.BlocksPaginationNext, trackerEvents.NextBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(trackerSelectors.BlocksPaginationFirst, trackerEvents.FirstBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(trackerSelectors.BlocksPaginationLast, trackerEvents.LastBlocksPage, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(trackerSelectors.BlockDetailClose, trackerEvents.CloseBlock, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(trackerSelectors.TransactionDetailClose, trackerEvents.CloseTransaction, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(trackerSelectors.AddressDetailsClose, trackerEvents.CloseAddress, null, vsCodePostMessage);
     
-    const checkbox = document.querySelector(selectors.HideEmptyBlocksCheckbox);
+    const checkbox = document.querySelector(trackerSelectors.HideEmptyBlocksCheckbox);
     if (checkbox) {
         checkbox.addEventListener(
             'change', 
-            () => vsCodePostMessage({ e: panelEvents.ChangeHideEmpty, c: (checkbox as any).checked }));
+            () => vsCodePostMessage({ e: trackerEvents.ChangeHideEmpty, c: (checkbox as any).checked }));
     }
 }
 

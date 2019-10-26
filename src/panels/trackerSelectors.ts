@@ -1,6 +1,6 @@
-// DOM query selectors for various elements in the panel.html template:
+// DOM query selectors for various elements in the tracker.html template:
 
-const selectors = {
+const trackerSelectors = {
     AllPages: '.page',
     StatusBar: '.status-bar',
     BlockHeight: '#blockHeight',
@@ -50,4 +50,4 @@ const selectors = {
     OpeningIndicator: '#opening-indicator',
 };
 
-export { selectors };
+export { trackerSelectors };

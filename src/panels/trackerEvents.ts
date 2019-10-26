@@ -1,6 +1,6 @@
 // Names of events expected by the code running in neoTrackerPanel.ts:
 
-const panelEvents = {
+const trackerEvents = {
     Init: 'init',
     PreviousBlocksPage: 'previousBlocks',
     NextBlocksPage: 'nextBlocks',
@@ -16,4 +16,4 @@ const panelEvents = {
     Copy: 'copy',
 };
 
-export { panelEvents };
+export { trackerEvents };

@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { INeoRpcConnection, INeoSubscription, INeoStatusReceiver, BlockchainInfo, Blocks } from './neoRpcConnection';
-import { panelEvents } from './panel/panelEvents';
+import { trackerEvents } from './panels/trackerEvents';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -64,11 +64,11 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);
 
         const htmlFileContents = fs.readFileSync(
-            path.join(extensionPath, 'src', 'panel', 'panel.html'), { encoding: 'utf8' });
+            path.join(extensionPath, 'src', 'panels', 'tracker.html'), { encoding: 'utf8' });
         const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panel', 'bundle.js'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'trackerBundle.js'))) + '';
         const cssHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panel', 'panel.css'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'tracker.css'))) + '';
         this.panel.webview.html = htmlFileContents
             .replace(JavascriptHrefPlaceholder, javascriptHref)
             .replace(CssHrefPlaceholder, cssHref);
@@ -110,54 +110,54 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 this.onIncomingMessage();
             }
 
-            if (message.e === panelEvents.Init) {
+            if (message.e === trackerEvents.Init) {
                 this.panel.webview.postMessage({ viewState: this.viewState });
                 if (this.viewState.blocks.blocks.length === 0) {
                     await this.updateBlockList(true);
                 }
-            } else if (message.e === panelEvents.PreviousBlocksPage) {
+            } else if (message.e === trackerEvents.PreviousBlocksPage) {
                 this.viewState.firstBlock = this.viewState.blocks.firstIndex + 1;
                 this.viewState.forwards = false;
                 await this.updateBlockList(true);
-            } else if (message.e === panelEvents.NextBlocksPage) {
+            } else if (message.e === trackerEvents.NextBlocksPage) {
                 this.viewState.firstBlock = this.viewState.blocks.lastIndex - 1;
                 this.viewState.forwards = true;
                 await this.updateBlockList(true);
-            } else if (message.e === panelEvents.FirstBlocksPage) {
+            } else if (message.e === trackerEvents.FirstBlocksPage) {
                 this.viewState.firstBlock = undefined;
                 this.viewState.forwards = true;
                 await this.updateBlockList(true);
-            } else if (message.e === panelEvents.LastBlocksPage) {
+            } else if (message.e === trackerEvents.LastBlocksPage) {
                 this.viewState.firstBlock = 0;
                 this.viewState.forwards = false;
                 await this.updateBlockList(true);
-            } else if (message.e === panelEvents.ChangeHideEmpty) {
+            } else if (message.e === trackerEvents.ChangeHideEmpty) {
                 this.viewState.hideEmptyBlocks = !!message.c;
                 await this.updateBlockList(true);
-            } else if (message.e === panelEvents.ShowBlock) {
+            } else if (message.e === trackerEvents.ShowBlock) {
                 this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);
                 this.viewState.activePage = ActivePage.BlockDetail;
-            } else if (message.e === panelEvents.CloseBlock) {
+            } else if (message.e === trackerEvents.CloseBlock) {
                 this.viewState.currentBlock = undefined;
                 this.viewState.activePage = (this.viewState.currentTransaction === undefined) ?
                     ActivePage.Blocks : ActivePage.TransactionDetail;
-            } else if (message.e === panelEvents.ShowTransaction) {
+            } else if (message.e === trackerEvents.ShowTransaction) {
                 this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c, this);
                 this.viewState.activePage = ActivePage.TransactionDetail;
-            } else if (message.e === panelEvents.CloseTransaction) {
+            } else if (message.e === trackerEvents.CloseTransaction) {
                 this.viewState.currentTransaction = undefined;
                 this.viewState.activePage = (this.viewState.currentAddress !== undefined) ?
                     ActivePage.AddressDetail : 
                     ((this.viewState.currentBlock === undefined) ? ActivePage.Blocks : ActivePage.BlockDetail);
-            } else if (message.e === panelEvents.ShowAddress) {
+            } else if (message.e === trackerEvents.ShowAddress) {
                 this.viewState.currentAddress = await this.rpcConnection.getUnspents(message.c, this);
                 this.viewState.activePage = ActivePage.AddressDetail;
-            } else if (message.e === panelEvents.CloseAddress) {
+            } else if (message.e === trackerEvents.CloseAddress) {
                 this.viewState.currentAddress = undefined;
                 this.viewState.activePage = (this.viewState.currentTransaction !== undefined) ?
                     ActivePage.TransactionDetail : 
                     ((this.viewState.currentBlock !== undefined) ? ActivePage.BlockDetail : ActivePage.Blocks );
-            } else if (message.e === panelEvents.Copy) {
+            } else if (message.e === trackerEvents.Copy) {
                 await vscode.env.clipboard.writeText(message.c);
             }
 

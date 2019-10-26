@@ -1,4 +1,4 @@
-import { panelEvents } from "./panelEvents";
+import { trackerEvents } from "./trackerEvents";
 
 const htmlHelpers = {
 
@@ -9,7 +9,7 @@ const htmlHelpers = {
     },
 
     newCopyLink: function(text: string, postMessage: any) { 
-        return this.newEventLink('Copy', panelEvents.Copy, text, postMessage);
+        return this.newEventLink('Copy', trackerEvents.Copy, text, postMessage);
     },
 
     newEventLink: function(text: string, event: string, context: any | undefined, postMessage: any) {
