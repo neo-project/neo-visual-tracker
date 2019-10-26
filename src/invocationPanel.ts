@@ -12,13 +12,14 @@ class ViewState {
     neoExpressJsonFileName: string = '';
     wallets: any[] = [];
     contracts: any[] = [];
+    selectedWallet: string = '';
 }
 
 export class InvocationPanel {
 
-    public readonly panel: vscode.WebviewPanel;
-    public readonly viewState: ViewState;
-
+    private readonly panel: vscode.WebviewPanel;
+    
+    private viewState: ViewState;
     private jsonParsed: boolean;
 
     constructor(
@@ -81,9 +82,9 @@ export class InvocationPanel {
 
         if (message.e === invokeEvents.Init) {
             this.panel.webview.postMessage({ viewState: this.viewState });
-        } /* else if (message.e === ...) {
-            ...
-        } ... */
+        } else if (message.e === invokeEvents.Update) {
+            this.viewState = message.c;
+        }
     }
 
     dispose() {

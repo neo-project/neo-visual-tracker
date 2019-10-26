@@ -3,6 +3,7 @@
 const invokeSelectors = {
     JsonFileName: '#neoExpressJsonFileName',
     JsonFilePath: '#neoExpressJsonFullPath',
+    WalletDropdown: '#walletDropdown',
 };
 
 export { invokeSelectors };
