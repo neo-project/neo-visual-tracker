@@ -7,10 +7,10 @@ const invokeRenderers = {
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFileName, htmlHelpers.text(viewState.neoExpressJsonFileName));
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFilePath, htmlHelpers.text(viewState.neoExpressJsonFullPath));
         this.renderWallets(viewState.wallets, viewState.selectedWallet);
-        this.renderContracts(viewState.contracts, viewState.selectedContract, updateViewState);
+        this.renderContracts(viewState.contracts, viewState.selectedContract, viewState.selectedMethod, updateViewState);
     },
 
-    renderContracts: function(contracts: any[], selectedContract: string, updateViewState: any) {
+    renderContracts: function(contracts: any[], selectedContract: string, selectedMethod: string, updateViewState: any) {
         const placeholder = document.querySelector(invokeSelectors.ContractsPlaceholder);
         const contractTemplate = document.querySelector(invokeSelectors.ContractTemplate);
         if (placeholder && contractTemplate) {
@@ -35,7 +35,50 @@ const invokeRenderers = {
                                 });
                             });
                     }
+                    this.renderMethods(
+                        thisContractDetail, 
+                        contractData.hash,
+                        contractData.functions || [],
+                        selectedMethod,
+                        updateViewState);
                     placeholder.appendChild(thisContract);
+                }
+            }
+        }
+    },
+
+    renderMethods: function(
+        contractDetailElement: ParentNode, 
+        contractHash: string, 
+        methods: any[], 
+        selectedMethod: string, 
+        updateViewState: any) {
+
+        const placeholder = contractDetailElement.querySelector(invokeSelectors.MethodsPlaceholder);
+        const methodTemplate = document.querySelector(invokeSelectors.MethodTemplate);
+        if (placeholder && methodTemplate) {
+            for (let i = 0; i < methods.length; i++) {
+                const methodData = methods[i];
+                const methodId = contractHash + '.' + methodData.name;
+                const thisMethod = document.createElement('div');
+                thisMethod.innerHTML = methodTemplate.innerHTML;
+                const thisMethodDetail = thisMethod.querySelector(invokeSelectors.MethodDetail);
+                if (thisMethodDetail) {
+                    htmlHelpers.setInnerPlaceholder(thisMethod, invokeSelectors.MethodName, htmlHelpers.text(methodData.name));
+                    (thisMethodDetail as any).style.display = selectedMethod === methodId ? 'block' : 'none';
+                    const clickable = thisMethod.querySelector(invokeSelectors.Clickable);
+                    if (clickable) {
+                        clickable.addEventListener(
+                            'click', 
+                            () => {
+                                htmlHelpers.hideAll(invokeSelectors.MethodDetail);
+                                updateViewState((viewState: any) => {
+                                    viewState.selectedMethod = (viewState.selectedMethod === methodId) ? '' : methodId;
+                                    (thisMethodDetail as any).style.display = (viewState.selectedMethod === methodId) ? 'block' : 'none';
+                                });
+                            });
+                    }
+                    placeholder.appendChild(thisMethod);
                 }
             }
         }

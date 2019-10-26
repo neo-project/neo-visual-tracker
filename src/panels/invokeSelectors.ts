@@ -9,6 +9,10 @@ const invokeSelectors = {
     ContractName: '.contractName',
     Clickable: '.clickable',
     ContractDetail: '.contractDetail',
+    MethodsPlaceholder: '.methodsPlaceholder',
+    MethodTemplate: '#methodTemplate',
+    MethodName: '.methodName',
+    MethodDetail: '.methodDetail',
 };
 
 export { invokeSelectors };
