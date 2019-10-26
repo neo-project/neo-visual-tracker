@@ -8,8 +8,9 @@ const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ViewState {
-    neoExpressJsonFullPath?: string;
-    neoExpressJsonFileName?: string;
+    neoExpressJsonFullPath: string = '';
+    neoExpressJsonFileName: string = '';
+    contracts: any[] = [];
 }
 
 export class InvocationPanel {
@@ -54,9 +55,15 @@ export class InvocationPanel {
 
     private async reload() {
         console.log('InvocationPanel is parsing ', this.viewState.neoExpressJsonFullPath);
+        try {
+            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
+            const neoExpressConfig = JSON.parse(jsonFileContents);
+            this.viewState.contracts = neoExpressConfig.contracts || [];        
+        } catch (e) {
+            console.error('Error parsing ', this.viewState.neoExpressJsonFullPath, e);
+            this.viewState.contracts = [];
+        }
 
-        // TODO: Parse NEO Express JSON file into ViewState.
-        
         this.jsonParsed = true;
     }
 
