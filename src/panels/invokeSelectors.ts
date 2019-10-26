@@ -7,6 +7,8 @@ const invokeSelectors = {
     ContractsPlaceholder: '#contractsPlaceholder',
     ContractTemplate: '#contractTemplate',
     ContractName: '.contractName',
+    Clickable: '.clickable',
+    ContractDetail: '.contractDetail',
 };
 
 export { invokeSelectors };

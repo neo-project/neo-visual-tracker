@@ -13,6 +13,7 @@ class ViewState {
     wallets: any[] = [];
     contracts: any[] = [];
     selectedWallet: string = '';
+    selectedContract: string = '';
 }
 
 export class InvocationPanel {

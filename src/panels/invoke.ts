@@ -13,11 +13,16 @@ declare var acquireVsCodeApi: any;
 
 let viewState: any = {};
 
+function updateViewState(updater: any) {
+    updater(viewState);
+    postViewState();   
+}
+
 function handleMessage(message: any) {
     if (message.viewState) {
-        console.log(message.viewState);
+        console.log('<-', message.viewState);
         viewState = message.viewState;
-        invokeRenderers.render(viewState);
+        invokeRenderers.render(viewState, updateViewState);
     }
 }
 
@@ -29,10 +34,9 @@ function initializePanel() {
     window.addEventListener('message', msg => handleMessage(msg.data));
     const walletDropdown: any = document.querySelector(invokeSelectors.WalletDropdown);
     if (walletDropdown) {
-        walletDropdown.addEventListener('change', () => {
-            viewState.selectedWallet = walletDropdown.children[walletDropdown.selectedIndex].value;
-            postViewState();
-        });
+        walletDropdown.addEventListener(
+            'change', 
+            () => updateViewState((viewState: any) => viewState.selectedWallet = walletDropdown.children[walletDropdown.selectedIndex].value));
     }
 
     vscode.postMessage({ e: invokeEvents.Init });
@@ -40,6 +44,7 @@ function initializePanel() {
 
 function postViewState() {
     vsCodePostMessage({ e: invokeEvents.Update, c: viewState });
+    console.log('->', viewState);
 }
 
 window.onload = initializePanel;

@@ -3,14 +3,14 @@ import { invokeSelectors } from "./invokeSelectors";
 
 const invokeRenderers = {
     
-    render: function(viewState: any) {
+    render: function(viewState: any, updateViewState: any) {
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFileName, htmlHelpers.text(viewState.neoExpressJsonFileName));
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFilePath, htmlHelpers.text(viewState.neoExpressJsonFullPath));
         this.renderWallets(viewState.wallets, viewState.selectedWallet);
-        this.renderContracts(viewState.contracts);
+        this.renderContracts(viewState.contracts, viewState.selectedContract, updateViewState);
     },
 
-    renderContracts: function(contracts: any[]) {
+    renderContracts: function(contracts: any[], selectedContract: string, updateViewState: any) {
         const placeholder = document.querySelector(invokeSelectors.ContractsPlaceholder);
         const contractTemplate = document.querySelector(invokeSelectors.ContractTemplate);
         if (placeholder && contractTemplate) {
@@ -19,8 +19,24 @@ const invokeRenderers = {
                 const contractData = contracts[i];
                 const thisContract = document.createElement('div');
                 thisContract.innerHTML = contractTemplate.innerHTML;
-                htmlHelpers.setInnerPlaceholder(thisContract, invokeSelectors.ContractName, htmlHelpers.text(contractData.name));
-                placeholder.appendChild(thisContract);
+                const thisContractDetail = thisContract.querySelector(invokeSelectors.ContractDetail);
+                if (thisContractDetail) {
+                    htmlHelpers.setInnerPlaceholder(thisContract, invokeSelectors.ContractName, htmlHelpers.text(contractData.name));
+                    (thisContractDetail as any).style.display = selectedContract === contractData.hash ? 'block' : 'none';
+                    const clickable = thisContract.querySelector(invokeSelectors.Clickable);
+                    if (clickable) {
+                        clickable.addEventListener(
+                            'click', 
+                            () => {
+                                htmlHelpers.hideAll(invokeSelectors.ContractDetail);
+                                updateViewState((viewState: any) => {
+                                    viewState.selectedContract = (viewState.selectedContract === contractData.hash) ? '' : contractData.hash;
+                                    (thisContractDetail as any).style.display = (viewState.selectedContract === contractData.hash) ? 'block' : 'none';
+                                });
+                            });
+                    }
+                    placeholder.appendChild(thisContract);
+                }
             }
         }
     },

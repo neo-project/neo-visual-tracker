@@ -8,6 +8,13 @@ const htmlHelpers = {
         }
     },
 
+    hideAll: function(selector: string) {
+        const elements = document.querySelectorAll(selector);
+        for (let i = 0; i < elements.length; i++) {
+            (elements[i] as any).style.display = 'none';
+        }
+    },
+
     newCopyLink: function(text: string, postMessage: any) { 
         return this.newEventLink('Copy', trackerEvents.Copy, text, postMessage);
     },
