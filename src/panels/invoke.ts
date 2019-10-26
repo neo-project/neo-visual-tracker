@@ -1,7 +1,5 @@
-import { htmlHelpers } from "./htmlHelpers";
 import { invokeEvents } from "./invokeEvents";
 import { invokeRenderers } from "./invokeRenderers";
-import { invokeSelectors } from "./invokeSelectors";
 
 /*
  * This code runs in the context of the WebView panel. It receives messages from the main extension 
@@ -15,7 +13,7 @@ declare var acquireVsCodeApi: any;
 function handleMessage(message: any) {
     if (message.viewState) {
         console.log(message.viewState);
-        // TODO: Render updates
+        invokeRenderers.render(message.viewState);
     }
 }
 

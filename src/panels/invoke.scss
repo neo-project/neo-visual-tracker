@@ -1,1 +1,16 @@
+#neoExpressJsonFullPath {
+    background-color: var(--vscode-statusBar-background);
+    color: var(--vscode-statusBar-foreground);
+    border-top: 1px solid var(--vscode-statusBar-border);
+    padding: 5px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
 
+#neoExpressJsonFileName {
+    font-family: 'Courier New', Courier, monospace;
+    padding-left: 0.3em;
+}
