@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
@@ -48,7 +49,16 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
-		console.log('User requested to invoke a contract ', server);
+		try {
+			const panel = new InvocationPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				context.subscriptions);
+		} catch (e) {
+			console.error('Error opening invocation panel ', e);
+		}
+
+		// TODO: Remove sampleInvocation
 		sampleInvocation(server.rpcUri);
 	});
 
