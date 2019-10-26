@@ -202,6 +202,23 @@
           ]
         }
       ]
+    },
+    {
+      "name": "HelloWorld",
+      "hash": "0x505d2e13ff4a4cf1c368ed2af7f7aad5720f4c38",
+      "entry-point": "Main",
+      "contract-data": "00c56b616168048418d60d0548656c6c6f05576f726c64615272680452a141f561616c7566",
+      "properties": {
+        "has-storage": "true"
+      },
+      "functions": [
+        {
+          "name": "Main",
+          "return-type": "Void",
+          "parameters": []
+        }
+      ],
+      "events": []
     }
   ]
 }
