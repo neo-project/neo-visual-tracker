@@ -107,13 +107,15 @@ export class InvocationPanel {
                     for (let j = 0; j < contract.functions.length; j++) {
                         if (contract.functions[j].name === methodName) {
                             const method = contract.functions[j];
+                            const contractHash = contract.hash.replace(/^0x/, '');
                             // TODO: Extract parameter data from method
                             const sb = Neon.create.scriptBuilder();
                             const config: DoInvokeConfig = {
                                 api: new api.neoCli.instance(this.viewState.rpcUrl),
-                                script: sb.emitAppCall(contract.hash.replace(/^0x/, ''), method.name).str,
+                                script: sb.emitAppCall(contractHash, method.name).str,
                                 account: new wallet.Account(this.viewState.selectedWallet),
                                 // TODO: Allow specification of 'intents' through UI
+                                // intents: api.makeIntent({ NEO: 50 }, contractHash)
                             };
                             const result = await Neon.doInvoke(config);
                             this.viewState.invocationResult = JSON.stringify(result);

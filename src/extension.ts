@@ -5,7 +5,6 @@ import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
-import { sampleInvocation } from './contractInvocation';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -58,9 +57,6 @@ export function activate(context: vscode.ExtensionContext) {
 		} catch (e) {
 			console.error('Error opening invocation panel ', e);
 		}
-
-		// TODO: Remove sampleInvocation
-		sampleInvocation(server.rpcUri);
 	});
 
 	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
