@@ -2,6 +2,7 @@
 
 const invokeEvents = {
     Init: 'init',
+    Invoke: 'invoke',
     Update: 'update',
 };
 

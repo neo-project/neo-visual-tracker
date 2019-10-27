@@ -53,6 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
 			const panel = new InvocationPanel(
 				context.extensionPath, 
 				server.jsonFile,
+				server.rpcUri,
 				context.subscriptions);
 		} catch (e) {
 			console.error('Error opening invocation panel ', e);

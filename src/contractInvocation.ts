@@ -10,7 +10,7 @@ export async function sampleInvocation(rpcUrl: string) {
 
     const sb = Neon.create.scriptBuilder();
 
-    const walletPrivateKey  = '8f1d86c5f47ec3d946dc717ff78b8abf9ea6e82e02507e4afa0160f6d0fd3c68';
+    const walletPrivateKey  = 'cea9fd5b3d8efb6328d562cf43eb31e814e30add3615dca0be24ab7950de3d0d';
 
     const contractScriptHash = '30f41a14ca6019038b055b585d002b287b5fdd47';
 

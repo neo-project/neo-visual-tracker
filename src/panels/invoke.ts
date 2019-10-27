@@ -13,6 +13,8 @@ declare var acquireVsCodeApi: any;
 
 let viewState: any = {};
 
+let vsCodePostMessage: Function;
+
 function updateViewState(updater: any) {
     updater(viewState);
     postViewState();   
@@ -22,11 +24,9 @@ function handleMessage(message: any) {
     if (message.viewState) {
         console.log('<-', message.viewState);
         viewState = message.viewState;
-        invokeRenderers.render(viewState, updateViewState);
+        invokeRenderers.render(viewState, updateViewState, vsCodePostMessage);
     }
 }
-
-let vsCodePostMessage : Function;
 
 function initializePanel() {
     const vscode = acquireVsCodeApi();

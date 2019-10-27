@@ -1,16 +1,29 @@
 import { htmlHelpers } from "./htmlHelpers";
+import { invokeEvents } from "./invokeEvents";
 import { invokeSelectors } from "./invokeSelectors";
 
 const invokeRenderers = {
     
-    render: function(viewState: any, updateViewState: any) {
+    render: function(viewState: any, updateViewState: Function, postMessage: Function) {
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFileName, htmlHelpers.text(viewState.neoExpressJsonFileName));
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFilePath, htmlHelpers.text(viewState.neoExpressJsonFullPath));
+        htmlHelpers.setPlaceholder(invokeSelectors.RpcUrl, htmlHelpers.text(viewState.rpcUrl));
         this.renderWallets(viewState.wallets, viewState.selectedWallet);
-        this.renderContracts(viewState.contracts, viewState.selectedContract, viewState.selectedMethod, updateViewState);
+        this.renderContracts(
+            viewState.contracts, 
+            viewState.selectedContract, 
+            viewState.selectedMethod, 
+            updateViewState, 
+            postMessage);
     },
 
-    renderContracts: function(contracts: any[], selectedContract: string, selectedMethod: string, updateViewState: any) {
+    renderContracts: function(
+        contracts: any[], 
+        selectedContract: string, 
+        selectedMethod: string, 
+        updateViewState: Function,
+        postMessage: Function) {
+
         const placeholder = document.querySelector(invokeSelectors.ContractsPlaceholder);
         const contractTemplate = document.querySelector(invokeSelectors.ContractTemplate);
         if (placeholder && contractTemplate) {
@@ -28,7 +41,7 @@ const invokeRenderers = {
                         clickable.addEventListener(
                             'click', 
                             () => {
-                                htmlHelpers.hideAll(invokeSelectors.ContractDetail);
+                                htmlHelpers.hideAll(placeholder, invokeSelectors.ContractDetail);
                                 updateViewState((viewState: any) => {
                                     viewState.selectedContract = (viewState.selectedContract === contractData.hash) ? '' : contractData.hash;
                                     (thisContractDetail as any).style.display = (viewState.selectedContract === contractData.hash) ? 'block' : 'none';
@@ -40,7 +53,8 @@ const invokeRenderers = {
                         contractData.hash,
                         contractData.functions || [],
                         selectedMethod,
-                        updateViewState);
+                        updateViewState,
+                        postMessage);
                     placeholder.appendChild(thisContract);
                 }
             }
@@ -52,7 +66,8 @@ const invokeRenderers = {
         contractHash: string, 
         methods: any[], 
         selectedMethod: string, 
-        updateViewState: any) {
+        updateViewState: Function,
+        postMessage: Function) {
 
         const placeholder = contractDetailElement.querySelector(invokeSelectors.MethodsPlaceholder);
         const methodTemplate = document.querySelector(invokeSelectors.MethodTemplate);
@@ -71,7 +86,7 @@ const invokeRenderers = {
                         clickable.addEventListener(
                             'click', 
                             () => {
-                                htmlHelpers.hideAll(invokeSelectors.MethodDetail);
+                                htmlHelpers.hideAll(placeholder, invokeSelectors.MethodDetail);
                                 updateViewState((viewState: any) => {
                                     viewState.selectedMethod = (viewState.selectedMethod === methodId) ? '' : methodId;
                                     (thisMethodDetail as any).style.display = (viewState.selectedMethod === methodId) ? 'block' : 'none';
@@ -79,6 +94,10 @@ const invokeRenderers = {
                             });
                     }
                     this.renderParameters(thisMethodDetail, methodData.parameters);
+                    const invokeButton = thisMethodDetail.querySelector(invokeSelectors.InvokeButton);
+                    if (invokeButton) {
+                        htmlHelpers.setOnClickEvent(invokeButton, invokeEvents.Invoke, methodData.name, postMessage);
+                    }
                     placeholder.appendChild(thisMethod);
                 }
             }

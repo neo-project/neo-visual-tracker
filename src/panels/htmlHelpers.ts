@@ -8,8 +8,8 @@ const htmlHelpers = {
         }
     },
 
-    hideAll: function(selector: string) {
-        const elements = document.querySelectorAll(selector);
+    hideAll: function(parent: ParentNode, selector: string) {
+        const elements = parent.querySelectorAll(selector);
         for (let i = 0; i < elements.length; i++) {
             (elements[i] as any).style.display = 'none';
         }
