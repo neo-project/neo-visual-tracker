@@ -48,7 +48,7 @@ const invokeRenderers = {
     },
 
     renderMethods: function(
-        contractDetailElement: ParentNode, 
+        contractDetailElement: ParentNode,
         contractHash: string, 
         methods: any[], 
         selectedMethod: string, 
@@ -78,8 +78,26 @@ const invokeRenderers = {
                                 });
                             });
                     }
+                    this.renderParameters(thisMethodDetail, methodData.parameters);
                     placeholder.appendChild(thisMethod);
                 }
+            }
+        }
+    },
+
+    renderParameters: function(
+        methodDetailElement: ParentNode, 
+        parameters: any[]) {
+
+        const placeholder = methodDetailElement.querySelector(invokeSelectors.ParametersPlaceholder);
+        const parameterTemplate = document.querySelector(invokeSelectors.ParameterTemplate);
+        if (placeholder && parameterTemplate) {
+            for (let i = 0 ; i < parameters.length; i++) {
+                const parameterData = parameters[i];
+                const thisParameter = document.createElement('div');
+                thisParameter.innerHTML = parameterTemplate.innerHTML;
+                // TODO: Populate thisParameter DOM with data from parameterData
+                placeholder.appendChild(thisParameter);
             }
         }
     },

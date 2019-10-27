@@ -1,0 +1,63 @@
+body {
+    /*more than the height of the status bar*/
+    margin-bottom: 75px;
+}
+
+.status-bar {
+    background-color: var(--vscode-statusBar-background);
+    color: var(--vscode-statusBar-foreground);
+    border-top: 1px solid var(--vscode-statusBar-border);
+    padding: 5px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+button {
+    padding: 8px 15px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: 0;
+}
+
+button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+button:disabled {
+    filter: contrast(0.75);
+}
+
+button:disabled:hover {
+    background-color: var(--vscode-button-background);
+}
+
+button:focus {
+    outline: none;
+}
+
+a {
+    color: var(--vscode-textLink-foreground);
+}
+
+a:hover {
+    color: var(--vscode-textLink-activeForeground);
+}
+
+#templates {
+    display: none;
+}

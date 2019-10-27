@@ -13,6 +13,9 @@ const invokeSelectors = {
     MethodTemplate: '#methodTemplate',
     MethodName: '.methodName',
     MethodDetail: '.methodDetail',
+    ParametersPlaceholder: '.parametersPlaceholder',
+    ParameterTemplate: '#parameterTemplate',
+    InvokeButton: '.invokeButton',
 };
 
 export { invokeSelectors };

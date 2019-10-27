@@ -10,7 +10,7 @@
 
 <body>
 
-    <div id="neoExpressJsonFullPath"></div>
+    <div class="status-bar" id="neoExpressJsonFullPath"></div>
 
     <h1>Smart Contract Invocation: <span id="neoExpressJsonFileName"></span></h1>
 
@@ -36,9 +36,14 @@
             <div class="card">
                 <h3 class="clickable">Method: <span class="methodName"></span></h3>
                 <div class="methodDetail">
-                    TODO
+                    <div class="parametersPlaceholder"></div>
+                    <div><button class="invokeButton">Invoke</button></div>
                 </div>
             </div>
+        </div>
+
+        <div id="parameterTemplate">
+            TODO: Parameter input
         </div>
 
     </div>
