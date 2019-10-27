@@ -15,6 +15,27 @@ body {
     z-index: 100;
 }
 
+.full-screen {
+    padding: 20% 30px 30px 30px;
+    position: fixed;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 101;
+    text-align: center;
+    * {
+        margin: 10px;
+    }
+    >div {
+        padding: 10px;
+        box-shadow: 5px 5px 5px var(--vscode-widget-shadow);
+        border: 1px solid var(--vscode-focusBorder);
+        background-color: var(--vscode-editor-background);
+        display: inline-block;
+    }
+}
+
 .left {
     float: left;
 }

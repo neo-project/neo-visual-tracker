@@ -96,6 +96,10 @@ export class InvocationPanel {
         } else if (message.e === invokeEvents.Invoke) {
             await this.invoke(message.c);
             this.panel.webview.postMessage({ viewState: this.viewState });
+        } else if (message.e === invokeEvents.Dismiss) {
+            this.viewState.invocationError = '';
+            this.viewState.invocationResult = '';
+            this.panel.webview.postMessage({ viewState: this.viewState });
         }
     }
 
@@ -118,7 +122,7 @@ export class InvocationPanel {
                                 // intents: api.makeIntent({ NEO: 50 }, contractHash)
                             };
                             const result = await Neon.doInvoke(config);
-                            this.viewState.invocationResult = JSON.stringify(result);
+                            this.viewState.invocationResult = JSON.stringify(result.response);
                             return;
                         }
                     }

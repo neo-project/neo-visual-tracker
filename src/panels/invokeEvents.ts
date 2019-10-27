@@ -4,6 +4,7 @@ const invokeEvents = {
     Init: 'init',
     Invoke: 'invoke',
     Update: 'update',
+    Dismiss: 'dismiss',
 };
 
 export { invokeEvents };

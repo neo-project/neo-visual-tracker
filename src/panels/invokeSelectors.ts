@@ -17,6 +17,12 @@ const invokeSelectors = {
     ParametersPlaceholder: '.parametersPlaceholder',
     ParameterTemplate: '#parameterTemplate',
     InvokeButton: '.invokeButton',
+    InvocationResultPopup: '#invocationResultPopup',
+    InvocationResultText: '#invocationResultText',
+    CloseInvocationResult: '#closeInvocationResult',
+    InvocationErrorPopup: '#invocationErrorPopup',
+    InvocationErrorText: '#invocationErrorText',
+    CloseInvocationError: '#closeInvocationError',
 };
 
 export { invokeSelectors };

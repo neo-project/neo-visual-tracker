@@ -15,6 +15,8 @@ const invokeRenderers = {
             viewState.selectedMethod, 
             updateViewState, 
             postMessage);
+        this.renderInvokeResult(viewState.invocationResult);
+        this.renderInvokeError(viewState.invocationError);
     },
 
     renderContracts: function(
@@ -58,6 +60,24 @@ const invokeRenderers = {
                     placeholder.appendChild(thisContract);
                 }
             }
+        }
+    },
+
+    renderInvokeError: function(error: string) {
+        if (error) {
+            htmlHelpers.showHide(invokeSelectors.InvocationErrorPopup, true);
+            htmlHelpers.setPlaceholder(invokeSelectors.InvocationErrorText, htmlHelpers.text(error));
+        } else {
+            htmlHelpers.showHide(invokeSelectors.InvocationErrorPopup, false);
+        }
+    },
+
+    renderInvokeResult: function(result: string) {
+        if (result) {
+            htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, true);
+            htmlHelpers.setPlaceholder(invokeSelectors.InvocationResultText, htmlHelpers.text(result));
+        } else {
+            htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, false);
         }
     },
 

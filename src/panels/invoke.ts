@@ -1,6 +1,7 @@
 import { invokeEvents } from "./invokeEvents";
 import { invokeRenderers } from "./invokeRenderers";
 import { invokeSelectors } from "./invokeSelectors";
+import { htmlHelpers } from "./htmlHelpers";
 
 /*
  * This code runs in the context of the WebView panel. It receives messages from the main extension 
@@ -38,6 +39,9 @@ function initializePanel() {
             'change', 
             () => updateViewState((viewState: any) => viewState.selectedWallet = walletDropdown.children[walletDropdown.selectedIndex].value));
     }
+
+    htmlHelpers.setOnClickEvent(invokeSelectors.CloseInvocationResult, invokeEvents.Dismiss, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(invokeSelectors.CloseInvocationError, invokeEvents.Dismiss, null, vsCodePostMessage);
 
     vscode.postMessage({ e: invokeEvents.Init });
 }
