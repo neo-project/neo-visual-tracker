@@ -1,7 +1,7 @@
 import * as fs from 'fs';
+import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import Neon, { api, wallet } from "@cityofzion/neon-js";
 
 import { invokeEvents } from './panels/invokeEvents';
 import { DoInvokeConfig } from '@cityofzion/neon-api/lib/funcs/types';
@@ -113,16 +113,31 @@ export class InvocationPanel {
                             const method = contract.functions[j];
                             const contractHash = contract.hash.replace(/^0x/, '');
                             // TODO: Extract parameter data from method
-                            const sb = Neon.create.scriptBuilder();
-                            const config: DoInvokeConfig = {
-                                api: new api.neoCli.instance(this.viewState.rpcUrl),
-                                script: sb.emitAppCall(contractHash, method.name).str,
-                                account: new wallet.Account(this.viewState.selectedWallet),
-                                // TODO: Allow specification of 'intents' through UI
-                                // intents: api.makeIntent({ NEO: 50 }, contractHash)
-                            };
-                            const result = await Neon.doInvoke(config);
-                            this.viewState.invocationResult = JSON.stringify(result.response);
+                            const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
+                            const sb = neon.default.create.scriptBuilder();
+                            const script = sb.emitAppCall(contractHash, method.name/*, TODO: arguments*/).str;
+                            const result = await rpcClient.invokeScript(script);
+                            this.viewState.invocationResult = '';
+                            this.appendToResult('Result', JSON.stringify(result.stack));
+                            this.appendToResult('VM State', result.state);
+                            this.appendToResult('GAS', result.gas_consumed);
+                            if (this.viewState.selectedWallet) {
+                                const config: DoInvokeConfig = {
+                                    api: new neon.api.neoCli.instance(this.viewState.rpcUrl),
+                                    script: script,
+                                    account: new neon.wallet.Account(this.viewState.selectedWallet),
+                                    // TODO: Allow specification of 'intents' through UI
+                                    // intents: api.makeIntent({ NEO: 50 }, contractHash)
+                                };
+                                const result = await neon.default.doInvoke(config);
+                                if (result.response) {
+                                    this.appendToResult('TX', result.response.txid);
+                                } else {
+                                    this.appendToResult('TX', '(no response from RPC server)');
+                                }
+                            } else {
+                                this.appendToResult('TX', '(not on-chain)');
+                            }
                             return;
                         }
                     }
@@ -136,6 +151,12 @@ export class InvocationPanel {
                 'Could not find NEO Express configuration for contract with hash ' + this.viewState.selectedContract;
         } catch (e) {
             this.viewState.invocationError = 'Could not invoke ' + methodName + ': ' + e;
+        }
+    }
+
+    private appendToResult(field: string, value?: string) {
+        if (value) {
+            this.viewState.invocationResult += field + ': ' + value + '\r\n';
         }
     }
 

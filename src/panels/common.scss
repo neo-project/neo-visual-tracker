@@ -82,3 +82,7 @@ a:hover {
 #templates {
     display: none;
 }
+
+.error {
+    color: var(--vscode-errorForeground);
+}
