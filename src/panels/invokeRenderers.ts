@@ -133,8 +133,10 @@ const invokeRenderers = {
         if (placeholder && parameterTemplate) {
             for (let i = 0 ; i < parameters.length; i++) {
                 const parameterData = parameters[i];
-                const thisParameter = document.createElement('div');
+                const thisParameter = document.createElement('tr');
                 thisParameter.innerHTML = parameterTemplate.innerHTML;
+                htmlHelpers.setInnerPlaceholder(thisParameter, invokeSelectors.ParameterName, htmlHelpers.text(parameterData.name));
+                htmlHelpers.setInnerPlaceholder(thisParameter, invokeSelectors.ParameterType, htmlHelpers.text('(' + parameterData.type + ')'));
                 // TODO: Populate thisParameter DOM with data from parameterData
                 placeholder.appendChild(thisParameter);
             }

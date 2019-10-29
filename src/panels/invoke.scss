@@ -6,15 +6,14 @@
 
 .card {
     padding: 10px 10px 10px 10px;
-    margin: 10px 10px 10px 30px;
-    background-color: var(--vscode-editor-background);
-    filter: contrast(0.90);
+    margin: 10px 10px 10px 10px;
+    background-color: var(--vscode-menubar-selectionBackground);
 }
 
-input,
-select {
-    padding: 10px;
-    margin: 10px;
+input {
+    width: 100%;
+    background-color: var(--vscode-editor-background);
+    padding: 5px;
 }
 
 h3 {
@@ -28,4 +27,19 @@ h3 {
 #invocationResultText {
     white-space: pre-line;
     text-align: left;
+}
+
+table {
+    width: 100%;
+    margin-top: 10px;
+    td,
+    th {
+        padding: 0px 10px 0px 10px;
+        &.parameterType {
+            font-style: italic;
+        }
+    }
+    th {
+        text-align: right;
+    }
 }

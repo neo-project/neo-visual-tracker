@@ -23,6 +23,9 @@ const invokeSelectors = {
     InvocationErrorPopup: '#invocationErrorPopup',
     InvocationErrorText: '#invocationErrorText',
     CloseInvocationError: '#closeInvocationError',
+    ParameterName: '.parameterName',
+    ParameterInput: '.parameterInput',
+    ParameterType: '.parameterType',
 };
 
 export { invokeSelectors };

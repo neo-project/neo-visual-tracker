@@ -53,15 +53,19 @@
             <div class="card">
                 <h3 class="clickable">Method: <span class="methodName"></span></h3>
                 <div class="methodDetail">
-                    <div class="parametersPlaceholder"></div>
+                    <table class="parametersPlaceholder"></table>
                     <div><button class="invokeButton">Invoke</button></div>
                 </div>
             </div>
         </div>
 
-        <div id="parameterTemplate">
-            TODO: Parameter input
-        </div>
+        <table>
+            <tr id="parameterTemplate">
+                <th width="20%" class="parameterName">Name</th>
+                <td width="60%"><input class="parameterInput" type="text" /></td>
+                <td width="20%" class="parameterType">(type)</td>
+            </tr>
+        </table>
 
     </div>
 
