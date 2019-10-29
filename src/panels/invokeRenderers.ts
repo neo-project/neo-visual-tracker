@@ -3,7 +3,7 @@ import { invokeEvents } from "./invokeEvents";
 import { invokeSelectors } from "./invokeSelectors";
 
 const invokeRenderers = {
-    
+
     render: function(viewState: any, updateViewState: Function, postMessage: Function) {
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFileName, htmlHelpers.text(viewState.neoExpressJsonFileName));
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFilePath, htmlHelpers.text(viewState.neoExpressJsonFullPath));
@@ -113,7 +113,7 @@ const invokeRenderers = {
                                 });
                             });
                     }
-                    this.renderParameters(thisMethodDetail, methodData.parameters);
+                    this.renderParameters(thisMethodDetail, methodData.parameters, updateViewState);
                     const invokeButton = thisMethodDetail.querySelector(invokeSelectors.InvokeButton);
                     if (invokeButton) {
                         htmlHelpers.setOnClickEvent(invokeButton, invokeEvents.Invoke, methodData.name, postMessage);
@@ -126,7 +126,8 @@ const invokeRenderers = {
 
     renderParameters: function(
         methodDetailElement: ParentNode, 
-        parameters: any[]) {
+        parameters: any[],
+        updateViewState: Function) {
 
         const placeholder = methodDetailElement.querySelector(invokeSelectors.ParametersPlaceholder);
         const parameterTemplate = document.querySelector(invokeSelectors.ParameterTemplate);
@@ -137,7 +138,18 @@ const invokeRenderers = {
                 thisParameter.innerHTML = parameterTemplate.innerHTML;
                 htmlHelpers.setInnerPlaceholder(thisParameter, invokeSelectors.ParameterName, htmlHelpers.text(parameterData.name));
                 htmlHelpers.setInnerPlaceholder(thisParameter, invokeSelectors.ParameterType, htmlHelpers.text('(' + parameterData.type + ')'));
-                // TODO: Populate thisParameter DOM with data from parameterData
+                const input = thisParameter.querySelector(invokeSelectors.ParameterInput) as HTMLInputElement;
+                if (input) {
+                    if (parameterData.value) {
+                        input.value = parameterData.value;
+                    }
+                    const handler = () => {
+                        parameterData.value = input.value;
+                        updateViewState();
+                    };
+                    input.addEventListener('change', handler);
+                    input.addEventListener('keyup', handler);
+                }
                 placeholder.appendChild(thisParameter);
             }
         }

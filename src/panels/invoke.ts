@@ -17,7 +17,9 @@ let viewState: any = {};
 let vsCodePostMessage: Function;
 
 function updateViewState(updater: any) {
-    updater(viewState);
+    if (updater) {
+        updater(viewState);
+    }
     postViewState();   
 }
 
