@@ -6,6 +6,8 @@ import * as vscode from 'vscode';
 import { invokeEvents } from './panels/invokeEvents';
 import { DoInvokeConfig } from '@cityofzion/neon-api/lib/funcs/types';
 
+const bs58check = require('bs58check');
+
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
@@ -112,10 +114,10 @@ export class InvocationPanel {
                         if (contract.functions[j].name === methodName) {
                             const method = contract.functions[j];
                             const contractHash = contract.hash.replace(/^0x/, '');
-                            // TODO: Extract parameter data from method
+                            const args = InvocationPanel.extractArguments(method.parameters);
                             const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
                             const sb = neon.default.create.scriptBuilder();
-                            const script = sb.emitAppCall(contractHash, method.name/*, TODO: arguments*/).str;
+                            const script = sb.emitAppCall(contractHash, method.name, args).str;
                             const result = await rpcClient.invokeScript(script);
                             this.viewState.invocationResult = '';
                             this.appendToResult('Result', JSON.stringify(result.stack));
@@ -158,6 +160,21 @@ export class InvocationPanel {
         if (value) {
             this.viewState.invocationResult += field + ': ' + value + '\r\n';
         }
+    }
+
+    private static extractArguments(parameters: any[]) {
+        const result = [];
+        for (let i = 0; i < parameters.length; i++) {
+            const parameter = parameters[i];
+            if (parameter.type === 'ByteArray') {
+                // TODO: Don't assume all ByteArray parameters are addresses!
+                result.push(bs58check.decode(parameter.value).toString('hex').substring(2));
+            } else {
+                throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
+            }
+        }
+
+        return result;
     }
 
     dispose() {
