@@ -167,8 +167,18 @@ export class InvocationPanel {
         for (let i = 0; i < parameters.length; i++) {
             const parameter = parameters[i];
             if (parameter.type === 'ByteArray') {
-                // TODO: Don't assume all ByteArray parameters are addresses!
-                result.push(bs58check.decode(parameter.value).toString('hex').substring(2));
+                // For ByteArray parameters, the user can provide either:
+                // i)   A NEO address (prefixed with '@'), or
+                // ii)  A hex string (prefixed with '0x'), or
+                // iii) An arbitrary string
+                if (parameter.value[0] === '@') { // case (i)
+                    result.push(bs58check.decode(parameter.value.substring(1)).toString('hex').substring(2));
+                } else if ((parameter.value[0] === '0') && (parameter.value[1] === 'x')) { // case (ii)
+                    result.push(parameter.value.substring(2));
+                } else { // case (iii)
+                    result.push((new Buffer(parameter.value)).toString('hex').substring(2));
+                }
+                
             } else {
                 throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
             }

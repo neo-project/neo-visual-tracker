@@ -55,6 +55,7 @@
                 <div class="methodDetail">
                     <table class="parametersPlaceholder"></table>
                     <div class="text-center"><button class="invokeButton">Invoke method</button></div>
+                    <div class="instructions"></div>
                 </div>
             </div>
         </div>
@@ -66,6 +67,26 @@
                 <td width="20%" class="parameterType">(type)</td>
             </tr>
         </table>
+
+        <div id="invokeInstructions">
+            <div class="stronger">Parameter input instructions</div>
+            <div class="strong">Parameters of type <em>ByteArray</em>:</div>
+            <div>
+                <ul>
+                    <li>
+                        To supply a NEO address, enter the address prefixed with the '@' character, e.g.
+                        <em>@AJCtRExcE3BCGniuLQA9ZRh21heAc2Yf8R</em>.
+                    </li>
+                    <li>
+                        To supply a hex string, enter the string prefixed with '0x' character, e.g.
+                        <em>0x0123456789abcdef</em>.
+                    </li>
+                    <li>
+                        To supply an arbitrary text string, enter it as-is and it will be automatically converted to hex.
+                    </li>
+                </ul>
+            </div>
+        </div>
 
     </div>
 

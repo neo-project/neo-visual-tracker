@@ -91,14 +91,16 @@ const invokeRenderers = {
 
         const placeholder = contractDetailElement.querySelector(invokeSelectors.MethodsPlaceholder);
         const methodTemplate = document.querySelector(invokeSelectors.MethodTemplate);
-        if (placeholder && methodTemplate) {
+        const instructionsTemplate = document.querySelector(invokeSelectors.InvokeInstructionsTemplate);
+        if (placeholder && methodTemplate && instructionsTemplate) {
             for (let i = 0; i < methods.length; i++) {
                 const methodData = methods[i];
                 const methodId = contractHash + '.' + methodData.name;
                 const thisMethod = document.createElement('div');
                 thisMethod.innerHTML = methodTemplate.innerHTML;
                 const thisMethodDetail = thisMethod.querySelector(invokeSelectors.MethodDetail);
-                if (thisMethodDetail) {
+                const instructionsPlaceholder = thisMethod.querySelector(invokeSelectors.InstructionsPlaceholder);
+                if (thisMethodDetail && instructionsPlaceholder) {
                     htmlHelpers.setInnerPlaceholder(thisMethod, invokeSelectors.MethodName, htmlHelpers.text(methodData.name));
                     (thisMethodDetail as any).style.display = selectedMethod === methodId ? 'block' : 'none';
                     const clickable = thisMethod.querySelector(invokeSelectors.Clickable);
@@ -118,6 +120,7 @@ const invokeRenderers = {
                     if (invokeButton) {
                         htmlHelpers.setOnClickEvent(invokeButton, invokeEvents.Invoke, methodData.name, postMessage);
                     }
+                    instructionsPlaceholder.innerHTML = instructionsTemplate.innerHTML;
                     placeholder.appendChild(thisMethod);
                 }
             }

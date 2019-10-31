@@ -56,6 +56,15 @@ body {
     cursor: pointer;
 }
 
+.strong {
+    font-weight: bold;
+}
+
+.stronger {
+    font-weight: bolder;
+    font-size: 1.1em;
+}
+
 button {
     padding: 8px 15px;
     background-color: var(--vscode-button-background);
