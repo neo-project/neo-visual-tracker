@@ -1,15 +1,15 @@
 {
     "name": "neo-visual-devtracker",
     "publisher": "ngd-seattle",
-    "displayName": "NEO Visual DevTracker",
-    "description": "A NEO Express blockchain explorer that is directly available within Visual Studio Code",
+    "displayName": "Neo Visual DevTracker",
+    "description": "A Neo Express blockchain explorer that is directly available within Visual Studio Code",
     "version": "0.0.0",
     "icon": "neo-logo-256.png",
     "galleryBanner": {
         "color": "#242424",
         "theme": "dark"
     },
-    "author": "NEO Global Development Seattle",
+    "author": "Neo Global Development Seattle",
     "engines": {
         "vscode": "^1.37.0"
     },
@@ -24,7 +24,7 @@
         "url": "https://github.com/ngdseattle/visual-devtracker.git"
     },
     "keywords": [
-        "NEO",
+        "Neo",
         "Blockchain",
         "Tracker"
     ],
@@ -38,21 +38,21 @@
             "explorer": [
                 {
                     "id": "neo-visual-devtracker.rpcServerExplorer",
-                    "name": "NEO RPC Servers"
+                    "name": "Neo RPC Servers"
                 }
             ]
         },
         "commands": [
             {
                 "command": "neo-visual-devtracker.openTracker",
-                "title": "Open NEO Visual DevTracker",
-                "category": "NEO Express",
+                "title": "Open Neo Visual DevTracker",
+                "category": "Neo Express",
                 "when": "false"
             },
             {
                 "command": "neo-visual-devtracker.refreshObjectExplorerNode",
-                "title": "Refresh NEO RPC Server list",
-                "category": "NEO Express",
+                "title": "Refresh Neo RPC Server list",
+                "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -60,8 +60,8 @@
             },
             {
                 "command": "neo-visual-devtracker.startServer",
-                "title": "Start NEO Express",
-                "category": "NEO Express",
+                "title": "Start Neo Express",
+                "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/play.svg",
                     "dark": "resources/dark/play.svg"
@@ -70,8 +70,8 @@
             },
             {
                 "command": "neo-visual-devtracker.stopServer",
-                "title": "Stop NEO Express",
-                "category": "NEO Express",
+                "title": "Stop Neo Express",
+                "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/stop.svg",
                     "dark": "resources/dark/stop.svg"

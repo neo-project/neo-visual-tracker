@@ -93,8 +93,8 @@ class RpcServerTreeItemIdentifier {
         } else {
             const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
             result.iconPath = vscode.ThemeIcon.Folder;
-            result.description = 'NEO Express Instance';
-            result.tooltip = 'NEO Express configuration loaded from: ' + this.jsonFile;
+            result.description = 'Neo Express Instance';
+            result.tooltip = 'Neo Express configuration loaded from: ' + this.jsonFile;
             return result;
         }
     }
@@ -121,11 +121,11 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
         const mainNetRpcServer = await RpcServerExplorer.getBestRpcServer(
             'https://api.neoscan.io/api/main_net/v1/get_all_nodes', 
-            'NEO Main Net');
+            'Neo Main Net');
 
         const testNetRpcServer = await RpcServerExplorer.getBestRpcServer(
             'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes', 
-            'NEO Test Net');
+            'Neo Test Net');
 
         this.rootItems = [];
 

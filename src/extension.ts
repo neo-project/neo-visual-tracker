@@ -22,10 +22,10 @@ export function activate(context: vscode.ExtensionContext) {
 					rpcConnectionPool.getConnection(url), 
 					context.subscriptions);
 			} catch (e) {
-				console.error('Error opening NEO tracker panel ', e);
+				console.error('Error opening Neo tracker panel ', e);
 			}
 		} else {
-			console.warn('Attempted to open NEO tracker without providing RPC URL');
+			console.warn('Attempted to open Neo tracker without providing RPC URL');
 		}
 	});
 

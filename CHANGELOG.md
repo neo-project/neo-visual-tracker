@@ -1,4 +1,4 @@
-# NEO-Express Visual DevTracker Change Log
+# Neo Visual DevTracker Change Log
 
 All notable changes to this project will be documented in this file.
 
