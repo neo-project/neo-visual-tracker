@@ -13,6 +13,12 @@ will not have contiguous patch numbers. Initial major and minor releases will be
 in this file without a patch number. Patch version will be included for bug fix releases, but
 may not exactly match a publicly released version.
 
+## [0.5.15] - 2019-10-31
+
+### Changed
+
+- updated Neo branding as per https://neo.org/presskit
+
 ## [0.5] - 2019-10-17
 
 Initial Release
