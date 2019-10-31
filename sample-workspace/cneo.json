@@ -5,6 +5,7 @@
       "tcp-port": 49152,
       "ws-port": 49153,
       "rpc-port": 49154,
+      "debug-port": 0,
       "wallet": {
         "name": "node1",
         "accounts": [
@@ -221,10 +222,10 @@
       ]
     },
     {
-      "name": "HelloWorld",
-      "hash": "0x505d2e13ff4a4cf1c368ed2af7f7aad5720f4c38",
+      "name": "TestContract",
+      "hash": "0x30dabcce2d2c1e54c704f078c500b0b02f511afc",
       "entry-point": "Main",
-      "contract-data": "00c56b616168048418d60d0548656c6c6f05576f726c64615272680452a141f561616c7566",
+      "contract-data": "00c56b616168048418d60d0548656c6c6f05576f726c64615272680452a141f561616c756600c56b616168048418d60d064e756d626572012a6157c6615272680452a141f561616c756651c56b6c766b00527ac4616168048418d60d064e756d6265726a00c3615272680452a141f561616c756651c56b616168048418d60d064e756d626572617c68041f2e7b076a00527ac46203006a00c3616c756651c56b61012a6157c66a00527ac46203006a00c3616c756651c56b61012b6157c66a00527ac46203006a00c3616c756651c56b6c766b00527ac4616168048418d60d06537472696e676a00c3615272680452a141f561616c756651c56b616168048418d60d06537472696e67617c68041f2e7b076a00527ac46203006a00c3616c7566",
       "properties": {
         "has-storage": "true"
       },
@@ -232,6 +233,51 @@
         {
           "name": "Main",
           "return-type": "Void",
+          "parameters": []
+        },
+        {
+          "name": "Store42",
+          "return-type": "Void",
+          "parameters": []
+        },
+        {
+          "name": "StoreNumber",
+          "return-type": "Void",
+          "parameters": [
+            {
+              "name": "number",
+              "type": "Integer"
+            }
+          ]
+        },
+        {
+          "name": "GetNumber",
+          "return-type": "Integer",
+          "parameters": []
+        },
+        {
+          "name": "Get42",
+          "return-type": "Integer",
+          "parameters": []
+        },
+        {
+          "name": "Get43",
+          "return-type": "Integer",
+          "parameters": []
+        },
+        {
+          "name": "StoreString",
+          "return-type": "Void",
+          "parameters": [
+            {
+              "name": "s",
+              "type": "String"
+            }
+          ]
+        },
+        {
+          "name": "GetString",
+          "return-type": "ByteArray",
           "parameters": []
         }
       ],

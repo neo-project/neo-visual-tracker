@@ -166,6 +166,7 @@ export class InvocationPanel {
         const result = [];
         for (let i = 0; i < parameters.length; i++) {
             const parameter = parameters[i];
+            parameter.value = parameter.value || '';
             if (parameter.type === 'ByteArray') {
                 // For ByteArray parameters, the user can provide either:
                 // i)   A NEO address (prefixed with '@'), or
@@ -178,7 +179,10 @@ export class InvocationPanel {
                 } else { // case (iii)
                     result.push((new Buffer(parameter.value)).toString('hex').substring(2));
                 }
-                
+            } else if (parameter.type === 'Integer') {
+                result.push(parseInt(parameter.value));
+            } else if (parameter.type === 'String') {
+                result.push((new Buffer(parameter.value)).toString('hex').substring(2));
             } else {
                 throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
             }
