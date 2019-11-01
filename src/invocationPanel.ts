@@ -117,7 +117,18 @@ export class InvocationPanel {
                             const args = InvocationPanel.extractArguments(method.parameters);
                             const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
                             const sb = neon.default.create.scriptBuilder();
-                            const script = sb.emitAppCall(contractHash, method.name, args).str;
+                            let script = '';
+                            if (method.name === 'Main') {
+                                script = sb.emitAppCall(
+                                    contractHash, 
+                                    null, 
+                                    args.length === 0 ? null : (args.length === 1 ? args[0] : args)).str;
+                            } else {
+                                script = sb.emitAppCall(
+                                    contractHash, 
+                                    method.name, 
+                                    args).str;
+                            }
                             const result = await rpcClient.invokeScript(script);
                             this.viewState.invocationResult = '';
                             this.appendToResult('Result', JSON.stringify(result.stack));
@@ -177,12 +188,12 @@ export class InvocationPanel {
                 } else if ((parameter.value[0] === '0') && (parameter.value[1] === 'x')) { // case (ii)
                     result.push(parameter.value.substring(2));
                 } else { // case (iii)
-                    result.push((new Buffer(parameter.value)).toString('hex').substring(2));
+                    result.push((new Buffer(parameter.value)).toString('hex'));
                 }
             } else if (parameter.type === 'Integer') {
                 result.push(parseInt(parameter.value));
             } else if (parameter.type === 'String') {
-                result.push((new Buffer(parameter.value)).toString('hex').substring(2));
+                result.push((new Buffer(parameter.value)).toString('hex'));
             } else {
                 throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
             }
