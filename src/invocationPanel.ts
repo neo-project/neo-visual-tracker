@@ -179,27 +179,42 @@ export class InvocationPanel {
             const parameter = parameters[i];
             parameter.value = parameter.value || '';
             if (parameter.type === 'ByteArray') {
-                // For ByteArray parameters, the user can provide either:
-                // i)   A NEO address (prefixed with '@'), or
-                // ii)  A hex string (prefixed with '0x'), or
-                // iii) An arbitrary string
-                if (parameter.value[0] === '@') { // case (i)
-                    result.push(bs58check.decode(parameter.value.substring(1)).toString('hex').substring(2));
-                } else if ((parameter.value[0] === '0') && (parameter.value[1] === 'x')) { // case (ii)
-                    result.push(parameter.value.substring(2));
-                } else { // case (iii)
-                    result.push((new Buffer(parameter.value)).toString('hex'));
-                }
+                result.push(InvocationPanel.parseStringArgument(parameter.value));
             } else if (parameter.type === 'Integer') {
                 result.push(parseInt(parameter.value));
             } else if (parameter.type === 'String') {
                 result.push((new Buffer(parameter.value)).toString('hex'));
+            } else if (parameter.type === 'Array') {
+                const array = JSON.parse(parameter.value);
+                if (!Array.isArray(array)) {
+                    throw new Error(parameter.name + ' must be an array');
+                }
+                for (let j = 0; j < array.length; j++) {
+                    if (typeof array[j] !== 'number') {
+                        array[j] = InvocationPanel.parseStringArgument(array[j]);
+                    }
+                }
+                result.push(array);
             } else {
                 throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
             }
         }
 
         return result;
+    }
+
+    private static parseStringArgument(parameter: string) {
+        // For ByteArray parameters, the user can provide either:
+        // i)   A NEO address (prefixed with '@'), or
+        // ii)  A hex string (prefixed with '0x'), or
+        // iii) An arbitrary string
+        if (parameter[0] === '@') { // case (i)
+            return bs58check.decode(parameter.substring(1)).toString('hex').substring(2);
+        } else if ((parameter[0] === '0') && (parameter[1] === 'x')) { // case (ii)
+            return parameter.substring(2);
+        } else { // case (iii)
+            return (new Buffer(parameter)).toString('hex');
+        }
     }
 
     dispose() {
