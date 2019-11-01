@@ -17,11 +17,11 @@
         "Other"
     ],
     "bugs": {
-        "url": "https://github.com/ngdseattle/visual-devtracker/issues"
+        "url": "https://github.com/neo-project/neo-visual-tracker/issues"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/ngdseattle/visual-devtracker.git"
+        "url": "https://github.com/neo-project/neo-visual-tracker.git"
     },
     "keywords": [
         "Neo",
