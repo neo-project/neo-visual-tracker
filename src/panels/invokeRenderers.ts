@@ -45,8 +45,12 @@ const invokeRenderers = {
                             'click', 
                             () => {
                                 htmlHelpers.hideAll(placeholder, invokeSelectors.ContractDetail);
+                                htmlHelpers.removeAllClass(document.body, 'selectedContract');
                                 updateViewState((viewState: any) => {
                                     viewState.selectedContract = (viewState.selectedContract === contractData.hash) ? '' : contractData.hash;
+                                    if (viewState.selectedContract === contractData.hash) {
+                                        htmlHelpers.addClass(thisContract.firstElementChild as HTMLElement, 'selectedContract');
+                                    }
                                     (thisContractDetail as any).style.display = (viewState.selectedContract === contractData.hash) ? 'block' : 'none';
                                 });
                             });

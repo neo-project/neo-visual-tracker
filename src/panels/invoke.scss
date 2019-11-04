@@ -10,11 +10,9 @@
     background-color: var(--vscode-menubar-selectionBackground);
     box-shadow: 3px 3px 3px var(--vscode-widget-shadow);
     border: 1px solid var(--vscode-menuBorder);
-/*  TODO: Highlight selected card
-    &.selected {
+    &.selectedContract {
         border: 1px solid var(--vscode-focusBorder);
     }
-*/
 }
 
 input {

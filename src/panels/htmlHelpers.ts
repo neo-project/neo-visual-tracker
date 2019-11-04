@@ -2,6 +2,10 @@ import { trackerEvents } from "./trackerEvents";
 
 const htmlHelpers = {
 
+    addClass: function(parent: HTMLElement, className: string) {
+        parent.className = (parent.className + ' ' + className).trim();
+    },
+
     clearChildren: function(element: Element) {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
@@ -48,6 +52,13 @@ const htmlHelpers = {
     number: function(n: number) {
         // avoid rounding small values to 0:
         return n.toLocaleString(undefined, { maximumFractionDigits: 20 });
+    },
+
+    removeAllClass: function(parent: HTMLElement, className: string) {
+        const elements = parent.querySelectorAll('.' + className);
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].className = elements[i].className.replace(className, '').replace('  ', ' ').trim();
+        }
     },
 
     setEnabled: function(selector: string, isEnabled: boolean) {
