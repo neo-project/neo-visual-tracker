@@ -53,14 +53,13 @@
             <div class="card">
                 <h3 class="clickable">Method: <span class="methodName"></span></h3>
                 <div class="methodDetail">
+                    <h4>Parameters:</h4>
                     <div class="parametersInputArea">
-                        <h4>Parameters:</h4>
                         <table class="parametersPlaceholder"></table>
                     </div>
-                    <h4>Intents:</h4>
                     <table>
                         <tr>
-                            <th width="20%">&nbsp;</th>
+                            <th width="20%">Intents</th>
                             <td width="30%"><input class="parameterInput intentSymbol" type="text" /></td>
                             <td width="30%"><input class="parameterInput intentValue" type="text" /></td>
                             <td width="20%" class="parameterType">(Optional)</td>
@@ -120,6 +119,15 @@
                     <li>
                         Supply a JSON array containing any combination of numbers, strings, hex strings and addresses, e.g.
                         <em>[42, 'foo', '0x1234', '@AJCtRExcE3BCGniuLQA9ZRh21heAc2Yf8R']</em>.
+                    </li>
+                </ul>
+            </div>
+            <div class="strong">Intents:</div>
+            <div>
+                <ul>
+                    <li>
+                        Optionally supply an asset symbol (e.g. <em>NEO</em>) and value (e.g. <em>50</em>) to extract
+                        appropriate UTXOs from the selected wallet to spend to the contract.
                     </li>
                 </ul>
             </div>

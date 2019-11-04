@@ -143,7 +143,6 @@ const invokeRenderers = {
                     if (invokeButton) {
                         htmlHelpers.setOnClickEvent(invokeButton, invokeEvents.Invoke, methodData.name, postMessage);
                     }
-                    (instructionsPlaceholder as any).style.display = (methodData.parameters.length > 0) ? 'block' : 'none';
                     instructionsPlaceholder.innerHTML = instructionsTemplate.innerHTML;
                     placeholder.appendChild(thisMethod);
                 }
