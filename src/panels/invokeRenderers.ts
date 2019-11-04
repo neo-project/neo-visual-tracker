@@ -139,9 +139,13 @@ const invokeRenderers = {
                     }
                     this.renderParameters(thisMethodDetail, methodData.parameters, updateViewState);
                     this.renderIntents(thisMethodDetail, methodData, updateViewState);
-                    const invokeButton = thisMethodDetail.querySelector(invokeSelectors.InvokeButton);
-                    if (invokeButton) {
-                        htmlHelpers.setOnClickEvent(invokeButton, invokeEvents.Invoke, methodData.name, postMessage);
+                    const invokeOffChainButton = thisMethodDetail.querySelector(invokeSelectors.InvokeOffChainButton);
+                    if (invokeOffChainButton) {
+                        htmlHelpers.setOnClickEvent(invokeOffChainButton, invokeEvents.InvokeOffChain, methodData.name, postMessage);
+                    }
+                    const invokeOnChainButton = thisMethodDetail.querySelector(invokeSelectors.InvokeOnChainButton);
+                    if (invokeOnChainButton) {
+                        htmlHelpers.setOnClickEvent(invokeOnChainButton, invokeEvents.InvokeOnChain, methodData.name, postMessage);
                     }
                     instructionsPlaceholder.innerHTML = instructionsTemplate.innerHTML;
                     placeholder.appendChild(thisMethod);

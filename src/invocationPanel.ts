@@ -98,8 +98,11 @@ export class InvocationPanel {
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === invokeEvents.Update) {
             this.viewState = message.c;
-        } else if (message.e === invokeEvents.Invoke) {
-            await this.invoke(message.c, /*onChain=*/ !!this.viewState.selectedWallet);
+        } else if (message.e === invokeEvents.InvokeOffChain) {
+            await this.invoke(message.c, /*onChain=*/ false);
+            this.panel.webview.postMessage({ viewState: this.viewState });
+        } else if (message.e === invokeEvents.InvokeOnChain) {
+            await this.invoke(message.c, /*onChain=*/ true);
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === invokeEvents.Dismiss) {
             this.viewState.invocationError = '';

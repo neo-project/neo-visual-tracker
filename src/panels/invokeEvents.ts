@@ -2,7 +2,8 @@
 
 const invokeEvents = {
     Init: 'init',
-    Invoke: 'invoke',
+    InvokeOnChain: 'invokeOnChain',
+    InvokeOffChain: 'invokeOffChain',
     Update: 'update',
     Dismiss: 'dismiss',
 };
