@@ -99,7 +99,7 @@ export class InvocationPanel {
         } else if (message.e === invokeEvents.Update) {
             this.viewState = message.c;
         } else if (message.e === invokeEvents.Invoke) {
-            await this.invoke(message.c);
+            await this.invoke(message.c, /*onChain=*/ !!this.viewState.selectedWallet);
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === invokeEvents.Dismiss) {
             this.viewState.invocationError = '';
@@ -108,7 +108,7 @@ export class InvocationPanel {
         }
     }
 
-    private async invoke(methodName: string) {
+    private async invoke(methodName: string, onChain: boolean) {
         try {
             for (let i = 0; i < this.viewState.contracts.length; i++) {
                 if (this.viewState.contracts[i].hash === this.viewState.selectedContract) {
@@ -117,7 +117,6 @@ export class InvocationPanel {
                         if (contract.functions[j].name === methodName) {
                             const method = contract.functions[j];
                             const contractHash = contract.hash.replace(/^0x/, '');
-                            const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
                             const sb = neon.default.create.scriptBuilder();
                             let script = '';
                             if (method.name === 'Main') {
@@ -133,12 +132,8 @@ export class InvocationPanel {
                                     method.name, 
                                     args).str;
                             }
-                            const result = await rpcClient.invokeScript(script);
-                            this.viewState.invocationResult = '';
-                            this.appendToResult('Result (off-chain)', JSON.stringify(result.stack));
-                            this.appendToResult('VM State (off-chain)', result.state);
-                            this.appendToResult('GAS', result.gas_consumed);
-                            if (this.viewState.selectedWallet) {
+                            
+                            if (onChain) {
                                 const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
                                 const config: DoInvokeConfig = {
                                     api: api,
@@ -149,12 +144,20 @@ export class InvocationPanel {
                                 const result = await neon.default.doInvoke(config);
                                 if (result.response && result.response.txid) {
                                     this.appendToResult('TXID', result.response.txid);
+                                    this.viewState.invocationResult = 'Transaction ' + result.response.txid + ' created.';
                                 } else {
-                                    this.appendToResult('TXID', '(no response from RPC server)');
+                                    this.viewState.invocationResult = undefined;
+                                    this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
                                 }
                             } else {
-                                this.appendToResult('TXID', '(not on-chain)');
+                                const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
+                                const result = await rpcClient.invokeScript(script);
+                                this.viewState.invocationResult = '';
+                                this.appendToResult('Result', JSON.stringify(result.stack));
+                                this.appendToResult('VM State', result.state);
+                                this.appendToResult('GAS', result.gas_consumed);
                             }
+
                             return;
                         }
                     }
