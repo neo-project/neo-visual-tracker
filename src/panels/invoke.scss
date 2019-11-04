@@ -10,6 +10,14 @@ body {
     background-color: var(--vscode-sideBar-background);
 }
 
+.chevronExpanded {
+    display: none;
+}
+
+.chevronCollpased {
+    display: inline-block;
+}
+
 .card {
     margin: 10px 10px 10px 10px;
     h2, h3 {
@@ -17,6 +25,7 @@ body {
         color: var(--vscode-sideBarSectionHeader-foreground);
         border: 1px solid var(--vscode-sideBarSectionHeader-border);
         padding: 5px;
+        font-size: 1.0em;
     }
     background-color: var(--vscode-sideBar-background);
     color: var(--vscode-sideBar-foreground);
@@ -31,9 +40,23 @@ body {
     box-shadow: 2px 2px 2px var(--vscode-widget-shadow);
     &.selectedContract {
         border: 1px solid var(--vscode-focusBorder);
-    }
-    &.selectedMethod {
-        border: 1px solid var(--vscode-focusBorder);
+        h2 {
+            .chevronExpanded {
+                display: inline-block;
+            }
+            .chevronCollpased {
+                display: none;
+            }
+        }
+        .card.selectedMethod {
+            border: 1px solid var(--vscode-focusBorder);
+            .chevronExpanded {
+                display: inline-block;
+            }
+            .chevronCollpased {
+                display: none;
+            }
+        }
     }
     .instructions {
         background-color: var(--vscode-sideBar-background);
