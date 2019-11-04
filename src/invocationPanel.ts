@@ -4,7 +4,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { invokeEvents } from './panels/invokeEvents';
+
+import { api } from '@cityofzion/neon-js';
 import { DoInvokeConfig } from '@cityofzion/neon-api/lib/funcs/types';
+import { TransactionOutput } from '@cityofzion/neon-core/lib/tx';
 
 const bs58check = require('bs58check');
 
@@ -132,38 +135,40 @@ export class InvocationPanel {
                             }
                             const result = await rpcClient.invokeScript(script);
                             this.viewState.invocationResult = '';
-                            this.appendToResult('Result', JSON.stringify(result.stack));
-                            this.appendToResult('VM State', result.state);
+                            this.appendToResult('Result (off-chain)', JSON.stringify(result.stack));
+                            this.appendToResult('VM State (off-chain)', result.state);
                             this.appendToResult('GAS', result.gas_consumed);
                             if (this.viewState.selectedWallet) {
+                                const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
                                 const config: DoInvokeConfig = {
-                                    api: new neon.api.neoCli.instance(this.viewState.rpcUrl),
+                                    api: api,
                                     script: script,
                                     account: new neon.wallet.Account(this.viewState.selectedWallet),
-                                    // TODO: Allow specification of 'intents' through UI
-                                    // intents: api.makeIntent({ NEO: 50 }, contractHash)
+                                    intents: InvocationPanel.extractIntents(method, contractHash),
                                 };
                                 const result = await neon.default.doInvoke(config);
-                                if (result.response) {
-                                    this.appendToResult('TX', result.response.txid);
+                                if (result.response && result.response.txid) {
+                                    this.appendToResult('TXID', result.response.txid);
                                 } else {
-                                    this.appendToResult('TX', '(no response from RPC server)');
+                                    this.appendToResult('TXID', '(no response from RPC server)');
                                 }
                             } else {
-                                this.appendToResult('TX', '(not on-chain)');
+                                this.appendToResult('TXID', '(not on-chain)');
                             }
                             return;
                         }
                     }
-
+                    this.viewState.invocationResult = undefined;
                     this.viewState.invocationError =
                         'Could not find NEO Express configuration for method ' + methodName;
                     return;
                 }
             }
+            this.viewState.invocationResult = undefined;
             this.viewState.invocationError = 
                 'Could not find NEO Express configuration for contract with hash ' + this.viewState.selectedContract;
         } catch (e) {
+            this.viewState.invocationResult = undefined;
             this.viewState.invocationError = 'Could not invoke ' + methodName + ': ' + e;
         }
     }
@@ -175,6 +180,10 @@ export class InvocationPanel {
     }
 
     private static extractArguments(parameters: any[]) {
+        if (parameters.length === 0) {
+            return undefined;
+        }
+
         const result = [];
         for (let i = 0; i < parameters.length; i++) {
             const parameter = parameters[i];
@@ -195,18 +204,19 @@ export class InvocationPanel {
         return result;
     }
 
-    private static parseStringArgument(parameter: string) {
-        // For ByteArray parameters, the user can provide either:
-        // i)   A NEO address (prefixed with '@'), or
-        // ii)  A hex string (prefixed with '0x'), or
-        // iii) An arbitrary string
-        if (parameter[0] === '@') { // case (i)
-            return bs58check.decode(parameter.substring(1)).toString('hex').substring(2);
-        } else if ((parameter[0] === '0') && (parameter[1] === 'x')) { // case (ii)
-            return parameter.substring(2);
-        } else { // case (iii)
-            return (new Buffer(parameter)).toString('hex');
+    private static extractIntents(method: any, contractHash: string): TransactionOutput[] | undefined {
+        const symbol = method.intentSymbol;
+        const value = method.intentValue;
+        if (symbol && value) {
+            const numericValue = parseFloat(value);
+            if (!isNaN(numericValue) && (numericValue > 0)) {
+                const intentAssets: any = {};
+                intentAssets[symbol] = value;
+                return api.makeIntent(intentAssets, contractHash);
+            }
         }
+
+        return undefined;
     }
 
     private static parseArrayArgument(parameter: string) {
@@ -220,6 +230,20 @@ export class InvocationPanel {
             }
         }
         return array;
+    }
+
+    private static parseStringArgument(parameter: string) {
+        // For ByteArray parameters, the user can provide either:
+        // i)   A NEO address (prefixed with '@'), or
+        // ii)  A hex string (prefixed with '0x'), or
+        // iii) An arbitrary string
+        if (parameter[0] === '@') { // case (i)
+            return bs58check.decode(parameter.substring(1)).toString('hex').substring(2);
+        } else if ((parameter[0] === '0') && (parameter[1] === 'x')) { // case (ii)
+            return parameter.substring(2);
+        } else { // case (iii)
+            return (new Buffer(parameter)).toString('hex');
+        }
     }
 
     dispose() {
