@@ -4,17 +4,44 @@
     padding-left: 0.3em;
 }
 
+body {
+    background-color: var(--vscode-editor-background);
+}
+
 .card {
     padding: 10px 10px 10px 10px;
     margin: 10px 10px 20px 10px;
-    background-color: var(--vscode-menubar-selectionBackground);
+    h2, h3 {
+        background-color: var(--vscode-sideBarSectionHeader-background);
+        color: var(--vscode-sideBarSectionHeader-foreground);
+        border: 1px solid var(--vscode-sideBarSectionHeader-border);
+        padding: 5px;
+    }
+    background-color: var(--vscode-sideBar-background);
+    color: var(--vscode-sideBar-foreground);
+    border: 1px solid var(--vscode-sideBar-border);
+    padding: 0px;
+    .methodDetail, .contractDetail {
+        padding: 6px;
+    }
+    .methodDetail {
+        background-color: var(--vscode-editor-background);
+    }
     box-shadow: 2px 2px 2px var(--vscode-widget-shadow);
-    border: 1px solid var(--vscode-menuBorder);
     &.selectedContract {
         border: 1px solid var(--vscode-focusBorder);
     }
     &.selectedMethod {
         border: 1px solid var(--vscode-focusBorder);
+    }
+    .instructions {
+        background-color: var(--vscode-sideBar-background);
+        color: var(--vscode-sideBar-foreground);
+        border: 1px solid var(--vscode-sideBar-border);
+        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
+        margin: 12px 10px 10px 10px;
+        padding: 10px;
+        opacity: 0.75;
     }
 }
 
