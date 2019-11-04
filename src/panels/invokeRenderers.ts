@@ -138,8 +138,12 @@ const invokeRenderers = {
                             'click', 
                             () => {
                                 htmlHelpers.hideAll(placeholder, invokeSelectors.MethodDetail);
+                                htmlHelpers.removeAllClass(document.body, 'selectedMethod');
                                 updateViewState((viewState: any) => {
                                     viewState.selectedMethod = (viewState.selectedMethod === methodId) ? '' : methodId;
+                                    if (viewState.selectedMethod === methodId) {
+                                        htmlHelpers.addClass(thisMethod.firstElementChild as HTMLElement, 'selectedMethod');
+                                    }
                                     (thisMethodDetail as any).style.display = (viewState.selectedMethod === methodId) ? 'block' : 'none';
                                 });
                             });
