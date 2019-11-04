@@ -114,16 +114,17 @@ export class InvocationPanel {
                         if (contract.functions[j].name === methodName) {
                             const method = contract.functions[j];
                             const contractHash = contract.hash.replace(/^0x/, '');
-                            const args = InvocationPanel.extractArguments(method.parameters);
                             const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
                             const sb = neon.default.create.scriptBuilder();
                             let script = '';
                             if (method.name === 'Main') {
+                                const args = InvocationPanel.parseArrayArgument(method.parameters[1].value);
                                 script = sb.emitAppCall(
                                     contractHash, 
-                                    null, 
-                                    args.length === 0 ? null : (args.length === 1 ? args[0] : args)).str;
+                                    method.parameters[0].value, 
+                                    args).str;
                             } else {
+                                const args = InvocationPanel.extractArguments(method.parameters);
                                 script = sb.emitAppCall(
                                     contractHash, 
                                     method.name, 
@@ -185,16 +186,7 @@ export class InvocationPanel {
             } else if (parameter.type === 'String') {
                 result.push((new Buffer(parameter.value)).toString('hex'));
             } else if (parameter.type === 'Array') {
-                const array = JSON.parse(parameter.value);
-                if (!Array.isArray(array)) {
-                    throw new Error(parameter.name + ' must be an array');
-                }
-                for (let j = 0; j < array.length; j++) {
-                    if (typeof array[j] !== 'number') {
-                        array[j] = InvocationPanel.parseStringArgument(array[j]);
-                    }
-                }
-                result.push(array);
+                result.push(InvocationPanel.parseArrayArgument(parameter.value));
             } else {
                 throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
             }
@@ -215,6 +207,19 @@ export class InvocationPanel {
         } else { // case (iii)
             return (new Buffer(parameter)).toString('hex');
         }
+    }
+
+    private static parseArrayArgument(parameter: string) {
+        const array = JSON.parse(parameter);
+        if (!Array.isArray(array)) {
+            throw new Error('Object passed instead of an array');
+        }
+        for (let j = 0; j < array.length; j++) {
+            if (typeof array[j] !== 'number') {
+                array[j] = InvocationPanel.parseStringArgument(array[j]);
+            }
+        }
+        return array;
     }
 
     dispose() {
