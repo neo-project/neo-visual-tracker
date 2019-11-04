@@ -18,6 +18,8 @@ const invokeSelectors = {
     ParametersInputArea: '.parametersInputArea',
     ParametersPlaceholder: '.parametersPlaceholder',
     ParameterTemplate: '#parameterTemplate',
+    IntentSymbol: '.intentSymbol',
+    IntentValue: '.intentValue',
     InvokeButton: '.invokeButton',
     InvocationResultPopup: '#invocationResultPopup',
     InvocationResultText: '#invocationResultText',

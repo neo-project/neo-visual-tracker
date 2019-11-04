@@ -63,6 +63,28 @@ const invokeRenderers = {
         }
     },
 
+    renderIntents: function(
+        methodDetailElement: ParentNode, 
+        methodData: any,
+        updateViewState: Function) {
+
+        const intentSymbolInput = methodDetailElement.querySelector(invokeSelectors.IntentSymbol) as HTMLInputElement;
+        const intentValueInput = methodDetailElement.querySelector(invokeSelectors.IntentValue) as HTMLInputElement;
+        if (intentSymbolInput && intentValueInput) {
+            intentSymbolInput.value = (methodData.intentSymbol || 'NEO');
+            intentValueInput.value = (methodData.intentValue || '0');
+            const handler = () => {
+                methodData.intentSymbol = intentSymbolInput.value;
+                methodData.intentValue = intentValueInput.value;
+                updateViewState();
+            };
+            intentSymbolInput.addEventListener('change', handler);
+            intentSymbolInput.addEventListener('keyup', handler);
+            intentValueInput.addEventListener('change', handler);
+            intentValueInput.addEventListener('keyup', handler);
+        }
+    },
+
     renderInvokeError: function(error: string) {
         if (error) {
             htmlHelpers.showHide(invokeSelectors.InvocationErrorPopup, true);
@@ -116,6 +138,7 @@ const invokeRenderers = {
                             });
                     }
                     this.renderParameters(thisMethodDetail, methodData.parameters, updateViewState);
+                    this.renderIntents(thisMethodDetail, methodData, updateViewState);
                     const invokeButton = thisMethodDetail.querySelector(invokeSelectors.InvokeButton);
                     if (invokeButton) {
                         htmlHelpers.setOnClickEvent(invokeButton, invokeEvents.Invoke, methodData.name, postMessage);
