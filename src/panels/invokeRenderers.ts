@@ -39,6 +39,9 @@ const invokeRenderers = {
                 if (thisContractDetail) {
                     htmlHelpers.setInnerPlaceholder(thisContract, invokeSelectors.ContractName, htmlHelpers.text(contractData.name));
                     (thisContractDetail as any).style.display = selectedContract === contractData.hash ? 'block' : 'none';
+                    if (selectedContract === contractData.hash) {
+                        htmlHelpers.addClass(thisContract.firstElementChild as HTMLElement, 'selectedContract');
+                    }
                     const clickable = thisContract.querySelector(invokeSelectors.Clickable);
                     if (clickable) {
                         clickable.addEventListener(
@@ -132,6 +135,9 @@ const invokeRenderers = {
                 if (thisMethodDetail && instructionsPlaceholder) {
                     htmlHelpers.setInnerPlaceholder(thisMethod, invokeSelectors.MethodName, htmlHelpers.text(methodData.name));
                     (thisMethodDetail as any).style.display = selectedMethod === methodId ? 'block' : 'none';
+                    if (selectedMethod === methodId) {
+                        htmlHelpers.addClass(thisMethod.firstElementChild as HTMLElement, 'selectedMethod');
+                    }
                     const clickable = thisMethod.querySelector(invokeSelectors.Clickable);
                     if (clickable) {
                         clickable.addEventListener(
