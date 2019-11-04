@@ -197,10 +197,11 @@ const invokeRenderers = {
                 if (accounts && accounts.length) {
                     for (let j = 0; j < accounts.length; j++) {
                         const privateKey = accounts[j]['private-key'];
+                        const address = accounts[j]['script-hash'];
                         if (privateKey) {
                             const item = document.createElement('option');
                             item.value = privateKey;
-                            item.innerText = walletName + ' - ' + privateKey;
+                            item.innerText = walletName + ' - ' + address;
                             if (selectedWallet === privateKey) {
                                 item.selected = true;
                             }
