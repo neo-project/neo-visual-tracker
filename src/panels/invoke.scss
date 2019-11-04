@@ -14,10 +14,20 @@ input {
     width: 100%;
     background-color: var(--vscode-editor-background);
     padding: 5px;
+
+    &.intentSymbol {
+        text-align: right;
+    }
 }
 
-h3 {
+h1, h2, h3 {
     margin: 0;
+    text-align: left;
+}
+
+h4, h5, h6 {
+    margin: 10px 0 0 0;
+    text-align: center;
 }
 
 .methodDetail>div {

@@ -15,6 +15,7 @@ const invokeSelectors = {
     MethodName: '.methodName',
     MethodDetail: '.methodDetail',
     InstructionsPlaceholder: '.instructions',
+    ParametersInputArea: '.parametersInputArea',
     ParametersPlaceholder: '.parametersPlaceholder',
     ParameterTemplate: '#parameterTemplate',
     InvokeButton: '.invokeButton',

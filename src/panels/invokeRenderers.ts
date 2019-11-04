@@ -120,6 +120,7 @@ const invokeRenderers = {
                     if (invokeButton) {
                         htmlHelpers.setOnClickEvent(invokeButton, invokeEvents.Invoke, methodData.name, postMessage);
                     }
+                    (instructionsPlaceholder as any).style.display = (methodData.parameters.length > 0) ? 'block' : 'none';
                     instructionsPlaceholder.innerHTML = instructionsTemplate.innerHTML;
                     placeholder.appendChild(thisMethod);
                 }
@@ -132,9 +133,11 @@ const invokeRenderers = {
         parameters: any[],
         updateViewState: Function) {
 
+        const area = methodDetailElement.querySelector(invokeSelectors.ParametersInputArea);
         const placeholder = methodDetailElement.querySelector(invokeSelectors.ParametersPlaceholder);
         const parameterTemplate = document.querySelector(invokeSelectors.ParameterTemplate);
-        if (placeholder && parameterTemplate) {
+        if (area && placeholder && parameterTemplate) {
+            (area as any).style.display = (parameters.length > 0) ? 'block' : 'none';
             for (let i = 0 ; i < parameters.length; i++) {
                 const parameterData = parameters[i];
                 const thisParameter = document.createElement('tr');
