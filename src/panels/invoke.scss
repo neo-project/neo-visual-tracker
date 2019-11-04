@@ -37,7 +37,6 @@ body {
     .methodDetail {
         background-color: var(--vscode-editor-background);
     }
-    box-shadow: 2px 2px 2px var(--vscode-widget-shadow);
     &.selectedContract {
         border: 1px solid var(--vscode-focusBorder);
         h2 {
