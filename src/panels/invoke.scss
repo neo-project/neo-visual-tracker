@@ -6,11 +6,11 @@
 
 body {
     background-color: var(--vscode-editor-background);
+    padding: 10px;
 }
 
 .card {
-    padding: 10px 10px 10px 10px;
-    margin: 10px 10px 20px 10px;
+    margin: 10px 10px 10px 10px;
     h2, h3 {
         background-color: var(--vscode-sideBarSectionHeader-background);
         color: var(--vscode-sideBarSectionHeader-foreground);

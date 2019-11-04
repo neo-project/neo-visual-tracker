@@ -5,7 +5,6 @@ import { invokeSelectors } from "./invokeSelectors";
 const invokeRenderers = {
 
     render: function(viewState: any, updateViewState: Function, postMessage: Function) {
-        htmlHelpers.setPlaceholder(invokeSelectors.JsonFileName, htmlHelpers.text(viewState.neoExpressJsonFileName));
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFilePath, htmlHelpers.text(viewState.neoExpressJsonFullPath));
         htmlHelpers.setPlaceholder(invokeSelectors.RpcUrl, htmlHelpers.text(viewState.rpcUrl));
         this.renderContracts(

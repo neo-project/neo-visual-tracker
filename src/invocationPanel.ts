@@ -48,7 +48,7 @@ export class InvocationPanel {
 
         this.panel = vscode.window.createWebviewPanel(
             'invocationPanel',
-            this.viewState.neoExpressJsonFileName,
+            this.viewState.neoExpressJsonFileName + ' - Smart contracts',
             vscode.ViewColumn.Active,
             { enableScripts: true });
 
