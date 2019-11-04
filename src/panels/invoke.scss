@@ -27,6 +27,20 @@ input {
     }
 }
 
+select {
+    width: 100%;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: none;
+}
+
+.walletDropdown {
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    width: 100%;
+    padding: 5px;
+}
+
 h2, h3 {
     margin: 0;
     text-align: left;

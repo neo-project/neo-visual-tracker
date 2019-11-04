@@ -4,7 +4,7 @@ const invokeSelectors = {
     JsonFileName: '#neoExpressJsonFileName',
     JsonFilePath: '#neoExpressJsonFullPath',
     RpcUrl: '#rpcUrl',
-    WalletDropdown: '#walletDropdown',
+    WalletDropdown: '.walletDropdown',
     ContractsPlaceholder: '#contractsPlaceholder',
     ContractTemplate: '#contractTemplate',
     ContractName: '.contractName',

@@ -20,7 +20,6 @@ class ViewState {
     neoExpressJsonFileName: string = '';
     wallets: any[] = [];
     contracts: any[] = [];
-    selectedWallet: string = '';
     selectedContract: string = '';
     selectedMethod: string = '';
     invocationError?: string;
@@ -137,20 +136,26 @@ export class InvocationPanel {
                             }
                             
                             if (onChain) {
-                                const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
-                                const config: DoInvokeConfig = {
-                                    api: api,
-                                    script: script,
-                                    account: new neon.wallet.Account(this.viewState.selectedWallet),
-                                    intents: InvocationPanel.extractIntents(method, contractHash),
-                                };
-                                const result = await neon.default.doInvoke(config);
-                                if (result.response && result.response.txid) {
-                                    this.appendToResult('TXID', result.response.txid);
-                                    this.viewState.invocationResult = 'Transaction ' + result.response.txid + ' created.';
+                                const selectedWallet = method.selectedWallet;
+                                if (!selectedWallet) {
+                                    this.viewState.invocationResult = '';
+                                    this.viewState.invocationError = 'Please select a wallet';
                                 } else {
-                                    this.viewState.invocationResult = undefined;
-                                    this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
+                                    const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
+                                    const config: DoInvokeConfig = {
+                                        api: api,
+                                        script: script,
+                                        account: new neon.wallet.Account(selectedWallet),
+                                        intents: InvocationPanel.extractIntents(method, contractHash),
+                                    };
+                                    const result = await neon.default.doInvoke(config);
+                                    if (result.response && result.response.txid) {
+                                        this.appendToResult('TXID', result.response.txid);
+                                        this.viewState.invocationResult = 'Transaction ' + result.response.txid + ' created.';
+                                    } else {
+                                        this.viewState.invocationResult = undefined;
+                                        this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
+                                    }
                                 }
                             } else {
                                 const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);

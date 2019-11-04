@@ -8,11 +8,11 @@ const invokeRenderers = {
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFileName, htmlHelpers.text(viewState.neoExpressJsonFileName));
         htmlHelpers.setPlaceholder(invokeSelectors.JsonFilePath, htmlHelpers.text(viewState.neoExpressJsonFullPath));
         htmlHelpers.setPlaceholder(invokeSelectors.RpcUrl, htmlHelpers.text(viewState.rpcUrl));
-        this.renderWallets(viewState.wallets, viewState.selectedWallet);
         this.renderContracts(
             viewState.contracts, 
             viewState.selectedContract, 
             viewState.selectedMethod, 
+            viewState.wallets,
             updateViewState, 
             postMessage);
         this.renderInvokeResult(viewState.invocationResult);
@@ -23,6 +23,7 @@ const invokeRenderers = {
         contracts: any[], 
         selectedContract: string, 
         selectedMethod: string, 
+        wallets: any[],
         updateViewState: Function,
         postMessage: Function) {
 
@@ -55,6 +56,7 @@ const invokeRenderers = {
                         contractData.hash,
                         contractData.functions || [],
                         selectedMethod,
+                        wallets,
                         updateViewState,
                         postMessage);
                     placeholder.appendChild(thisContract);
@@ -108,6 +110,7 @@ const invokeRenderers = {
         contractHash: string, 
         methods: any[], 
         selectedMethod: string, 
+        wallets: any[],
         updateViewState: Function,
         postMessage: Function) {
 
@@ -147,6 +150,11 @@ const invokeRenderers = {
                     if (invokeOnChainButton) {
                         htmlHelpers.setOnClickEvent(invokeOnChainButton, invokeEvents.InvokeOnChain, methodData.name, postMessage);
                     }
+                    this.renderWallets(
+                        thisMethod, 
+                        wallets, 
+                        methodData.selectedWallet, 
+                        (w: string) => { methods[i].selectedWallet = w; updateViewState(); });
                     instructionsPlaceholder.innerHTML = instructionsTemplate.innerHTML;
                     placeholder.appendChild(thisMethod);
                 }
@@ -187,32 +195,47 @@ const invokeRenderers = {
         }
     },
 
-    renderWallets: function(wallets: any[], selectedWallet: string) {
-        const dropdown = document.querySelector(invokeSelectors.WalletDropdown);
-        if (dropdown) {
-            htmlHelpers.clearChildren(dropdown);
-            const noneItem = document.createElement('option');
-            noneItem.value = '';
-            noneItem.innerText = '(none)';
-            dropdown.appendChild(noneItem);
-            for (let i = 0; i < wallets.length; i++) {
-                const walletName = wallets[i].name;
-                const accounts = wallets[i].accounts;
-                if (accounts && accounts.length) {
-                    for (let j = 0; j < accounts.length; j++) {
-                        const privateKey = accounts[j]['private-key'];
-                        const address = accounts[j]['script-hash'];
-                        if (privateKey) {
-                            const item = document.createElement('option');
-                            item.value = privateKey;
-                            item.innerText = walletName + ' - ' + address;
-                            if (selectedWallet === privateKey) {
-                                item.selected = true;
+    renderWallets: function(parent: ParentNode, wallets: any[], selectedWallet: string, setSelected: Function) {
+        const placeholder = parent.querySelector(invokeSelectors.WalletDropdown) as HTMLElement;
+        
+        if (placeholder) {
+            htmlHelpers.clearChildren(placeholder);
+            const dropdown = document.createElement('select') as HTMLSelectElement;
+            placeholder.appendChild(dropdown);
+            if (wallets.length === 0) {
+                const noneItem = document.createElement('option');
+                noneItem.value = '';
+                noneItem.innerText = '(Create a wallet to continue)';
+                dropdown.appendChild(noneItem);
+                setSelected(undefined);
+            } else {
+                const noneItem = document.createElement('option');
+                noneItem.value = '';
+                noneItem.innerText = '(Select a wallet...)';
+                dropdown.appendChild(noneItem);
+                for (let i = 0; i < wallets.length; i++) {
+                    const walletName = wallets[i].name;
+                    const accounts = wallets[i].accounts;
+                    if (accounts && accounts.length) {
+                        for (let j = 0; j < accounts.length; j++) {
+                            const privateKey = accounts[j]['private-key'];
+                            const address = accounts[j]['script-hash'];
+                            if (privateKey) {
+                                const item = document.createElement('option');
+                                item.value = privateKey;
+                                item.innerText = walletName + ' - ' + address;
+                                if (selectedWallet === privateKey) {
+                                    item.selected = true;
+                                }
+                                dropdown.appendChild(item);
                             }
-                            dropdown.appendChild(item);
                         }
                     }
                 }
+                dropdown.addEventListener('change', _ => {
+                    setSelected(dropdown.options[dropdown.selectedIndex].value);
+                    dropdown.blur();
+                });
             }
         }
     },
