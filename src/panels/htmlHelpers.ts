@@ -69,10 +69,13 @@ const htmlHelpers = {
     },
 
     setInnerPlaceholder: function(element: ParentNode, selector: string, value: Node) {
-        const placeHolderElement = element.querySelector(selector);
-        if (placeHolderElement) {
-            this.clearChildren(placeHolderElement);
-            placeHolderElement.appendChild(value);
+        const placeHolderElements = element.querySelectorAll(selector);
+        if (placeHolderElements && placeHolderElements.length) {
+            for (let i = 0; i < placeHolderElements.length; i++) {
+                const placeHolderElement = placeHolderElements[i];
+                this.clearChildren(placeHolderElement);
+                placeHolderElement.appendChild(value.cloneNode(true));
+            }
         }
     },
 
