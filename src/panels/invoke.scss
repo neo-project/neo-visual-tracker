@@ -83,10 +83,6 @@ input {
     width: 100%;
     background-color: var(--vscode-input-background);
     padding: 5px;
-
-    &.intentSymbol {
-        text-align: right;
-    }
 }
 
 select {

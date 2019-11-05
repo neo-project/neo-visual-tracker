@@ -68,9 +68,9 @@
                     <div class="text-center"><button class="invokeOffChainButton">Call method</button></div>
                     <table>
                             <tr>
-                                <th width="20%">Intents</th>
+                                <th width="20%">Spend</th>
+                                <td width="30%"><input class="parameterInput intentValue text-right" type="text" /></td>
                                 <td width="30%"><input class="parameterInput intentSymbol" type="text" /></td>
-                                <td width="30%"><input class="parameterInput intentValue" type="text" /></td>
                                 <td width="20%" class="parameterType">(Optional)</td>
                             </tr>
                     </table>
@@ -142,12 +142,12 @@
                     </li>
                 </ul>
             </div>
-            <div class="strong">Intents:</div>
+            <div class="strong">Spend:</div>
             <div>
                 <ul>
                     <li>
-                        Optionally supply an asset symbol (e.g. <em>NEO</em>) and value (e.g. <em>50</em>) to extract
-                        appropriate UTXOs from the selected wallet to spend to the contract.
+                        Optionally supply an asset symbol (e.g. <em>NEO</em>) and value (e.g. <em>50</em>).  If greater
+                        than zero, appropriate UTXOs will be assembled and spent to the contract.
                     </li>
                 </ul>
             </div>
