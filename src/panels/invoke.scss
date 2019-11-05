@@ -94,7 +94,7 @@ h4 {
         padding: 10px;
         opacity: 0.75;
         clear: both;
-        *:not(:first-child) {
+        div:not(:first-child) {
             margin-left: 20px;
         }
     }
