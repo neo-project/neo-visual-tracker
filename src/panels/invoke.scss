@@ -1,12 +1,8 @@
 @import 'common';
-#neoExpressJsonFileName {
-    font-family: 'Courier New', Courier, monospace;
-    padding-left: 0.3em;
-}
 
 body {
     background-color: var(--vscode-editor-background);
-    padding: 10px;
+    padding: 0;
     background-color: var(--vscode-sideBar-background);
 }
 
@@ -18,27 +14,43 @@ body {
     display: inline-block;
 }
 
-.card {
-    margin: 10px 10px 10px 10px;
-    h2, h3 {
-        background-color: var(--vscode-sideBarSectionHeader-background);
-        color: var(--vscode-sideBarSectionHeader-foreground);
-        border: 1px solid var(--vscode-sideBarSectionHeader-border);
-        padding: 5px;
-        font-size: 1.0em;
+h1, h2, h3 {
+    background-color: var(--vscode-sideBarSectionHeader-background);
+    color: var(--vscode-sideBarSectionHeader-foreground);
+    border: 1px solid var(--vscode-sideBarSectionHeader-border);
+    padding: 5px;
+    font-size: 1.0em;
+}
+h2 {
+    padding-left: 20px;
+}
+h3 {
+    padding-left: 40px;
+}
+h1 {
+    margin: 0;
+    .chevronExpanded {
+        display: inline-block;
     }
+}
+
+.card {
+    margin: 0;
     background-color: var(--vscode-sideBar-background);
     color: var(--vscode-sideBar-foreground);
     border: 1px solid var(--vscode-sideBar-border);
     padding: 0px;
-    .methodDetail, .contractDetail {
-        padding: 6px;
-    }
     .methodDetail {
         background-color: var(--vscode-editor-background);
+        margin: 0px 20px 10px 60px;
+        padding: 5px;
+        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
+        border: 1px solid var(--vscode-sideBar-border);
     }
     &.selectedContract {
-        border: 1px solid var(--vscode-focusBorder);
+        .contractDetail {
+            border: 1px solid var(--vscode-focusBorder);
+        }
         h2 {
             .chevronExpanded {
                 display: inline-block;
@@ -48,7 +60,6 @@ body {
             }
         }
         .card.selectedMethod {
-            border: 1px solid var(--vscode-focusBorder);
             .chevronExpanded {
                 display: inline-block;
             }
