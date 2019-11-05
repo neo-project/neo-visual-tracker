@@ -122,6 +122,19 @@
 
         <div id="invokeInstructions">
             <div class="stronger">Tips:</div>
+            <div class="strong"><em>Call</em> vs. <em>Invoke</em>:</div>
+            <div>
+                <ul>
+                    <li>
+                        <em>Calling</em> a contract will invoke the method using the Neo Express
+                        instance, but <em>not</em> broadcast a transaction.
+                    </li>
+                    <li>
+                        <em>Invoking</em> a contract will create and broadcast an 
+                        <em>InvocationTransaction</em> using the Neo Express instance.
+                    </li>
+                </ul>
+            </div>
             <div class="strong">Parameters of type <em>ByteArray</em>:</div>
             <div>
                 <ul>
