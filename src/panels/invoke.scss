@@ -1,0 +1,213 @@
+@import 'common';
+
+body {
+    background-color: var(--vscode-editor-background);
+    padding: 0;
+    background-color: var(--vscode-sideBar-background);
+}
+
+.chevronExpanded {
+    display: none;
+}
+
+.chevronCollpased {
+    display: inline-block;
+}
+
+.half {
+    width: 50%;
+    display: inline-block;
+    text-align: center;
+    padding-bottom: 20px;
+    margin: 0;
+    table {
+        width: 90%;
+    }
+    button {
+        margin-top: 10px;
+        width: 90%;
+    }
+}
+
+h1, h2, h3 {
+    background-color: var(--vscode-sideBarSectionHeader-background);
+    color: var(--vscode-sideBarSectionHeader-foreground);
+    border: 1px solid var(--vscode-sideBarSectionHeader-border);
+    padding: 5px;
+    font-size: 1.0em;
+}
+h2 {
+    padding-left: 20px;
+}
+h3 {
+    padding-left: 40px;
+}
+h1 {
+    margin: 0;
+    .chevronExpanded {
+        display: inline-block;
+    }
+}
+h4 {
+    font-size: 1.2em;
+}
+
+.card {
+    margin: 0;
+    background-color: var(--vscode-sideBar-background);
+    color: var(--vscode-sideBar-foreground);
+    border: 1px solid var(--vscode-sideBar-border);
+    padding: 0px;
+    .methodDetail {
+        background-color: var(--vscode-editor-background);
+        margin: 0px 20px 10px 60px;
+        padding: 5px;
+        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
+        border: 1px solid var(--vscode-sideBar-border);
+    }
+    &.selectedContract {
+        .contractDetail {
+            border: 1px solid var(--vscode-focusBorder);
+        }
+        h2 {
+            .chevronExpanded {
+                display: inline-block;
+            }
+            .chevronCollpased {
+                display: none;
+            }
+        }
+        .card.selectedMethod {
+            .chevronExpanded {
+                display: inline-block;
+            }
+            .chevronCollpased {
+                display: none;
+            }
+        }
+    }
+    .instructions {
+        background-color: var(--vscode-sideBar-background);
+        color: var(--vscode-sideBar-foreground);
+        border: 1px solid var(--vscode-sideBar-border);
+        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
+        margin: 12px 10px 10px 10px;
+        padding: 10px;
+        opacity: 0.75;
+        clear: both;
+        div:not(:first-child) {
+            margin-left: 20px;
+        }
+    }
+}
+
+input {
+    width: 100%;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-foreground);
+    padding: 5px;
+}
+
+select {
+    width: 100%;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: none;
+}
+
+select:focus {
+    border: none;
+}
+
+.walletDropdownOuter {
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-foreground);
+    width: 100%;
+    padding: 5px;
+}
+
+h2, h3 {
+    margin: 0;
+    text-align: left;
+}
+
+h4, h5, h6 {
+    margin: 10px 0 0 0;
+    text-align: center;
+}
+
+.methodDetail>div {
+    padding-top: 10px;
+}
+
+#invocationResultText {
+    white-space: pre-line;
+    text-align: left;
+}
+
+table {
+    width: 100%;
+    margin-top: 10px;
+    td,
+    th {
+        padding: 0px 10px 0px 10px;
+        &.parameterType {
+            font-style: italic;
+        }
+    }
+    th {
+        text-align: right;
+    }
+    thead {
+        th {
+            padding-bottom: 5px;
+            text-align: center;
+        }
+    }
+}
+
+ul {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#resultStatus {
+    background-color: var(--vscode-statusBar-background);
+    color: var(--vscode-statusBar-foreground);
+    border-top: 1px solid var(--vscode-statusBar-border);
+    padding: 5px;
+    margin: 0;
+    overflow: auto;
+    span {
+        margin: 0;
+    }
+    span.left {
+        margin: 0 10px 0 0;
+    }
+    span.right {
+        margin: 0 0 0 10px;
+    }
+}
+
+#resultsPlaceholder {
+    padding: 0;
+    table {
+        width: auto;
+        margin: 10px;
+        border: 1px solid var(--vscode-textBlockQuote-border);
+        background-color: var(--vscode-textBlockQuote-background);
+        td, th {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        td {
+            text-align: right;
+            vertical-align: top;
+        }
+        th {
+            text-align: left;
+            word-break: break-all;
+        }
+    }
+}

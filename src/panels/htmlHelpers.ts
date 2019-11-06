@@ -2,9 +2,20 @@ import { trackerEvents } from "./trackerEvents";
 
 const htmlHelpers = {
 
+    addClass: function(parent: HTMLElement, className: string) {
+        parent.className = (parent.className + ' ' + className).trim();
+    },
+
     clearChildren: function(element: Element) {
         while (element.firstChild) {
             element.removeChild(element.firstChild);
+        }
+    },
+
+    hideAll: function(parent: ParentNode, selector: string) {
+        const elements = parent.querySelectorAll(selector);
+        for (let i = 0; i < elements.length; i++) {
+            (elements[i] as any).style.display = 'none';
         }
     },
 
@@ -43,10 +54,28 @@ const htmlHelpers = {
         return n.toLocaleString(undefined, { maximumFractionDigits: 20 });
     },
 
+    removeAllClass: function(parent: HTMLElement, className: string) {
+        const elements = parent.querySelectorAll('.' + className);
+        for (let i = 0; i < elements.length; i++) {
+            elements[i].className = elements[i].className.replace(className, '').replace('  ', ' ').trim();
+        }
+    },
+
     setEnabled: function(selector: string, isEnabled: boolean) {
         const element = document.querySelector(selector);
         if (element) {
             (element as any).disabled = !isEnabled;
+        }
+    },
+
+    setInnerPlaceholder: function(element: ParentNode, selector: string, value: Node) {
+        const placeHolderElements = element.querySelectorAll(selector);
+        if (placeHolderElements && placeHolderElements.length) {
+            for (let i = 0; i < placeHolderElements.length; i++) {
+                const placeHolderElement = placeHolderElements[i];
+                this.clearChildren(placeHolderElement);
+                placeHolderElement.appendChild(value.cloneNode(true));
+            }
         }
     },
 
@@ -58,11 +87,7 @@ const htmlHelpers = {
     },
 
     setPlaceholder: function(selector: string, value: Node) {
-        const placeHolderElement = document.querySelector(selector);
-        if (placeHolderElement) {
-            this.clearChildren(placeHolderElement);
-            placeHolderElement.appendChild(value);
-        }
+        this.setInnerPlaceholder(document, selector, value);
     },
 
     showHide: function(selector: string, show: boolean) {

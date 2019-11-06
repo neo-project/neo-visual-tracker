@@ -77,6 +77,12 @@
                     "dark": "resources/dark/stop.svg"
                 },
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
+                "command": "neo-visual-devtracker.invokeContract",
+                "title": "Invoke contract",
+                "category": "NEO Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             }
         ],
         "menus": {
@@ -105,17 +111,23 @@
                 {
                     "command": "neo-visual-devtracker.stopServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "neo-visual-devtracker.invokeContract",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 }
             ]
         }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js",
+        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && node-sass src/panels/invoke.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js && browserify out/panels/invoke.js -o out/panels/invokeBundle.js",
         "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
-        "watch-css": "node-sass src/panels/tracker.scss -wo out/panels",
-        "watch-browserify": "watchify out/panels/tracker.js -o out/panels/trackerBundle.js",
+        "watch-css-1": "node-sass src/panels/tracker.scss -wo out/panels",
+        "watch-css-2": "node-sass src/panels/invoke.scss -wo out/panels",
+        "watch-browserify-1": "watchify out/panels/tracker.js -o out/panels/trackerBundle.js",
+        "watch-browserify-2": "watchify out/panels/invoke.js -o out/panels/invokeBundle.js",
         "package": "npm run setversion && vsce package",
         "pretest": "npm run compile",
         "setversion": "gulp setversion",
@@ -147,6 +159,8 @@
         "@cityofzion/neon-js": "^4.7.0",
         "@neo-one/node-core": "^1.2.2",
         "bitset": "^5.0.5",
+        "bs58": "^4.0.1",
+        "bs58check": "^2.1.2",
         "find-process": "^1.4.2",
         "memoizee": "^0.4.14",
         "request": "^2.88.0"

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 
+import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
-import { sampleInvocation } from './contractInvocation';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -48,8 +48,15 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
-		console.log('User requested to invoke a contract ', server);
-		sampleInvocation(server.rpcUri);
+		try {
+			const panel = new InvocationPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				server.rpcUri,
+				context.subscriptions);
+		} catch (e) {
+			console.error('Error opening invocation panel ', e);
+		}
 	});
 
 	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);

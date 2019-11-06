@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="full-screen" id="invocationResultPopup">
+        <div class="dialog">
+            <div class="content">
+                <h4>Smart contract result</h4>
+                <div class="pad" id="resultsPlaceholder"></div>
+                <div class="pad">
+                    <button id="closeInvocationResult">Close</button>
+                </div>
+            </div>
+            <div id="resultStatus">
+                <span class="left">
+                    VM State: <span class="strong" id="vm-state-value"></span>
+                </span>
+                <span class="right">
+                    Gas consumed: <span class="strong" id="gas-used-value"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="full-screen" id="broadcastResultPopup">
+        <div class="dialog">
+            <div class="content">
+                <h4>Transaction created</h4>
+                <div class="pad" id="broadcastResultText"></div>
+                <div class="pad"><button id="closeBroadcastResult">Close</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="full-screen" id="invocationErrorPopup">
+        <div class="dialog">
+            <div class="content">
+                <h4 class="error">Error</h4>
+                <div class="pad error" id="invocationErrorText"></div>
+                <div class="pad"><button id="closeInvocationError">Close</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <span id="rpcUrl" class="left"></span>
+        <span id="neoExpressJsonFullPath" class="right"></span>
+    </div>
+
+    <h1>
+        <span class="chevronExpanded">&#x25BC;</span>
+        Neo Express Instance:
+        <span id="neoExpressJsonFileName"></span>
+    </h1>
+
+    <div id="contractsPlaceholder"></div>
+
+    <div id="templates">
+
+        <div id="contractTemplate">
+            <div class="card">
+                <h2 class="clickable">
+                    <span class="chevronCollpased">&#x25B6;</span>
+                    <span class="chevronExpanded">&#x25BC;</span>
+                    Contract:
+                    <span class="contractName"></span>
+                </h2>
+                <div class="contractDetail">
+                    <div class="methodsPlaceholder"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="methodTemplate">
+            <div class="card">
+                <h3 class="clickable">
+                    <span class="chevronCollpased">&#x25B6;</span>
+                    <span class="chevronExpanded">&#x25BC;</span>
+                    Method: 
+                    <span class="methodName"></span>
+                </h3>
+                <div class="methodDetail">
+                    <h4>Invoke contract method: '<span class="methodName"></span>'</h4>
+                    <div class="parametersInputArea">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th colspan="3">Parameters:</th>
+                                </tr>
+                            </thead>
+                            <tbody  class="parametersPlaceholder">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="half left">
+                        <table>
+                            <tr>
+                                <td class='hide'><input class="parameterInput" type="text" /></td>
+                            </tr>
+                            <tr>
+                                <td class='hide'><div class="walletDropdownOuter">&nbsp;</div></td>
+                            </tr>
+                        </table>
+                        <div>
+                            <button class="invokeOffChainButton">Call method</button>
+                        </div>
+                    </div>
+                    <div class="half right">
+                        <table>
+                                <tr>
+                                    <th width="20%">Spend:</th>
+                                    <td width="30%"><input class="parameterInput intentValue text-right" type="text" /></td>
+                                    <td width="30%"><input class="parameterInput intentSymbol" type="text" /></td>
+                                    <td width="20%" class="parameterType">(Optional)</td>
+                                </tr>
+                                <tr>
+                                    <th width="20%">Wallet:</th>
+                                    <td width="60%" colspan="2">
+                                        <div class="walletDropdownOuter walletDropdown"></div>
+                                    </td>
+                                    <td width="20%" class="parameterType">(Required)</td>
+                                </tr>
+                        </table>
+                        <div>
+                            <button class="invokeOnChainButton">Broadcast invocation transaction</button>
+                        </div>
+                    </div>
+                    <div class="instructions"></div>
+                </div>
+            </div>
+        </div>
+
+        <table>
+            <tr id="parameterTemplate">
+                <th width="20%" class="parameterName">Name</th>
+                <td width="60%"><input class="parameterInput" type="text" /></td>
+                <td width="20%" class="parameterType">(type)</td>
+            </tr>
+        </table>
+
+        <table id="resultTemplate">
+            <tr>
+                <td width="20%">As number:</td>
+                <th class="asNumber"></th>
+            </tr>
+            <tr>
+                <td width="20%">As string:</td>
+                <th class="asString"></th>
+            </tr>
+            <tr>
+                <td width="20%">As data:</td>
+                <th class="asData"></th>
+            </tr>
+        </div>
+
+        <div id="invokeInstructions">
+            <div class="stronger">Tips:</div>
+            <div class="strong"><em>Call</em> vs. <em>Invoke</em>:</div>
+            <div>
+                <ul>
+                    <li>
+                        <em>Calling</em> a contract will invoke the method using the Neo Express
+                        instance, but <em>not</em> broadcast a transaction.
+                    </li>
+                    <li>
+                        <em>Invoking</em> a contract will create and broadcast an 
+                        <em>InvocationTransaction</em> using the Neo Express instance.
+                    </li>
+                </ul>
+            </div>
+            <div class="strong">Parameters of type <em>ByteArray</em>:</div>
+            <div>
+                <ul>
+                    <li>
+                        To supply a NEO address, enter the address prefixed with the '@' character, e.g.
+                        <em>@AJCtRExcE3BCGniuLQA9ZRh21heAc2Yf8R</em>.
+                    </li>
+                    <li>
+                        To supply a hex string, enter the string prefixed with '0x', e.g.
+                        <em>0x0123456789abcdef</em>.
+                    </li>
+                    <li>
+                        To supply arbitrary text, enter as-is.
+                    </li>
+                </ul>
+            </div>
+            <div class="strong">Parameters of type <em>Integer</em>:</div>
+            <div>
+                <ul>
+                    <li>
+                        Enter an integer value as-is, e.g. <em>3422342349565424</em>.
+                    </li>
+                </ul>
+            </div>
+            <div class="strong">Parameters of type <em>String</em>:</div>
+            <div>
+                <ul>
+                    <li>
+                        Supply arbitrary text, as-is.
+                    </li>
+                </ul>
+            </div>
+            <div class="strong">Parameters of type <em>Array</em>:</div>
+            <div>
+                <ul>
+                    <li>
+                        Supply a JSON array containing any combination of numbers, strings, hex strings and addresses, e.g.
+                        <em>[42, 'foo', '0x1234', '@AJCtRExcE3BCGniuLQA9ZRh21heAc2Yf8R']</em>.
+                    </li>
+                </ul>
+            </div>
+            <div class="strong">Spend:</div>
+            <div>
+                <ul>
+                    <li>
+                        Optionally supply an asset symbol (e.g. <em>NEO</em>) and value (e.g. <em>50</em>).  If greater
+                        than zero, appropriate UTXOs will be assembled and spent to the contract.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>
