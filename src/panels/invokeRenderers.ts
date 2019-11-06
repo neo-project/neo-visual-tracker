@@ -15,8 +15,18 @@ const invokeRenderers = {
             viewState.wallets,
             updateViewState, 
             postMessage);
-        this.renderInvokeResult(viewState.invocationResult);
+        this.renderBroadcastResult(viewState.broadcastResult);
         this.renderInvokeError(viewState.invocationError);
+        this.renderInvokeResult(viewState);
+    },
+
+    renderBroadcastResult: function(result: string) {
+        if (result) {
+            htmlHelpers.showHide(invokeSelectors.BroadcastResultPopup, true);
+            htmlHelpers.setPlaceholder(invokeSelectors.BroadcastResultText, htmlHelpers.text(result));
+        } else {
+            htmlHelpers.showHide(invokeSelectors.BroadcastResultPopup, false);
+        }
     },
 
     renderContracts: function(
@@ -103,10 +113,9 @@ const invokeRenderers = {
         }
     },
 
-    renderInvokeResult: function(result: string) {
-        if (result) {
+    renderInvokeResult: function(viewstate: any) {
+        if (viewstate.showResult) {
             htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, true);
-            htmlHelpers.setPlaceholder(invokeSelectors.InvocationResultText, htmlHelpers.text(result));
         } else {
             htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, false);
         }

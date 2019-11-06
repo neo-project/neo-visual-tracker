@@ -14,6 +14,11 @@ const bs58check = require('bs58check');
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
+class ResultValue {
+    constructor(public readonly result: any) {
+    }
+}
+
 class ViewState {
     rpcUrl: string = '';
     neoExpressJsonFullPath: string = '';
@@ -23,7 +28,11 @@ class ViewState {
     selectedContract: string = '';
     selectedMethod: string = '';
     invocationError?: string;
-    invocationResult?: string;
+    showResult?: boolean;
+    resultVmState?: string;
+    resultGasUsed?: string;
+    resultValues?: ResultValue[];
+    broadcastResult?: string;
 }
 
 export class InvocationPanel {
@@ -105,7 +114,8 @@ export class InvocationPanel {
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === invokeEvents.Dismiss) {
             this.viewState.invocationError = '';
-            this.viewState.invocationResult = '';
+            this.viewState.broadcastResult = '';
+            this.viewState.showResult = false;
             this.panel.webview.postMessage({ viewState: this.viewState });
         }
     }
@@ -138,7 +148,8 @@ export class InvocationPanel {
                             if (onChain) {
                                 const selectedWallet = method.selectedWallet;
                                 if (!selectedWallet) {
-                                    this.viewState.invocationResult = '';
+                                    this.viewState.broadcastResult = '';
+                                    this.viewState.showResult = false;
                                     this.viewState.invocationError = 'Please select a wallet';
                                 } else {
                                     const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
@@ -150,43 +161,39 @@ export class InvocationPanel {
                                     };
                                     const result = await neon.default.doInvoke(config);
                                     if (result.response && result.response.txid) {
-                                        this.appendToResult('TXID', result.response.txid);
-                                        this.viewState.invocationResult = 'Transaction ' + result.response.txid + ' created.';
+                                        this.viewState.broadcastResult = 'Transaction ' + result.response.txid + ' created.';
                                     } else {
-                                        this.viewState.invocationResult = undefined;
+                                        this.viewState.broadcastResult = undefined;
                                         this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
                                     }
                                 }
                             } else {
                                 const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
                                 const result = await rpcClient.invokeScript(script);
-                                this.viewState.invocationResult = '';
-                                this.appendToResult('Result', JSON.stringify(result.stack));
-                                this.appendToResult('VM State', result.state);
-                                this.appendToResult('GAS', result.gas_consumed);
+                                this.viewState.showResult = true;
+                                this.viewState.resultGasUsed = result.gas_consumed;
+                                this.viewState.resultVmState = result.state;
+                                this.viewState.resultValues = result.stack.map(_ => new ResultValue(_));
                             }
 
                             return;
                         }
                     }
-                    this.viewState.invocationResult = undefined;
+                    this.viewState.showResult = false;
+                    this.viewState.broadcastResult = undefined;
                     this.viewState.invocationError =
                         'Could not find NEO Express configuration for method ' + methodName;
                     return;
                 }
             }
-            this.viewState.invocationResult = undefined;
+            this.viewState.showResult = false;
+            this.viewState.broadcastResult = undefined;
             this.viewState.invocationError = 
                 'Could not find NEO Express configuration for contract with hash ' + this.viewState.selectedContract;
         } catch (e) {
-            this.viewState.invocationResult = undefined;
+            this.viewState.showResult = false;
+            this.viewState.broadcastResult = undefined;
             this.viewState.invocationError = 'Could not invoke ' + methodName + ': ' + e;
-        }
-    }
-
-    private appendToResult(field: string, value?: string) {
-        if (value) {
-            this.viewState.invocationResult += field + ': ' + value + '\r\n';
         }
     }
 

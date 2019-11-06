@@ -43,6 +43,7 @@ function initializePanel() {
     }
 
     htmlHelpers.setOnClickEvent(invokeSelectors.CloseInvocationResult, invokeEvents.Dismiss, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(invokeSelectors.CloseBroadcastResult, invokeEvents.Dismiss, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(invokeSelectors.CloseInvocationError, invokeEvents.Dismiss, null, vsCodePostMessage);
 
     vscode.postMessage({ e: invokeEvents.Init });
