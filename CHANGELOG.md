@@ -19,6 +19,7 @@ may not exactly match a publicly released version.
 
 - Moved project home to official [Neo project GitHub organization](https://github.com/neo-project).
 - Updated Neo branding as per [official press kit](https://neo.org/presskit).
+- Added support for smart contract invocation within vscode.
 
 ## [0.5] - 2019-10-17
 
