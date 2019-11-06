@@ -15,7 +15,24 @@ const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ResultValue {
-    constructor(public readonly result: any) {
+    public readonly asInteger: string;
+    public readonly asByteArray: string;
+    public readonly asString: string;
+    constructor(result: any) {
+        let value = result.value;
+        if ((value !== null) && (value !== undefined)) {
+            const buffer = new Buffer(value, 'hex');
+            if (value.length === 0) {
+                value = '00';
+            }
+            this.asByteArray = '0x' + value;
+            this.asInteger = BigInt(this.asByteArray).toString();
+            this.asString = buffer.toString();
+        } else {
+            this.asInteger = '0';
+            this.asByteArray = '(empty)';
+            this.asString = '(empty)';
+        }
     }
 }
 
