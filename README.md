@@ -24,3 +24,7 @@ for instructions on installing Neo-Express.
 * Explore the blockchain from within vscode (works for Neo-Express private blockchains and the public Neo blockchain)
 
 ![Built-in blockchain explorer](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-block-explorer.png)
+
+* Invoke smart contracts on a Neo-Express instance from within vscode
+
+![Contract invocation](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-invoke.png)
