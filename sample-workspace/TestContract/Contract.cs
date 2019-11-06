@@ -34,15 +34,6 @@ public class TestContract : SmartContract
         {
             return GetData();
         }
-        else if (method == "PutArray") 
-        {
-            PutArray((BigInteger[]) args[0]);
-            return ((BigInteger[]) args[0]).Length;
-        } 
-        else if (method == "GetArray")
-        {
-            return GetArray();
-        }
         else
         {
             return 0;
@@ -77,27 +68,6 @@ public class TestContract : SmartContract
     public static byte[] GetData()
     {
         return Storage.Get(Storage.CurrentContext, "Data");
-    }
-
-    public static void PutArray(BigInteger[] ns)
-    {
-        Storage.Put(Storage.CurrentContext, "Array_Length", new BigInteger(ns.Length));
-        // for (int i = 0; i < ns.Length; i++) 
-        // {
-        //     Storage.Put(Storage.CurrentContext, "Array_" + i, ns[i]);
-        // }
-    }
-
-    public static BigInteger[] GetArray()
-    {
-        BigInteger length = new BigInteger(Storage.Get(Storage.CurrentContext, "Array_Length"));
-        BigInteger[] result = new BigInteger[length.AsByte()];
-        for (int i = 0; i < result.Length; i++) 
-        {
-            result[i] = new BigInteger(Storage.Get(Storage.CurrentContext, "Array_" + i));
-        }
-
-        return result;
     }
 }
 
