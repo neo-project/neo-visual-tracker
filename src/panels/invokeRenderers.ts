@@ -115,6 +115,8 @@ const invokeRenderers = {
 
     renderInvokeResult: function(viewstate: any) {
         if (viewstate.showResult) {
+            htmlHelpers.setPlaceholder(invokeSelectors.InvocationResultGasUsed, htmlHelpers.text(viewstate.resultGasUsed));
+            htmlHelpers.setPlaceholder(invokeSelectors.InvocationResultVMState, htmlHelpers.text(viewstate.resultVmState));
             htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, true);
         } else {
             htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, false);

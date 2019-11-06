@@ -19,6 +19,7 @@ body {
     display: inline-block;
     text-align: center;
     padding-bottom: 20px;
+    margin: 0;
     table {
         width: 90%;
     }
@@ -164,4 +165,22 @@ table {
 ul {
     margin-top: 0;
     margin-bottom: 0;
+}
+
+#resultStatus {
+    background-color: var(--vscode-statusBar-background);
+    color: var(--vscode-statusBar-foreground);
+    border-top: 1px solid var(--vscode-statusBar-border);
+    padding: 5px;
+    margin: 0;
+    overflow: auto;
+    span {
+        margin: 0;
+    }
+    span.left {
+        margin: 0 10px 0 0;
+    }
+    span.right {
+        margin: 0 0 0 10px;
+    }
 }

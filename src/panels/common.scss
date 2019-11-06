@@ -27,12 +27,15 @@ body {
     * {
         margin: 10px;
     }
-    >div {
-        padding: 10px;
+    .dialog {
+        padding: 0;
         box-shadow: 5px 5px 5px var(--vscode-widget-shadow);
         border: 1px solid var(--vscode-focusBorder);
         background-color: var(--vscode-editor-background);
         display: inline-block;
+        .content {
+            padding: 10px;
+        }
     }
 }
 
@@ -46,6 +49,10 @@ body {
 
 .right {
     float: right;
+}
+
+.clear {
+    clear: both;
 }
 
 .text-right {
