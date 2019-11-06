@@ -14,8 +14,8 @@
         <div class="dialog">
             <div class="content">
                 <h4>Smart contract result</h4>
-                <div>TODO: Render result</div>
-                <div>
+                <div class="pad" id="resultsPlaceholder"></div>
+                <div class="pad">
                     <button id="closeInvocationResult">Close</button>
                 </div>
             </div>
@@ -33,8 +33,9 @@
     <div class="full-screen" id="broadcastResultPopup">
         <div class="dialog">
             <div class="content">
-                <div id="broadcastResultText"></div>
-                <button id="closeBroadcastResult">Close</button>
+                <h4>Transaction created</h4>
+                <div class="pad" id="broadcastResultText"></div>
+                <div class="pad"><button id="closeBroadcastResult">Close</button></div>
             </div>
         </div>
     </div>
@@ -42,8 +43,9 @@
     <div class="full-screen" id="invocationErrorPopup">
         <div class="dialog">
             <div class="content">
-                <div class="error" id="invocationErrorText"></div>
-                <button id="closeInvocationError">Close</button>
+                <h4 class="error">Error</h4>
+                <div class="pad error" id="invocationErrorText"></div>
+                <div class="pad"><button id="closeInvocationError">Close</button></div>
             </div>
         </div>
     </div>
@@ -143,6 +145,21 @@
                 <td width="20%" class="parameterType">(type)</td>
             </tr>
         </table>
+
+        <table id="resultTemplate">
+            <tr>
+                <td width="20%">As number:</td>
+                <th class="asNumber"></th>
+            </tr>
+            <tr>
+                <td width="20%">As string:</td>
+                <th class="asString"></th>
+            </tr>
+            <tr>
+                <td width="20%">As data:</td>
+                <th class="asData"></th>
+            </tr>
+        </div>
 
         <div id="invokeInstructions">
             <div class="stronger">Tips:</div>

@@ -117,6 +117,22 @@ const invokeRenderers = {
         if (viewstate.showResult) {
             htmlHelpers.setPlaceholder(invokeSelectors.InvocationResultGasUsed, htmlHelpers.text(viewstate.resultGasUsed));
             htmlHelpers.setPlaceholder(invokeSelectors.InvocationResultVMState, htmlHelpers.text(viewstate.resultVmState));
+            const resultsPlaceholder = document.querySelector(invokeSelectors.InvocationResultsPlaceholder);
+            const resultTemplate = document.querySelector(invokeSelectors.InvocationResultTemplate);
+            if (resultsPlaceholder && resultTemplate) {
+                htmlHelpers.clearChildren(resultsPlaceholder);
+                if (viewstate.resultValues && viewstate.resultValues.length) {
+                    for (let i = 0; i < viewstate.resultValues.length; i++) {
+                        const result = viewstate.resultValues[i];
+                        const resultElement = document.createElement('table');
+                        resultElement.innerHTML = resultTemplate.innerHTML;
+                        htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsData, htmlHelpers.text(result.asByteArray));
+                        htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsNumber, htmlHelpers.text(result.asInteger));
+                        htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsString, htmlHelpers.text(result.asString));
+                        resultsPlaceholder.appendChild(resultElement);
+                    }
+                }
+            }
             htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, true);
         } else {
             htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, false);

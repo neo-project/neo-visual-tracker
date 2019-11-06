@@ -184,3 +184,25 @@ ul {
         margin: 0 0 0 10px;
     }
 }
+
+#resultsPlaceholder {
+    padding: 0;
+    table {
+        width: auto;
+        margin: 10px;
+        border: 1px solid var(--vscode-textBlockQuote-border);
+        background-color: var(--vscode-textBlockQuote-background);
+        td, th {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        td {
+            text-align: right;
+            vertical-align: top;
+        }
+        th {
+            text-align: left;
+            word-break: break-all;
+        }
+    }
+}
