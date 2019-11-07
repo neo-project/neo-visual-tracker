@@ -30,6 +30,7 @@ const invokeSelectors = {
     ResultAsNumber: '.asNumber',
     ResultAsString: '.asString',
     ResultAsData: '.asData',
+    ResultAsAddress: '.asAddress',
     CloseInvocationResult: '#closeInvocationResult',
     BroadcastResultPopup: '#broadcastResultPopup',
     BroadcastResultText: '#broadcastResultText',

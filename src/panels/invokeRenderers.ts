@@ -129,6 +129,7 @@ const invokeRenderers = {
                         htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsData, htmlHelpers.text(result.asByteArray));
                         htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsNumber, htmlHelpers.text(result.asInteger));
                         htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsString, htmlHelpers.text(result.asString));
+                        htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsAddress, htmlHelpers.text(result.asAddress));
                         resultsPlaceholder.appendChild(resultElement);
                     }
                 }
