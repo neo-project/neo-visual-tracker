@@ -1,6 +1,6 @@
 # Neo Visual DevTracker
 
-[![Build Status](https://dev.azure.com/NGDSeattle/Public/_apis/build/status/ngdseattle.neo-visual-devtracker?branchName=master)](https://dev.azure.com/NGDSeattle/Public/_build/latest?definitionId=19&branchName=master)
+[![Build Status](https://dev.azure.com/NGDSeattle/Public/_apis/build/status/neo-project.neo-visual-tracker?branchName=master)](https://dev.azure.com/NGDSeattle/Public/_build/latest?definitionId=28&branchName=master)
 
 This is a Visual Studio Code extension that supports running and interacting with Neo-Express instances from within
 Visual Studio Code. Please see the
