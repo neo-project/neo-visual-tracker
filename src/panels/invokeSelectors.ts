@@ -27,6 +27,7 @@ const invokeSelectors = {
     InvocationResultVMState: '#vm-state-value',
     InvocationResultsPlaceholder: '#resultsPlaceholder',
     InvocationResultTemplate: '#resultTemplate',
+    InvocationNoResultsTemplate: '#noResultsTemplate',
     ResultAsNumber: '.asNumber',
     ResultAsString: '.asString',
     ResultAsData: '.asData',
