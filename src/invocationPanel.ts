@@ -26,7 +26,7 @@ class ResultValue {
                 value = '00';
             }
             this.asByteArray = '0x' + value;
-            const buffer = new Buffer(value, 'hex');
+            const buffer = Buffer.from(value, 'hex');
             this.asString = buffer.toString();
             this.asAddress = '';
             if (value.length === 42) {
@@ -235,7 +235,7 @@ export class InvocationPanel {
             } else if (parameter.type === 'Integer') {
                 result.push(parseInt(parameter.value));
             } else if (parameter.type === 'String') {
-                result.push((new Buffer(parameter.value)).toString('hex'));
+                result.push((Buffer.from(parameter.value)).toString('hex'));
             } else if (parameter.type === 'Array') {
                 result.push(InvocationPanel.parseArrayArgument(parameter.value));
             } else {
@@ -284,7 +284,7 @@ export class InvocationPanel {
         } else if ((parameter[0] === '0') && (parameter[1] === 'x')) { // case (ii)
             return parameter.substring(2);
         } else { // case (iii)
-            return (new Buffer(parameter)).toString('hex');
+            return (Buffer.from(parameter)).toString('hex');
         }
     }
 
