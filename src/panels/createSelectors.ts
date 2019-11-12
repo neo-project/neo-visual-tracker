@@ -4,6 +4,7 @@ const createSelectors = {
     BrowseButton: '#change-path',
     CustomPathPicker: '#custom-path-picker',
     CurrentPath: '#current-path',
+    FilenameInput: '#filename',
 };
 
 export { createSelectors };

@@ -9,7 +9,7 @@ const createRenderers = {
         
         
         htmlHelpers.setPlaceholder(createSelectors.CurrentPath, htmlHelpers.text(viewState.path));
-        
+        (document.querySelector(createSelectors.FilenameInput) as HTMLInputElement).value = viewState.filename;
         
     },
 

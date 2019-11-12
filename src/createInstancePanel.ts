@@ -9,6 +9,7 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ViewState {
     path: string = '';
+    filename: string = 'default.neo-express.json';
 }
 
 export class CreateInstancePanel {
