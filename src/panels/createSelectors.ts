@@ -3,10 +3,12 @@
 const createSelectors = {
     AllowOverwrite: '#allow-overwrite',
     BrowseButton: '#change-path',
-    CombinedPath: '#combined-path',
+    CombinedPath: '.combined-path',
     CreateButton: '#create',
     CustomPathPicker: '#custom-path-picker',
     CurrentPath: '#current-path',
+    ErrorMessage: '#error-message',
+    FileDoesNotExistNotice: '#file-does-not-exist-notice',
     FileExistsWarning: '#file-exists-warning',
     FilenameInput: '#filename',
     NodeCountPicker: '#node-count-picker',

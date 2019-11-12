@@ -78,6 +78,7 @@ export class CreateInstancePanel {
         } else if (message.e === createEvents.Update) {
             this.viewState = message.c;
             this.updateViewState();
+            this.viewState.showError = false;
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === createEvents.Create) {
             this.doCreate();
