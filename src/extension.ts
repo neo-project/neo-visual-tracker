@@ -59,6 +59,10 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	const createInstanceCommand = vscode.commands.registerCommand('neo-visual-devtracker.createInstance', () => {
+		// TODO
+	});
+
 	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
 	context.subscriptions.push(openTrackerCommand);
@@ -66,6 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(startServerCommand);
 	context.subscriptions.push(stopServerCommand);
 	context.subscriptions.push(invokeContractCommand);
+	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(serverExplorer);
 }
 

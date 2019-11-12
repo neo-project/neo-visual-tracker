@@ -83,12 +83,26 @@
                 "title": "Invoke contract",
                 "category": "NEO Express",
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
+                "command": "neo-visual-devtracker.createInstance",
+                "title": "Create instance",
+                "category": "NEO Express",
+                "icon": {
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
+                }
             }
         ],
         "menus": {
             "view/title": [
                 {
                     "command": "neo-visual-devtracker.refreshObjectExplorerNode",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.createInstance",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
                     "group": "navigation"
                 }
