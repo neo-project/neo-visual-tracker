@@ -15,7 +15,7 @@ for instructions on installing Neo-Express.
 
 * Create a new Neo-Express instance from within vscode
 
-![Contract invocation](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-create.png)
+![Create instance](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-create.png)
 
 * Start and stop Neo-Express instances from within vscode
 
