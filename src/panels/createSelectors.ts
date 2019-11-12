@@ -4,6 +4,7 @@ const createSelectors = {
     AllowOverwrite: '#allow-overwrite',
     BrowseButton: '#change-path',
     CombinedPath: '#combined-path',
+    CreateButton: '#create',
     CustomPathPicker: '#custom-path-picker',
     CurrentPath: '#current-path',
     FileExistsWarning: '#file-exists-warning',

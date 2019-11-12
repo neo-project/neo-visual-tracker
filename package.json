@@ -156,6 +156,7 @@
         "@types/mocha": "^5.2.6",
         "@types/node": "^10.17.5",
         "@types/pouchdb-core": "^7.0.4",
+        "@types/shell-escape": "^0.2.0",
         "@types/vscode": "^1.40.0",
         "browserify": "^16.5.0",
         "concurrently": "^4.1.2",
@@ -179,6 +180,7 @@
         "bs58check": "^2.1.2",
         "find-process": "^1.4.2",
         "memoizee": "^0.4.14",
-        "request": "^2.88.0"
+        "request": "^2.88.0",
+        "shell-escape": "^0.2.0"
     }
 }

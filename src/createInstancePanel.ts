@@ -1,5 +1,7 @@
+import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as shellEscape from 'shell-escape';
 import * as vscode from 'vscode';
 
 import { createEvents } from './panels/createEvents';
@@ -13,6 +15,9 @@ class ViewState {
     combinedPath: string = '';
     configFileExists: boolean = false;
     allowOverwrite: boolean = false;
+    showError: boolean = false;
+    showSuccess: boolean = false;
+    result: string = '';
     nodeCount: number = 1;
 }
 
@@ -74,6 +79,8 @@ export class CreateInstancePanel {
             this.viewState = message.c;
             this.updateViewState();
             this.panel.webview.postMessage({ viewState: this.viewState });
+        } else if (message.e === createEvents.Create) {
+            this.doCreate();
         }
     }
 
@@ -83,6 +90,31 @@ export class CreateInstancePanel {
         if (!this.viewState.configFileExists) {
             this.viewState.allowOverwrite = false;
         }
+    }
+
+    private doCreate() {
+        const command = shellEscape.default([
+            'neo-express', 
+            'create', 
+            '-c', this.viewState.nodeCount + '', 
+            '-o', this.viewState.combinedPath, 
+            this.viewState.allowOverwrite ? '-f' : '']);
+        this.viewState.showError = false;
+        this.viewState.showSuccess = false;
+        childProcess.exec(command, (error, stdout, stderr) => {
+            if (error) {
+                this.viewState.showError = true;
+                this.viewState.result = error.message;
+            } else if (stderr) {
+                this.viewState.showError = true;
+                this.viewState.result = stderr;
+            } else {
+                this.viewState.showSuccess = true;
+                this.viewState.result = stdout;
+            }
+            this.updateViewState();
+            this.panel.webview.postMessage({ viewState: this.viewState });
+        });
     }
 
     dispose() {

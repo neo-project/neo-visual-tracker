@@ -43,7 +43,6 @@ function setNodeCount(nodeCount: number) {
 function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
-
     const browseButton = document.querySelector(createSelectors.BrowseButton) as HTMLButtonElement;
     const customPathPicker = document.querySelector(createSelectors.CustomPathPicker) as HTMLInputElement;
     const filenameInput = document.querySelector(createSelectors.FilenameInput) as HTMLInputElement;
@@ -51,6 +50,7 @@ function initializePanel() {
     const nodeCountOption1 = document.querySelector(createSelectors.NodeCountOption1) as HTMLElement;
     const nodeCountOption4 = document.querySelector(createSelectors.NodeCountOption4) as HTMLElement;
     const nodeCountOption7 = document.querySelector(createSelectors.NodeCountOption7) as HTMLElement;
+    const createButton = document.querySelector(createSelectors.CreateButton) as HTMLButtonElement;
     browseButton.addEventListener('click', _ => customPathPicker.click());
     customPathPicker.addEventListener('change', _ => {
         const newPath = customPathPicker.files && customPathPicker.files.length ? (customPathPicker.files[0] as any).path : viewState.path;
@@ -73,7 +73,7 @@ function initializePanel() {
     nodeCountOption1.addEventListener('click', _ => setNodeCount(1));
     nodeCountOption4.addEventListener('click', _ => setNodeCount(4));
     nodeCountOption7.addEventListener('click', _ => setNodeCount(7));
-
+    createButton.addEventListener('click', _ => vsCodePostMessage({ e: createEvents.Create }));
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: createEvents.Init });
 }
