@@ -1,10 +1,9 @@
 import { htmlHelpers } from "./htmlHelpers";
-import { createEvents } from "./createEvents";
 import { createSelectors } from "./createSelectors";
 
 const createRenderers = {
 
-    render: function(viewState: any, updateViewState: Function, postMessage: Function) {
+    render: function(viewState: any) {
         
         htmlHelpers.setPlaceholder(createSelectors.CurrentPath, htmlHelpers.text(viewState.path));
 
@@ -15,7 +14,9 @@ const createRenderers = {
         htmlHelpers.showHide(createSelectors.FileExistsWarning, viewState.configFileExists);
 
         const allowOverwrite = document.querySelector(createSelectors.AllowOverwrite) as HTMLInputElement;
+        const createButton = document.querySelector(createSelectors.CreateButton) as HTMLButtonElement;
         allowOverwrite.checked = viewState.allowOverwrite;
+        createButton.disabled = !allowOverwrite.checked && viewState.configFileExists;
 
         const nodeCountPicker = document.querySelector(createSelectors.NodeCountPicker) as HTMLElement;
         htmlHelpers.removeAllClass(nodeCountPicker, 'selected');
@@ -25,6 +26,7 @@ const createRenderers = {
         htmlHelpers.showHide(createSelectors.ErrorMessage, viewState.showError);
         htmlHelpers.showHide(createSelectors.ViewResults, viewState.showSuccess);
         htmlHelpers.showHide(createSelectors.ViewDataEntry, !viewState.showSuccess);
+
     },
 
 };

@@ -20,18 +20,11 @@ function postViewState() {
     console.log('->', viewState);
 }
 
-function updateViewState(updater: any) {
-    if (updater) {
-        updater(viewState);
-    }
-    postViewState();   
-}
-
 function handleMessage(message: any) {
     if (message.viewState) {
         console.log('<-', message.viewState);
         viewState = message.viewState;
-        createRenderers.render(viewState, updateViewState, vsCodePostMessage);
+        createRenderers.render(viewState);
     }
 }
 
