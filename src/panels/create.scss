@@ -40,14 +40,17 @@ body {
 }
 
 input {
-    width: 100%;
-    box-sizing: border-box;
     margin: 10px 0 10px 0;
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
     border: 1px solid var(--vscode-input-foreground);
     padding: 8px 5px 8px 5px;
+    &[type=text] {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
+
 
 
 

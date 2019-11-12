@@ -36,6 +36,17 @@
         <div>
             <input type="text" id="filename" />
         </div>
+        <div id="file-exists-warning" class="error">
+            <div>
+                The selected configuration file (<span id="combined-path"></span>) already exists.
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" id="allow-overwrite" />
+                    Allow configuration file overwrite
+                </label>
+            </div>
+        </div>
         
     </div>
 

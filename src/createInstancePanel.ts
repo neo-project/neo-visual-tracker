@@ -10,6 +10,9 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 class ViewState {
     path: string = '';
     filename: string = 'default.neo-express.json';
+    combinedPath: string = '';
+    configFileExists: boolean = false;
+    allowOverwrite: boolean = false;
 }
 
 export class CreateInstancePanel {
@@ -27,6 +30,7 @@ export class CreateInstancePanel {
 
         this.viewState = new ViewState();
         this.viewState.path = workspacePath;
+        this.updateViewState();
         
         this.panel = vscode.window.createWebviewPanel(
             'createInstancePanel',
@@ -67,6 +71,16 @@ export class CreateInstancePanel {
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === createEvents.Update) {
             this.viewState = message.c;
+            this.updateViewState();
+            this.panel.webview.postMessage({ viewState: this.viewState });
+        }
+    }
+
+    private updateViewState() {
+        this.viewState.combinedPath = path.join(this.viewState.path, this.viewState.filename);
+        this.viewState.configFileExists = fs.existsSync(this.viewState.combinedPath);
+        if (!this.viewState.configFileExists) {
+            this.viewState.allowOverwrite = false;
         }
     }
 

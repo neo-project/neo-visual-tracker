@@ -42,6 +42,7 @@ function initializePanel() {
     const browseButton = document.querySelector(createSelectors.BrowseButton) as HTMLButtonElement;
     const customPathPicker = document.querySelector(createSelectors.CustomPathPicker) as HTMLInputElement;
     const filenameInput = document.querySelector(createSelectors.FilenameInput) as HTMLInputElement;
+    const allowOverwrite = document.querySelector(createSelectors.AllowOverwrite) as HTMLInputElement;
     browseButton.addEventListener('click', _ => customPathPicker.click());
     customPathPicker.addEventListener('change', _ => {
         const newPath = customPathPicker.files && customPathPicker.files.length ? (customPathPicker.files[0] as any).path : viewState.path;
@@ -55,6 +56,10 @@ function initializePanel() {
     });
     filenameInput.addEventListener('keyup', _ => {
         viewState.filename = filenameInput.value;
+        postViewState();
+    });
+    allowOverwrite.addEventListener('change', _ => {
+        viewState.allowOverwrite = allowOverwrite.checked;
         postViewState();
     });
 
