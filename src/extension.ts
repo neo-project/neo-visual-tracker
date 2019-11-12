@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
@@ -13,6 +14,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
 
 	const neoExpressInstanceManager = new NeoExpressInstanceManager();
+
+	let createInstancePanel: CreateInstancePanel | null = null;
 
 	const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', (url?: string) => {
 		if (url) {	
@@ -60,7 +63,17 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const createInstanceCommand = vscode.commands.registerCommand('neo-visual-devtracker.createInstance', () => {
-		// TODO
+		if ((createInstancePanel === null) || createInstancePanel.isDisposed()) {
+			const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
+				vscode.workspace.workspaceFolders[0].uri.fsPath : 
+				process.cwd();
+			createInstancePanel = new CreateInstancePanel(
+				context.extensionPath,
+				defaultPath,
+				context.subscriptions);
+		}
+
+		createInstancePanel.reveal();
 	});
 
 	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
