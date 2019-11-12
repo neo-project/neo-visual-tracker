@@ -28,6 +28,7 @@ export class CreateInstancePanel {
     private viewState: ViewState;
 
     private disposed: boolean = false;
+    private created: boolean = false;
 
     constructor(
         extensionPath: string,
@@ -82,6 +83,8 @@ export class CreateInstancePanel {
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === createEvents.Create) {
             this.doCreate();
+        } else if (message.e === createEvents.Close) {
+            this.dispose();
         }
     }
 
@@ -110,6 +113,7 @@ export class CreateInstancePanel {
                 this.viewState.showError = true;
                 this.viewState.result = stderr;
             } else {
+                this.created = true;
                 this.viewState.showSuccess = true;
                 this.viewState.result = stdout;
             }
@@ -121,6 +125,12 @@ export class CreateInstancePanel {
     dispose() {
         this.disposed = true;
         this.panel.dispose();
+    }
+
+    disposeIfCreated() {
+        if (this.created) {
+            this.dispose();
+        }
     }
 
 }

@@ -39,6 +39,10 @@ body {
     }
 }
 
+.combined-path {
+    font-style: italic;
+}
+
 /* Input boxes should have similar styling to the path-selection pseudo-input: */
 input {
     margin: 10px 0 10px 0;
@@ -72,7 +76,15 @@ input {
     }
 }
 
-#create {
+/* More prominent main action buttons: */
+#create, #close {
     margin-top: 15px;
     padding: 12px;
+}
+
+/* Spacing for text in results dialog: */
+#results-view {
+    div {
+        margin-top: 10px;
+    }
 }

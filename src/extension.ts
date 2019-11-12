@@ -63,6 +63,10 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const createInstanceCommand = vscode.commands.registerCommand('neo-visual-devtracker.createInstance', () => {
+		if (createInstancePanel !== null) {
+			createInstancePanel.disposeIfCreated(); // clear previous successful creation
+		}
+
 		if ((createInstancePanel === null) || createInstancePanel.isDisposed()) {
 			const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
 				vscode.workspace.workspaceFolders[0].uri.fsPath : 

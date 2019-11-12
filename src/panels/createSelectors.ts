@@ -3,6 +3,7 @@
 const createSelectors = {
     AllowOverwrite: '#allow-overwrite',
     BrowseButton: '#change-path',
+    CloseButton: '#close',
     CombinedPath: '.combined-path',
     CreateButton: '#create',
     CustomPathPicker: '#custom-path-picker',
@@ -16,6 +17,9 @@ const createSelectors = {
     NodeCountOption1: '#node-count-1',
     NodeCountOption4: '#node-count-4',
     NodeCountOption7: '#node-count-7',
+    ResultText: '.result-text',
+    ViewDataEntry: '#data-entry-view',
+    ViewResults: '#results-view',
 };
 
 export { createSelectors };

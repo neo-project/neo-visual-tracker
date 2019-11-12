@@ -21,8 +21,10 @@ const createRenderers = {
         htmlHelpers.removeAllClass(nodeCountPicker, 'selected');
         htmlHelpers.addClass(document.querySelector(createSelectors.NodeCountOptionPrefix + viewState.nodeCount) as HTMLElement, 'selected');
       
+        htmlHelpers.setPlaceholder(createSelectors.ResultText, htmlHelpers.text(viewState.result));
         htmlHelpers.showHide(createSelectors.ErrorMessage, viewState.showError);
-        htmlHelpers.setPlaceholder(createSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
+        htmlHelpers.showHide(createSelectors.ViewResults, viewState.showSuccess);
+        htmlHelpers.showHide(createSelectors.ViewDataEntry, !viewState.showSuccess);
     },
 
 };
