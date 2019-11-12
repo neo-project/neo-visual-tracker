@@ -74,6 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
 			createInstancePanel = new CreateInstancePanel(
 				context.extensionPath,
 				defaultPath,
+				rpcServerExplorer,
 				context.subscriptions);
 		}
 

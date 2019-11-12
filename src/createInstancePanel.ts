@@ -5,6 +5,7 @@ import * as shellEscape from 'shell-escape';
 import * as vscode from 'vscode';
 
 import { createEvents } from './panels/createEvents';
+import { RpcServerExplorer } from './rpcServerExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -24,6 +25,7 @@ class ViewState {
 export class CreateInstancePanel {
 
     private readonly panel: vscode.WebviewPanel;
+    private readonly rpcServerExplorer: RpcServerExplorer;
 
     private viewState: ViewState;
 
@@ -33,7 +35,10 @@ export class CreateInstancePanel {
     constructor(
         extensionPath: string,
         workspacePath: string,
+        rpcServerExplorer: RpcServerExplorer,
         disposables: vscode.Disposable[]) {
+
+        this.rpcServerExplorer = rpcServerExplorer;
 
         this.viewState = new ViewState();
         this.viewState.path = workspacePath;
@@ -116,6 +121,7 @@ export class CreateInstancePanel {
                 this.created = true;
                 this.viewState.showSuccess = true;
                 this.viewState.result = stdout;
+                this.rpcServerExplorer.refresh();
             }
             this.updateViewState();
             this.panel.webview.postMessage({ viewState: this.viewState });
