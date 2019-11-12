@@ -81,13 +81,13 @@
             {
                 "command": "neo-visual-devtracker.invokeContract",
                 "title": "Invoke contract",
-                "category": "NEO Express",
+                "category": "Neo Express",
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
             {
                 "command": "neo-visual-devtracker.createInstance",
-                "title": "Create instance",
-                "category": "NEO Express",
+                "title": "Create new Neo Express instance",
+                "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/add.svg",
                     "dark": "resources/dark/add.svg"
