@@ -1,5 +1,6 @@
 @import 'common';
 
+/* Make the entire page look like a horizontally and vertically centered dialog box: */
 body {
     background-color: var(--vscode-sideBar-background);
     .dialog {
@@ -12,9 +13,42 @@ body {
         border: 1px solid var(--vscode-editorWidget-border);
         background-color: var(--vscode-editor-background);
         h1 {
+            text-align: center;
             font-size: 1.2em;
             margin-top: 0;
         }
+        h2 {
+            font-size: 1.1em;
+            
+        }
     }
 }
+
+/* Show the currently selected path, and allow the user to change it: */
+#path-selection {
+    width: 100%;
+    margin: 10px 0 10px 0;
+    border: 1px solid var(--vscode-input-foreground);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    td {
+        padding: 0 0 0 5px;
+    }
+    #custom-path-picker {
+        display: none;
+    }
+}
+
+input {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 10px 0 10px 0;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-foreground);
+    padding: 8px 5px 8px 5px;
+}
+
+
+
 

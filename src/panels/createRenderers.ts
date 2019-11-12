@@ -5,7 +5,12 @@ import { createSelectors } from "./createSelectors";
 const createRenderers = {
 
     render: function(viewState: any, updateViewState: Function, postMessage: Function) {
-        // TODO
+        
+        
+        
+        htmlHelpers.setPlaceholder(createSelectors.CurrentPath, htmlHelpers.text(viewState.path));
+        
+        
     },
 
 };
