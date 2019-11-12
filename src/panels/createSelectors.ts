@@ -8,6 +8,11 @@ const createSelectors = {
     CurrentPath: '#current-path',
     FileExistsWarning: '#file-exists-warning',
     FilenameInput: '#filename',
+    NodeCountPicker: '#node-count-picker',
+    NodeCountOptionPrefix: '#node-count-',
+    NodeCountOption1: '#node-count-1',
+    NodeCountOption4: '#node-count-4',
+    NodeCountOption7: '#node-count-7',
 };
 
 export { createSelectors };

@@ -16,6 +16,10 @@ const createRenderers = {
 
         const allowOverwrite = document.querySelector(createSelectors.AllowOverwrite) as HTMLInputElement;
         allowOverwrite.checked = viewState.allowOverwrite;
+
+        const nodeCountPicker = document.querySelector(createSelectors.NodeCountPicker) as HTMLElement;
+        htmlHelpers.removeAllClass(nodeCountPicker, 'selected');
+        htmlHelpers.addClass(document.querySelector(createSelectors.NodeCountOptionPrefix + viewState.nodeCount) as HTMLElement, 'selected');
         
     },
 

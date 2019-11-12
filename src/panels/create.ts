@@ -35,6 +35,11 @@ function handleMessage(message: any) {
     }
 }
 
+function setNodeCount(nodeCount: number) {
+    viewState.nodeCount = nodeCount;
+    postViewState();
+}
+
 function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
@@ -43,6 +48,9 @@ function initializePanel() {
     const customPathPicker = document.querySelector(createSelectors.CustomPathPicker) as HTMLInputElement;
     const filenameInput = document.querySelector(createSelectors.FilenameInput) as HTMLInputElement;
     const allowOverwrite = document.querySelector(createSelectors.AllowOverwrite) as HTMLInputElement;
+    const nodeCountOption1 = document.querySelector(createSelectors.NodeCountOption1) as HTMLElement;
+    const nodeCountOption4 = document.querySelector(createSelectors.NodeCountOption4) as HTMLElement;
+    const nodeCountOption7 = document.querySelector(createSelectors.NodeCountOption7) as HTMLElement;
     browseButton.addEventListener('click', _ => customPathPicker.click());
     customPathPicker.addEventListener('change', _ => {
         const newPath = customPathPicker.files && customPathPicker.files.length ? (customPathPicker.files[0] as any).path : viewState.path;
@@ -62,6 +70,9 @@ function initializePanel() {
         viewState.allowOverwrite = allowOverwrite.checked;
         postViewState();
     });
+    nodeCountOption1.addEventListener('click', _ => setNodeCount(1));
+    nodeCountOption4.addEventListener('click', _ => setNodeCount(4));
+    nodeCountOption7.addEventListener('click', _ => setNodeCount(7));
 
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: createEvents.Init });

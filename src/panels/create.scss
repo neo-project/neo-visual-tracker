@@ -39,6 +39,7 @@ body {
     }
 }
 
+/* Input boxes should have similar styling to the path-selection pseudo-input: */
 input {
     margin: 10px 0 10px 0;
     background-color: var(--vscode-input-background);
@@ -51,7 +52,23 @@ input {
     }
 }
 
-
-
-
+/* Styling for the node count selector: */
+#node-count-picker {
+    width: 100%;
+    margin: 10px 0 10px 0;
+    td {
+        text-align: center;
+        cursor: pointer;
+        border: 1px solid var(--vscode-input-foreground);
+        padding: 10px;
+        width: 33.3%;
+        font-weight: bold;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        &.selected {
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
+    }
+}
 

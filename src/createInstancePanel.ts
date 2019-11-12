@@ -13,6 +13,7 @@ class ViewState {
     combinedPath: string = '';
     configFileExists: boolean = false;
     allowOverwrite: boolean = false;
+    nodeCount: number = 1;
 }
 
 export class CreateInstancePanel {
