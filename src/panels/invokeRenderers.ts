@@ -119,7 +119,8 @@ const invokeRenderers = {
             htmlHelpers.setPlaceholder(invokeSelectors.InvocationResultVMState, htmlHelpers.text(viewstate.resultVmState));
             const resultsPlaceholder = document.querySelector(invokeSelectors.InvocationResultsPlaceholder);
             const resultTemplate = document.querySelector(invokeSelectors.InvocationResultTemplate);
-            if (resultsPlaceholder && resultTemplate) {
+            const noResultsTemplate = document.querySelector(invokeSelectors.InvocationNoResultsTemplate);
+            if (resultsPlaceholder && resultTemplate && noResultsTemplate) {
                 htmlHelpers.clearChildren(resultsPlaceholder);
                 if (viewstate.resultValues && viewstate.resultValues.length) {
                     for (let i = 0; i < viewstate.resultValues.length; i++) {
@@ -129,8 +130,13 @@ const invokeRenderers = {
                         htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsData, htmlHelpers.text(result.asByteArray));
                         htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsNumber, htmlHelpers.text(result.asInteger));
                         htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsString, htmlHelpers.text(result.asString));
+                        htmlHelpers.setInnerPlaceholder(resultElement, invokeSelectors.ResultAsAddress, htmlHelpers.text(result.asAddress));
                         resultsPlaceholder.appendChild(resultElement);
                     }
+                } else {
+                    const resultElement = document.createElement('div');
+                    resultElement.innerHTML = noResultsTemplate.innerHTML;
+                    resultsPlaceholder.appendChild(resultElement);
                 }
             }
             htmlHelpers.showHide(invokeSelectors.InvocationResultPopup, true);

@@ -35,17 +35,9 @@ function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
     window.addEventListener('message', msg => handleMessage(msg.data));
-    const walletDropdown: any = document.querySelector(invokeSelectors.WalletDropdown);
-    if (walletDropdown) {
-        walletDropdown.addEventListener(
-            'change', 
-            () => updateViewState((viewState: any) => viewState.selectedWallet = walletDropdown.children[walletDropdown.selectedIndex].value));
-    }
-
     htmlHelpers.setOnClickEvent(invokeSelectors.CloseInvocationResult, invokeEvents.Dismiss, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(invokeSelectors.CloseBroadcastResult, invokeEvents.Dismiss, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(invokeSelectors.CloseInvocationError, invokeEvents.Dismiss, null, vsCodePostMessage);
-
     vscode.postMessage({ e: invokeEvents.Init });
 }
 
