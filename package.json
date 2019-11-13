@@ -29,6 +29,7 @@
         "Tracker"
     ],
     "activationEvents": [
+        "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.openTracker",
         "onView:neo-visual-devtracker.rpcServerExplorer"
     ],
