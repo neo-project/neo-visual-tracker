@@ -47,6 +47,10 @@ export function activate(context: vscode.ExtensionContext) {
 		neoExpressInstanceManager.stop(server.jsonFile, server.index);
 	});
 
+	const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', (server) => {
+		// TODO
+	});
+
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
 		try {
 			const panel = new InvocationPanel(
@@ -65,6 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(refreshServersCommand);
 	context.subscriptions.push(startServerCommand);
 	context.subscriptions.push(stopServerCommand);
+	context.subscriptions.push(createWalletCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(serverExplorer);
 }

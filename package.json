@@ -79,9 +79,15 @@
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
             {
+                "command": "neo-visual-devtracker.createWallet",
+                "title": "Create wallet",
+                "category": "Neo Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
                 "command": "neo-visual-devtracker.invokeContract",
                 "title": "Invoke contract",
-                "category": "NEO Express",
+                "category": "Neo Express",
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             }
         ],
@@ -110,6 +116,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.stopServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "neo-visual-devtracker.createWallet",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {
