@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
+import { NewWalletPanel } from './newWalletPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
 
@@ -48,7 +49,14 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', (server) => {
-		// TODO
+		try {
+			const panel = new NewWalletPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				context.subscriptions);
+		} catch (e) {
+			console.error('Error opening new wallet panel ', e);
+		}
 	});
 
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {

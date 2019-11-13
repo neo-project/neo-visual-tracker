@@ -131,13 +131,22 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && node-sass src/panels/invoke.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js && browserify out/panels/invoke.js -o out/panels/invokeBundle.js",
+        "compile": "npm install && concurrently -r npm:compile-*",
+        "compile-ts": "tsc -p ./",
+        "compile-css-1": "node-sass src/panels/tracker.scss -o out/panels",
+        "compile-css-2": "node-sass src/panels/invoke.scss -o out/panels",
+        "compile-css-3": "node-sass src/panels/newwallet.scss -o out/panels",
+        "compile-browserify-1": "browserify out/panels/tracker.js -o out/panels/trackerBundle.js",
+        "compile-browserify-2": "browserify out/panels/invoke.js -o out/panels/invokeBundle.js",
+        "compile-browserify-3": "browserify out/panels/newwallet.js -o out/panels/newwalletBundle.js",
         "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
         "watch-css-1": "node-sass src/panels/tracker.scss -wo out/panels",
         "watch-css-2": "node-sass src/panels/invoke.scss -wo out/panels",
+        "watch-css-3": "node-sass src/panels/newwallet.scss -wo out/panels",
         "watch-browserify-1": "watchify out/panels/tracker.js -o out/panels/trackerBundle.js",
         "watch-browserify-2": "watchify out/panels/invoke.js -o out/panels/invokeBundle.js",
+        "watch-browserify-3": "watchify out/panels/newwallet.js -o out/panels/newwalletBundle.js",
         "package": "npm run setversion && vsce package",
         "pretest": "npm run compile",
         "setversion": "gulp setversion",
@@ -150,6 +159,7 @@
         "@types/mocha": "^5.2.6",
         "@types/node": "^10.17.5",
         "@types/pouchdb-core": "^7.0.4",
+        "@types/shell-escape": "^0.2.0",
         "@types/vscode": "^1.40.0",
         "browserify": "^16.5.0",
         "concurrently": "^4.1.2",
@@ -173,6 +183,7 @@
         "bs58check": "^2.1.2",
         "find-process": "^1.4.2",
         "memoizee": "^0.4.14",
-        "request": "^2.88.0"
+        "request": "^2.88.0",
+        "shell-escape": "^0.2.0"
     }
 }

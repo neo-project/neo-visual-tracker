@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="dialog">
+
+        <div id="data-entry-view">
+
+            <h1>Create a new wallet</h1>
+
+            <h2>Neo Express instance</h2>
+            
+            <div>
+                A new wallet will be created and stored in the following Neo Express configuration file:
+                <span class="display-config-file"></span>.
+            </div>
+
+            <h2>Wallet name</h2>
+
+            <div>
+                Choose a name for the new wallet:
+            </div>
+
+            <div>
+                <input type="text" id="walletName" />
+            </div>
+
+            <div id="wallet-exists-warning" class="error">
+                <div>
+                    The chosen wallet name (<span class="display-wallet-name"></span>) already exists.
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" id="allow-overwrite" />
+                        Overwrite existing wallet
+                    </label>
+                </div>
+            </div>
+            
+            <div id="error-message" class="result-text error">
+            </div>
+
+            <div class="text-center">
+                <button id="create">Create wallet</button>
+            </div>
+
+        </div>
+
+        <div id="results-view">
+
+            <h1>New wallet created</h1>
+
+            <div>
+                The <span class="display-wallet-name"></span> wallet has been created in Neo Express configuration 
+                file: <span class="display-config-file"></span>.
+            </div>
+
+            <div>
+                <pre class="result-text"></pre>
+            </div>
+
+            <div class="text-center">
+                <button id="close">OK</button>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>
