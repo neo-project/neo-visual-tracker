@@ -102,12 +102,13 @@ export class CreateInstancePanel {
     }
 
     private doCreate() {
-        const command = shellEscape.default([
+        let command = shellEscape.default([
             'neo-express', 
             'create', 
             '-c', this.viewState.nodeCount + '', 
-            '-o', this.viewState.combinedPath, 
             this.viewState.allowOverwrite ? '-f' : '']);
+        // Hack to use double quotes instead of single quotes to wrap the path (needed on Windows):
+        command += ' -o ' + shellEscape.default([this.viewState.combinedPath]).replace(/'/g, '"');
         this.viewState.showError = false;
         this.viewState.showSuccess = false;
         childProcess.exec(command, (error, stdout, stderr) => {
