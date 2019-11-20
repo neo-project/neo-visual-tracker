@@ -202,7 +202,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
     public async getClaimable(address: string, statusReceiver: INeoStatusReceiver) {
         try {
             statusReceiver.updateStatus('Getting claimable GAS information for address ' + address);
-            const result = await this.rpcClient.getClaimable(address);
+            const result = (await this.rpcClient.getClaimable(address)).result;
             result.getClaimableSupport = true;
             return result;
         } catch(e) {

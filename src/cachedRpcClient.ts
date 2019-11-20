@@ -84,7 +84,7 @@ export class CachedRpcClient {
 
         this.memoizedGetClaimable =
             memoize(
-                (address: string) => this.rpcClient.getClaimable(address),
+                (address: string) => this.rpcClient.query({ method: 'getclaimable', params: [ address ] }),
                 labeledCacheOptions('getClaimable'));
 
         this.memoizedGetApplicationLog =
