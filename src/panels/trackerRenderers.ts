@@ -183,16 +183,11 @@ const trackerRenderers = {
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false, postMessage);
-            (document.querySelector(trackerSelectors.TransactionValueTransferTable) as any).style.display =
-                valueTransferCount > 0 ? 'table' : 'none';
+            htmlHelpers.showHide(trackerSelectors.TransactionValueTransferTable, valueTransferCount > 0, true);
             const scriptsTbody = document.querySelector(trackerSelectors.TransactionScriptsTableBody);
-            (document.querySelector(trackerSelectors.TransactionMainScriptArea) as any).style.display =
-                transaction.scriptDisassembled ? 'table' : 'none';
-            htmlHelpers.setPlaceholder(
-                trackerSelectors.TransactionMainScriptBody, 
-                htmlHelpers.text(transaction.scriptDisassembled));
-            (document.querySelector(trackerSelectors.TransactionScriptsTable) as any).style.display =
-                transaction.scripts.length > 0 ? 'table' : 'none';
+            htmlHelpers.showHide(trackerSelectors.TransactionMainScriptArea, transaction.scriptDisassembled, true);
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionMainScriptBody, htmlHelpers.text(transaction.scriptDisassembled));
+            htmlHelpers.showHide(trackerSelectors.TransactionScriptsTable, transaction.scripts.length > 0, true);
             if (scriptsTbody) {
                 htmlHelpers.clearChildren(scriptsTbody);
                 for (let i = 0; i < transaction.scripts.length; i++) {
@@ -202,6 +197,19 @@ const trackerRenderers = {
                     scriptsTbody.appendChild(
                         htmlHelpers.newTableRow(htmlHelpers.text('Verification:'), htmlHelpers.text(script.verificationDisassembled)));
                 }
+            }
+            if (!transaction.applicationLogsSupported) {
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, true);
+                htmlHelpers.setPlaceholder(
+                    trackerSelectors.TransactionApplicationLogBody,
+                    htmlHelpers.text('This RPC server does not support the getapplicationlog method.'));
+            } else if (!transaction.applicationLog || !transaction.applicationLog.result) {
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, false, true);
+            } else {
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, true);
+                htmlHelpers.setPlaceholder(
+                    trackerSelectors.TransactionApplicationLogBody,
+                    htmlHelpers.text(JSON.stringify(transaction.applicationLog.result.executions || [], undefined, 4)));
             }
         }
     },

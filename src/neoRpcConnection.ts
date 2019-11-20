@@ -288,6 +288,20 @@ export class NeoRpcConnection implements INeoRpcConnection {
             }
         }
 
+        try {
+            statusReceiver.updateStatus('Retrieving application log for transaction ' + txid);
+            transaction.applicationLogsSupported = true;
+            transaction.applicationLog = await this.rpcClient.getApplicationLog(txid);
+        } catch(e) {
+            if (e.message.toLowerCase().indexOf('method not found') !== -1) {
+                transaction.applicationLogsSupported = false;
+            } else if (e.message.toLowerCase().indexOf('unknown transaction') !== -1) {
+                // No application log for this transaction
+            } else {
+                console.error('NeoRpcConnection could not retrieve application log (txid=' + txid + '): ' + e);
+            }
+        }
+
         return transaction;
     }
 

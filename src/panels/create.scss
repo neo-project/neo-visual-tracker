@@ -1,0 +1,90 @@
+@import 'common';
+
+/* Make the entire page look like a horizontally and vertically centered dialog box: */
+body {
+    background-color: var(--vscode-sideBar-background);
+    .dialog {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 15px;
+        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
+        border: 1px solid var(--vscode-editorWidget-border);
+        background-color: var(--vscode-editor-background);
+        h1 {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 1.1em;
+            
+        }
+    }
+}
+
+/* Show the currently selected path, and allow the user to change it: */
+#path-selection {
+    width: 100%;
+    margin: 10px 0 10px 0;
+    border: 1px solid var(--vscode-input-foreground);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    td {
+        padding: 0 0 0 5px;
+    }
+    #custom-path-picker {
+        display: none;
+    }
+}
+
+.combined-path {
+    font-style: italic;
+}
+
+/* Input boxes should have similar styling to the path-selection pseudo-input: */
+input {
+    margin: 10px 0 10px 0;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-foreground);
+    padding: 8px 5px 8px 5px;
+    &[type=text] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+/* Styling for the node count selector: */
+#node-count-picker {
+    width: 100%;
+    margin: 10px 0 10px 0;
+    td {
+        text-align: center;
+        cursor: pointer;
+        border: 1px solid var(--vscode-input-foreground);
+        padding: 8px;
+        width: 33.3%;
+        font-weight: bold;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        &.selected {
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
+    }
+}
+
+/* More prominent main action buttons: */
+#create, #close {
+    margin-top: 15px;
+    padding: 12px;
+}
+
+/* Spacing for text in results dialog: */
+#results-view {
+    div {
+        margin-top: 10px;
+    }
+}

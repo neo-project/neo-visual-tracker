@@ -71,10 +71,16 @@ const htmlHelpers = {
     setInnerPlaceholder: function(element: ParentNode, selector: string, value: Node) {
         const placeHolderElements = element.querySelectorAll(selector);
         if (placeHolderElements && placeHolderElements.length) {
-            for (let i = 0; i < placeHolderElements.length; i++) {
-                const placeHolderElement = placeHolderElements[i];
+            if (placeHolderElements.length === 1) {
+                const placeHolderElement = placeHolderElements[0];
                 this.clearChildren(placeHolderElement);
-                placeHolderElement.appendChild(value.cloneNode(true));
+                placeHolderElement.appendChild(value);
+            } else {
+                for (let i = 0; i < placeHolderElements.length; i++) {
+                    const placeHolderElement = placeHolderElements[i];
+                    this.clearChildren(placeHolderElement);
+                    placeHolderElement.appendChild(value.cloneNode(true));
+                }
             }
         }
     },
@@ -90,10 +96,10 @@ const htmlHelpers = {
         this.setInnerPlaceholder(document, selector, value);
     },
 
-    showHide: function(selector: string, show: boolean) {
+    showHide: function(selector: string, show: boolean, isTable?: boolean) {
         const element: any = document.querySelector(selector);
         if (element) {
-            element.style.display = show ? 'block' : 'none';
+            element.style.display = show ? (isTable ? 'table' : 'block') : 'none';
         }
     },
 

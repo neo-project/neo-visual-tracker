@@ -39,6 +39,8 @@ const trackerSelectors = {
     TransactionScriptsTableBody: '#transactiondetail #scripts .script-rows',
     TransactionMainScriptArea: '#transactiondetail #main-script',
     TransactionMainScriptBody: '#transactiondetail #main-script .script-body',
+    TransactionApplicationLog: '#transactiondetail #application-log',
+    TransactionApplicationLogBody: '#transactiondetail #application-log-body',
     AddressDetailsClose: '#addressdetail .close',
     AddressDetailsHash: '#addressdetail .hash',
     AddressDetailsUnspentAssetTemplate: '#unspentAssetTemplate',
