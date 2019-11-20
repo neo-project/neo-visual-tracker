@@ -4,6 +4,7 @@ import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
+import { NewWalletPanel } from './newWalletPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
 
@@ -50,6 +51,17 @@ export function activate(context: vscode.ExtensionContext) {
 		neoExpressInstanceManager.stop(server.jsonFile, server.index);
 	});
 
+	const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', (server) => {
+		try {
+			const panel = new NewWalletPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				context.subscriptions);
+		} catch (e) {
+			console.error('Error opening new wallet panel ', e);
+		}
+	});
+
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
 		try {
 			const panel = new InvocationPanel(
@@ -87,6 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(refreshServersCommand);
 	context.subscriptions.push(startServerCommand);
 	context.subscriptions.push(stopServerCommand);
+	context.subscriptions.push(createWalletCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(serverExplorer);

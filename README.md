@@ -29,6 +29,10 @@ for instructions on installing Neo-Express.
 
 ![Built-in blockchain explorer](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-block-explorer.png)
 
+* Create a Neo-Express wallet from within within vscode
+
+![Neo-Express wallet creation](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-create-wallet.png)
+
 * Invoke smart contracts on a Neo-Express instance from within vscode
 
 ![Contract invocation](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-invoke.png)

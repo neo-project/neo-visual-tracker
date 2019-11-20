@@ -80,6 +80,12 @@
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
             {
+                "command": "neo-visual-devtracker.createWallet",
+                "title": "Create wallet",
+                "category": "Neo Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
                 "command": "neo-visual-devtracker.invokeContract",
                 "title": "Invoke contract",
                 "category": "Neo Express",
@@ -128,6 +134,10 @@
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {
+                    "command": "neo-visual-devtracker.createWallet",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
                     "command": "neo-visual-devtracker.invokeContract",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 }
@@ -136,15 +146,17 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && node-sass src/panels/invoke.scss -o out/panels && node-sass src/panels/create.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js && browserify out/panels/invoke.js -o out/panels/invokeBundle.js && browserify out/panels/create.js -o out/panels/createBundle.js",
+        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && node-sass src/panels/invoke.scss -o out/panels && node-sass src/panels/create.scss -o out/panels && node-sass src/panels/newwallet.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js && browserify out/panels/invoke.js -o out/panels/invokeBundle.js && browserify out/panels/create.js -o out/panels/createBundle.js && browserify out/panels/newwallet.js -o out/panels/newwalletBundle.js",
         "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
         "watch-css-1": "node-sass src/panels/tracker.scss -wo out/panels",
         "watch-css-2": "node-sass src/panels/invoke.scss -wo out/panels",
         "watch-css-3": "node-sass src/panels/create.scss -wo out/panels",
+        "watch-css-4": "node-sass src/panels/newwallet.scss -wo out/panels",
         "watch-browserify-1": "watchify out/panels/tracker.js -o out/panels/trackerBundle.js",
         "watch-browserify-2": "watchify out/panels/invoke.js -o out/panels/invokeBundle.js",
         "watch-browserify-3": "watchify out/panels/create.js -o out/panels/createBundle.js",
+        "watch-browserify-4": "watchify out/panels/newwallet.js -o out/panels/newwalletBundle.js",
         "package": "npm run setversion && vsce package",
         "pretest": "npm run compile",
         "setversion": "gulp setversion",
