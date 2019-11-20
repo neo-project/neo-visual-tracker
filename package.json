@@ -29,6 +29,7 @@
         "Tracker"
     ],
     "activationEvents": [
+        "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.openTracker",
         "onView:neo-visual-devtracker.rpcServerExplorer"
     ],
@@ -81,14 +82,28 @@
             {
                 "command": "neo-visual-devtracker.invokeContract",
                 "title": "Invoke contract",
-                "category": "NEO Express",
+                "category": "Neo Express",
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
+                "command": "neo-visual-devtracker.createInstance",
+                "title": "Create new Neo Express instance",
+                "category": "Neo Express",
+                "icon": {
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
+                }
             }
         ],
         "menus": {
             "view/title": [
                 {
                     "command": "neo-visual-devtracker.refreshObjectExplorerNode",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.createInstance",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
                     "group": "navigation"
                 }
@@ -121,13 +136,15 @@
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
-        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && node-sass src/panels/invoke.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js && browserify out/panels/invoke.js -o out/panels/invokeBundle.js",
+        "compile": "npm install && tsc -p ./ && node-sass src/panels/tracker.scss -o out/panels && node-sass src/panels/invoke.scss -o out/panels && node-sass src/panels/create.scss -o out/panels && browserify out/panels/tracker.js -o out/panels/trackerBundle.js && browserify out/panels/invoke.js -o out/panels/invokeBundle.js && browserify out/panels/create.js -o out/panels/createBundle.js",
         "watch": "npm run compile && concurrently -r npm:watch-*",
         "watch-ts": "tsc -watch -p ./",
         "watch-css-1": "node-sass src/panels/tracker.scss -wo out/panels",
         "watch-css-2": "node-sass src/panels/invoke.scss -wo out/panels",
+        "watch-css-3": "node-sass src/panels/create.scss -wo out/panels",
         "watch-browserify-1": "watchify out/panels/tracker.js -o out/panels/trackerBundle.js",
         "watch-browserify-2": "watchify out/panels/invoke.js -o out/panels/invokeBundle.js",
+        "watch-browserify-3": "watchify out/panels/create.js -o out/panels/createBundle.js",
         "package": "npm run setversion && vsce package",
         "pretest": "npm run compile",
         "setversion": "gulp setversion",
@@ -140,6 +157,7 @@
         "@types/mocha": "^5.2.6",
         "@types/node": "^10.17.5",
         "@types/pouchdb-core": "^7.0.4",
+        "@types/shell-escape": "^0.2.0",
         "@types/vscode": "^1.40.0",
         "browserify": "^16.5.0",
         "concurrently": "^4.1.2",
@@ -163,6 +181,7 @@
         "bs58check": "^2.1.2",
         "find-process": "^1.4.2",
         "memoizee": "^0.4.14",
-        "request": "^2.88.0"
+        "request": "^2.88.0",
+        "shell-escape": "^0.2.0"
     }
 }

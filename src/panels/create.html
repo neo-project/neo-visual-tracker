@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="dialog">
+
+        <div id="data-entry-view">
+
+            <h1>Create a new Neo Express instance</h1>
+
+            <h2>Configuration path</h2>
+            <div>
+                Select the path that the Neo Express configuration should be saved in:
+            </div>
+            <table id="path-selection">
+                <tr>
+                    <td>
+                        <input type="file" id="custom-path-picker" webkitdirectory />
+                        <span id="current-path"></span>
+                    </td>
+                    <td class="text-right">
+                        <button id="change-path">Browse</button>
+                    </td>
+                </tr>
+            </table>
+            <div>
+                Choose a name for the Neo Express configuration file:
+            </div>
+            <div>
+                <input type="text" id="filename" />
+            </div>
+            <div id="file-exists-warning" class="error">
+                <div>
+                    The selected configuration file <span class="combined-path"></span> already exists.
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" id="allow-overwrite" />
+                        Allow configuration file overwrite
+                    </label>
+                </div>
+            </div>
+            <div id="file-does-not-exist-notice">
+                <div>
+                    The configuration file <span class="combined-path"></span> will be created.
+                </div>
+            </div>
+
+            <h2>Node count</h2>
+            <div>
+                Number of nodes in the new instance:
+            </div>
+            <table id="node-count-picker">
+                <tr>
+                    <td id="node-count-1">1</td>
+                    <td id="node-count-4">4</td>
+                    <td id="node-count-7">7</td>
+                </tr>
+            </table>
+
+            <div id="error-message" class="result-text error">
+            </div>
+
+            <div class="text-center">
+                <button id="create">Create instance</button>
+            </div>
+
+        </div>
+
+        <div id="results-view">
+
+            <h1>New instance created</h1>
+
+            <div>
+                The configuration file <span class="combined-path"></span> has been created:
+            </div>
+
+            <div>
+                <pre class="result-text"></pre>
+            </div>
+
+            <div class="text-center">
+                <button id="close">OK</button>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>
