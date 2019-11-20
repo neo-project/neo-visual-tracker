@@ -49,6 +49,9 @@ export class CachedRpcClient {
     private readonly memoizedGetUnspents: 
         ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
 
+    private readonly memoizedGetApplicationLog: 
+        ((txid: string) => Promise<any>) & memoize.Memoized<(txid: string) => Promise<any>>;
+
     private lastKnownBlockCount: number;
     
     public constructor(rpcUrl: string) {
@@ -75,6 +78,11 @@ export class CachedRpcClient {
             memoize(
                 (address: string) => this.rpcClient.getUnspents(address),
                 labeledCacheOptions('getUnspents'));
+
+        this.memoizedGetApplicationLog =
+            memoize(
+                (txid: string) => this.rpcClient.query({ method: 'getapplicationlog', params: [ txid ] }),
+                labeledCacheOptions('getapplicationlog'));
     }
 
     public async getBlockCount() : Promise<number> {
@@ -117,6 +125,10 @@ export class CachedRpcClient {
 
     public getUnspents(address: string): Promise<any> {
         return this.memoizedGetUnspents(address);
+    }
+
+    public getApplicationLog(txid: string): Promise<any> {
+        return this.memoizedGetApplicationLog(txid);
     }
 
 }
