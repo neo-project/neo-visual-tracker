@@ -25,32 +25,32 @@ const trackerRenderers = {
         return assetId;
     },
 
-    renderAddress: function(address: any | undefined, postMessage: any) {
-        if (address) {
-            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(address.address));
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !address.getUnspentsSupport);
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsSupported, !!address.getUnspentsSupport);
-            if (address.getUnspentsSupport) {
+    renderAddress: function(unspentsInfo: any | undefined, claimableInfo: any | undefined, postMessage: any) {
+        if (unspentsInfo) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(unspentsInfo.address));
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !unspentsInfo.getUnspentsSupport);
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsSupported, !!unspentsInfo.getUnspentsSupport);
+            if (unspentsInfo.getUnspentsSupport) {
                 const unspentAssetTemplate = document.querySelector(trackerSelectors.AddressDetailsUnspentAssetTemplate);
                 const placeholderArea = document.querySelector(trackerSelectors.AddressDetailsGetUnspentsSupported);
                 if (unspentAssetTemplate && placeholderArea) {
                     htmlHelpers.clearChildren(placeholderArea);
-                    for (let assetName in address.assets) {
+                    for (let assetName in unspentsInfo.assets) {
                         const unspentAsset = document.createElement('div');
                         unspentAsset.innerHTML = unspentAssetTemplate.innerHTML;
                         const assetNameElement = unspentAsset.querySelector(trackerSelectors.AddressDetailsUnspentAssetName);
                         const tbody = unspentAsset.querySelector('tbody');
                         if (assetNameElement && tbody) {
                             let assetBalance = 0;
-                            if (address.assets[assetName].unspent) {
-                                for (let i = 0; i < address.assets[assetName].unspent.length; i++) {
-                                    const txid = address.assets[assetName].unspent[i].txid;
-                                    const value = parseFloat(address.assets[assetName].unspent[i].value);
+                            if (unspentsInfo.assets[assetName].unspent) {
+                                for (let i = 0; i < unspentsInfo.assets[assetName].unspent.length; i++) {
+                                    const txid = unspentsInfo.assets[assetName].unspent[i].txid;
+                                    const value = parseFloat(unspentsInfo.assets[assetName].unspent[i].value);
                                     assetBalance += value;
                                     const row = htmlHelpers.newTableRow(
                                         htmlHelpers.newEventLink(txid, trackerEvents.ShowTransaction, txid, postMessage),
                                         htmlHelpers.text(htmlHelpers.number(value) + ' ' + assetName),
-                                        htmlHelpers.newCopyLink(JSON.stringify(address.assets[assetName].unspent[i]), postMessage));
+                                        htmlHelpers.newCopyLink(JSON.stringify(unspentsInfo.assets[assetName].unspent[i]), postMessage));
                                     tbody.appendChild(row);
                                 }
                                 tbody.appendChild(

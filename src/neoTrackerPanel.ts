@@ -23,7 +23,8 @@ class ViewState {
     public blocks: Blocks = new Blocks();
     public currentBlock: any = undefined;
     public currentTransaction: any = undefined;
-    public currentAddress: any = undefined;
+    public currentAddressUnspents: any = undefined;
+    public currentAddressClaimable: any = undefined;
     public hideEmptyBlocks: boolean = false;
 }
 
@@ -146,14 +147,16 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 this.viewState.activePage = ActivePage.TransactionDetail;
             } else if (message.e === trackerEvents.CloseTransaction) {
                 this.viewState.currentTransaction = undefined;
-                this.viewState.activePage = (this.viewState.currentAddress !== undefined) ?
+                this.viewState.activePage = (this.viewState.currentAddressUnspents !== undefined) ?
                     ActivePage.AddressDetail : 
                     ((this.viewState.currentBlock === undefined) ? ActivePage.Blocks : ActivePage.BlockDetail);
             } else if (message.e === trackerEvents.ShowAddress) {
-                this.viewState.currentAddress = await this.rpcConnection.getUnspents(message.c, this);
+                this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(message.c, this);
+                this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(message.c, this);
                 this.viewState.activePage = ActivePage.AddressDetail;
             } else if (message.e === trackerEvents.CloseAddress) {
-                this.viewState.currentAddress = undefined;
+                this.viewState.currentAddressUnspents = undefined;
+                this.viewState.currentAddressClaimable = undefined;
                 this.viewState.activePage = (this.viewState.currentTransaction !== undefined) ?
                     ActivePage.TransactionDetail : 
                     ((this.viewState.currentBlock !== undefined) ? ActivePage.BlockDetail : ActivePage.Blocks );
