@@ -47,6 +47,8 @@ const trackerSelectors = {
     AddressDetailsUnspentAssetName: '.assetName',
     AddressDetailsGetUnspentsSupported: '#addressdetail .unspentsSupported',
     AddressDetailsGetUnspentsNotSupported: '#addressdetail .unspentsNotSupported',
+    AddressDetailsGetClaimableSupported: '#addressdetail .claimableSupported',
+    AddressDetailsGetClaimableNotSupported: '#addressdetail .claimableNotSupported',
     LoadingIndicator: '#loading-indicator',
     LoadingMessage: '#loading-indicator .message',
     OpeningIndicator: '#opening-indicator',
