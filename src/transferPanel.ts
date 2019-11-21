@@ -62,7 +62,34 @@ export class TransferPanel {
     }
 
     private async doTransfer() {
-        // TODO
+        try {
+            this.viewState.showError = false;
+            this.viewState.showSuccess = false;
+            let command = shellEscape.default(['neo-express', 'transfer']);
+            command += ' -i ' + TransferPanel.doubleQuoteEscape(this.viewState.neoExpressJsonFullPath);
+            command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.assetName || 'unknown');
+            command += ' ' + (parseFloat(this.viewState.amount || '0') || 0);
+            command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.sourceWallet || 'unknown');
+            command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.destinationWallet || 'unknown');
+            const output = await new Promise((resolve, reject) => {
+                childProcess.exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        reject(error);
+                    } else if (stderr) {
+                        reject(stderr);
+                    } else {
+                        resolve(stdout);
+                    }
+                });
+            });
+            console.info('Transfer completed', command, output);
+            this.viewState.showSuccess = true;
+            this.viewState.result = command;
+        } catch (e) {
+            this.viewState.showError = true;
+            this.viewState.result = 'The transfer failed. Please check that the values entered are valid and try again.';
+            console.error('Transfer failed ', e);
+        }
     }
 
     private async onMessage(message: any) {
@@ -162,9 +189,7 @@ export class TransferPanel {
             !!this.viewState.destinationWallet &&
             !this.viewState.sourceWalletBalancesError &&
             !!this.viewState.sourceWalletBalances.length &&
-            !!this.viewState.assetName &&
-            !!this.viewState.amount &&
-            (parseFloat(this.viewState.amount) > 0);
+            !!this.viewState.assetName;
     }
 
     private static doubleQuoteEscape(argument: string) {
