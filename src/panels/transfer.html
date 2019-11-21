@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="dialog">
+
+        <div id="data-entry-view">
+
+            <h1>Transfer assets</h1>
+
+            <h2>Source</h2>
+            <div>
+                Select the account to transfer assets from:
+            </div>
+            <div>
+                TODO
+            </div>
+            <div>
+                Enter the asset and amount to transfer:
+            </div>
+            <div>
+                TODO
+            </div>
+            
+            <h2>Destination</h2>
+            <div>
+                Select the account to receive the assets:
+            </div>
+            <div>
+                TODO
+            </div>
+
+            <div id="error-message" class="result-text error">
+            </div>
+
+            <div class="text-center">
+                <button id="transfer" class="action-btn">Transfer</button>
+            </div>
+
+        </div>
+
+        <div id="results-view" class="results">
+
+            <h1>Assets transferred</h1>
+
+            <div>
+                The following transfer was made:
+            </div>
+
+            <div>
+                <pre class="result-text"></pre>
+            </div>
+
+            <div class="text-center">
+                <button id="close" class="action-btn">OK</button>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>
