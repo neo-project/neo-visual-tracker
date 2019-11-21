@@ -29,6 +29,9 @@ input, .select {
     color: var(--vscode-input-foreground);
     border: 1px solid var(--vscode-input-foreground);
     padding: 8px 5px 8px 5px;
+    &.select {
+        padding: 6px 5px 6px 5px;
+    }
     &[type=text], &.select {
         width: 100%;
         box-sizing: border-box;
@@ -70,6 +73,7 @@ a:focus {
 /* Simple tables where the first cell of each row is a header: */
 .table {
     margin-top: 5px;
+    margin-bottom: 5px;
     margin-left: 10px;
     td {
         text-align: right;
@@ -80,4 +84,9 @@ a:focus {
         font-weight: bold;
         text-align: left;
     }
+}
+
+.col-2 {
+    width: 49%;
+    display: inline-block;
 }

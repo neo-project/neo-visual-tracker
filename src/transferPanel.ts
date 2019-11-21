@@ -15,6 +15,8 @@ class ViewState {
     sourceWalletBalances: any[] = [];
     sourceWalletBalancesError: boolean = false;
     sourceWallet?: string = undefined;
+    assetName?: string = undefined;
+    amount?: string = undefined;
     destinationWallet?: string = undefined;
     showError: boolean = false;
     showSuccess: boolean = false;
@@ -66,15 +68,17 @@ export class TransferPanel {
     private async onMessage(message: any) {
         if (message.e === transferEvents.Init) {
             await this.updateWallets();
-            this.panel.webview.postMessage({ viewState: this.viewState });
+            await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Update) {
             this.viewState = message.c;
-            await this.updateWallets();
-            this.panel.webview.postMessage({ viewState: this.viewState });
+            if (message.v) {
+                await this.updateWallets();
+                await this.panel.webview.postMessage({ viewState: this.viewState });
+            }
         } else if (message.e === transferEvents.Transfer) {
             await this.updateWallets();
             await this.doTransfer();
-            this.panel.webview.postMessage({ viewState: this.viewState });
+            await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Close) {
             this.dispose();
         }
@@ -147,11 +151,20 @@ export class TransferPanel {
 
         await this.updateBalances();
 
+        if (this.viewState.assetName &&
+            (this.viewState.sourceWalletBalances.map(_ => _.asset).indexOf(this.viewState.assetName) === -1)) {
+            this.viewState.assetName = undefined;
+            this.viewState.amount = undefined;
+        }
+
         this.viewState.isValid =
             !!this.viewState.sourceWallet &&
             !!this.viewState.destinationWallet &&
             !this.viewState.sourceWalletBalancesError &&
-            !!this.viewState.sourceWalletBalances.length;
+            !!this.viewState.sourceWalletBalances.length &&
+            !!this.viewState.assetName &&
+            !!this.viewState.amount &&
+            (parseFloat(this.viewState.amount) > 0);
     }
 
     private static doubleQuoteEscape(argument: string) {

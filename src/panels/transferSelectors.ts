@@ -1,6 +1,8 @@
 // DOM query selectors for various elements in the transfer.html template:
 
 const transferSelectors = {
+    AmountInput: '#amount',
+    AssetDropdown: '#assetDropdown',
     CloseButton: '#close',
     DestinationWalletDropdown: '#destinationWalletDropdown',
     DisplaySourceWallet: '.display-source-wallet',
