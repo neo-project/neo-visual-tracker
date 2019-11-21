@@ -20,7 +20,10 @@ function postViewState() {
 }
 
 function render() {
-    // TODO
+    htmlHelpers.setPlaceholder(transferSelectors.ResultText, htmlHelpers.text(viewState.result));
+    htmlHelpers.showHide(transferSelectors.ErrorMessage, viewState.showError);
+    htmlHelpers.showHide(transferSelectors.ViewResults, viewState.showSuccess);
+    htmlHelpers.showHide(transferSelectors.ViewDataEntry, !viewState.showSuccess);
 }
 
 function handleMessage(message: any) {

@@ -11,7 +11,9 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ViewState {
     neoExpressJsonFullPath: string = '';
-    // ...
+    wallets: string[] = [];
+    sourceWallet?: string = undefined;
+    destinationWallet?: string = undefined;
     showError: boolean = false;
     showSuccess: boolean = false;
     result: string = '';
@@ -22,15 +24,11 @@ export class TransferPanel {
     private readonly panel: vscode.WebviewPanel;
 
     private viewState: ViewState;
-    private jsonParsed: boolean;
-    private wallets: any[] = [];
 
     constructor(
         extensionPath: string,
         neoExpressJsonFullPath: string,
         disposables: vscode.Disposable[]) {
-
-        this.jsonParsed = false;
 
         this.viewState = new ViewState();
         this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
@@ -63,18 +61,15 @@ export class TransferPanel {
     }
 
     private async onMessage(message: any) {
-        if (!this.jsonParsed) {
-            await this.parseJson();
-        }
-
         if (message.e === transferEvents.Init) {
+            await this.updateWallets();
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Update) {
             this.viewState = message.c;
-            // ... 
+            await this.updateWallets();
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Transfer) {
-            // ...
+            await this.updateWallets();
             await this.doTransfer();
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Close) {
@@ -82,16 +77,29 @@ export class TransferPanel {
         }
     }
 
-    private async parseJson() {
+    private async updateWallets() {
+        this.viewState.wallets = [ 'genesis' ];
+        
         try {
             const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
-            this.wallets = neoExpressConfig.wallets || []; 
+            const wallets = neoExpressConfig.wallets || [];
+            for (let i = 0; i < wallets.length; i++) {
+                if (wallets[i].name) {
+                    this.viewState.wallets.push(wallets[i].name);
+                }
+            }
         } catch (e) {
             console.error('TransferPanel encountered an error parsing ', this.viewState.neoExpressJsonFullPath, e);
-            this.wallets = [];
         }
-        this.jsonParsed = true;
+
+        if (this.viewState.sourceWallet && this.viewState.wallets.indexOf(this.viewState.sourceWallet) === -1) {
+            this.viewState.sourceWallet = undefined;
+        }
+
+        if (this.viewState.destinationWallet && this.viewState.wallets.indexOf(this.viewState.destinationWallet) === -1) {
+            this.viewState.destinationWallet = undefined;
+        }
     }
 
 }
