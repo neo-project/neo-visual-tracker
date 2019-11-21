@@ -1,0 +1,54 @@
+/* Make the entire page look like a horizontally and vertically centered dialog box: */
+body {
+    background-color: var(--vscode-sideBar-background);
+    .dialog {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-width: 40%;
+        transform: translate(-50%, -50%);
+        padding: 15px;
+        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
+        border: 1px solid var(--vscode-editorWidget-border);
+        background-color: var(--vscode-editor-background);
+        h1 {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 1.1em;
+        }
+    }
+}
+
+/* Input box styling: */
+input {
+    margin: 10px 0 10px 0;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-foreground);
+    padding: 8px 5px 8px 5px;
+    &[type=text] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+/* Spacing for text in results dialog: */
+.results {
+    div {
+        margin-top: 10px;
+    }
+}
+
+/* More prominent main action buttons: */
+.action-btn {
+    margin-top: 15px;
+    padding: 12px;
+}
+
+/* Emphasis applied to user supplied values that appear mid-sentence: */
+.emphasis {
+    font-style: italic;
+}
