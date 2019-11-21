@@ -12,6 +12,8 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 class ViewState {
     neoExpressJsonFullPath: string = '';
     wallets: string[] = [];
+    sourceWalletBalances: any[] = [];
+    sourceWalletBalancesError: boolean = false;
     sourceWallet?: string = undefined;
     destinationWallet?: string = undefined;
     showError: boolean = false;
@@ -78,6 +80,41 @@ export class TransferPanel {
         }
     }
 
+    private async updateBalances() {
+        this.viewState.sourceWalletBalances = [];
+        this.viewState.sourceWalletBalancesError = false;
+        if (this.viewState.sourceWallet) {
+            try {
+                let command = shellEscape.default(['neo-express', 'show', 'account']);
+                command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.sourceWallet);
+                command += ' -i ' + TransferPanel.doubleQuoteEscape(this.viewState.neoExpressJsonFullPath);
+                const accountJson = await new Promise((resolve, reject) => {
+                    childProcess.exec(command, (error, stdout, stderr) => {
+                        if (error) {
+                            reject(error);
+                        } else if (stderr) {
+                            reject(stderr);
+                        } else {
+                            resolve(stdout);
+                        }
+                    });
+                });
+                const account = JSON.parse(accountJson as string);
+                if (account.balances && account.balances.length) {
+                    for (let i = 0; i < account.balances.length; i++) {
+                        this.viewState.sourceWalletBalances.push({
+                            asset: account.balances[i].asset,
+                            value: account.balances[i].value,
+                        });
+                    }
+                }
+            } catch (e) {
+                this.viewState.sourceWalletBalancesError = true;
+                console.error('Could not get balances for ', this.viewState.sourceWallet, e);
+            }
+        }
+    }
+
     private async updateWallets() {
         this.viewState.wallets = [ 'genesis' ];
 
@@ -102,9 +139,21 @@ export class TransferPanel {
             this.viewState.destinationWallet = undefined;
         }
 
+        await this.updateBalances();
+
         this.viewState.isValid =
             !!this.viewState.sourceWallet &&
             !!this.viewState.destinationWallet;
+    }
+
+    private static doubleQuoteEscape(argument: string) {
+        let escaped = shellEscape.default([ argument ]);
+        if ((escaped.length >= 2) && 
+            (escaped[0] === '\'') && 
+            (escaped[escaped.length - 1] === '\'')) {
+            escaped = '"' + escaped.substring(1, escaped.length - 1).replace(/"/g, '\\"') + '"';
+        }
+        return escaped;
     }
 
 }
