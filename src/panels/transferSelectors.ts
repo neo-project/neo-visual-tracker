@@ -3,10 +3,16 @@
 const transferSelectors = {
     CloseButton: '#close',
     DestinationWalletDropdown: '#destinationWalletDropdown',
-    TransferButton: '#transfer',
+    DisplaySourceWallet: '.display-source-wallet',
+    ErrorBalanceRetrievalFailure: '#errorBalanceRetrievalFailure',
     ErrorMessage: '#error-message',
+    ErrorSourceWalletEmpty: '#errorSourceWalletEmpty',
+    RefreshBalancesLink: '#refreshBalancesLink',
     ResultText: '.result-text',
+    SourceBalancesTable: '#sourceBalancesTable',
+    SourceBalancesTableBody: '#sourceBalancesTableBody',
     SourceWalletDropdown: '#sourceWalletDropdown',
+    TransferButton: '#transfer',
     ViewDataEntry: '#data-entry-view',
     ViewResults: '#results-view',
 };

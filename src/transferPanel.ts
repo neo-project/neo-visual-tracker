@@ -102,8 +102,14 @@ export class TransferPanel {
                 const account = JSON.parse(accountJson as string);
                 if (account.balances && account.balances.length) {
                     for (let i = 0; i < account.balances.length; i++) {
+                        let assetName = account.balances[i].asset;
+                        if (assetName === '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b') {
+                            assetName = 'NEO';
+                        } else if (assetName === '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7') {
+                            assetName = 'GAS';
+                        }
                         this.viewState.sourceWalletBalances.push({
-                            asset: account.balances[i].asset,
+                            asset: assetName,
                             value: account.balances[i].value,
                         });
                     }
@@ -143,7 +149,9 @@ export class TransferPanel {
 
         this.viewState.isValid =
             !!this.viewState.sourceWallet &&
-            !!this.viewState.destinationWallet;
+            !!this.viewState.destinationWallet &&
+            !this.viewState.sourceWalletBalancesError &&
+            !!this.viewState.sourceWalletBalances.length;
     }
 
     private static doubleQuoteEscape(argument: string) {

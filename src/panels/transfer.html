@@ -16,13 +16,39 @@
 
             <h1>Transfer assets</h1>
 
-            <h2>Source</h2>
+            <h2>Source wallet</h2>
             <div>
+                <a href="#" 
+                    id="refreshBalancesLink" 
+                    class="right"
+                    title="Click to update source wallet list and  balances">Refresh</a>
                 Select the account to transfer assets from:
             </div>
             <div>
                 <div class="select"><select id="sourceWalletDropdown"></select></div>
             </div>
+            <div class="error" id="errorBalanceRetrievalFailure">
+                There was an error when attempting to retrieve current balances for 
+                <span class="display-source-wallet emphasis"></span>.
+                Is Neo Express running?
+            </div>
+            <div class="error" id="errorSourceWalletEmpty">
+                The
+                <span class="display-source-wallet emphasis"></span>
+                account does not contain any assets.
+            </div>
+            <div id="sourceBalancesTable">
+                <div>
+                    The <span class="display-source-wallet emphasis"></span> account
+                    contains the following assets:
+                </div>
+                <table class="table">
+                    <tbody id="sourceBalancesTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Transfer amount</h2>
             <div>
                 Enter the asset and amount to transfer:
             </div>
@@ -30,7 +56,7 @@
                 TODO
             </div>
             
-            <h2>Destination</h2>
+            <h2>Destination wallet</h2>
             <div>
                 Select the account to receive the assets:
             </div>

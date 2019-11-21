@@ -38,12 +38,25 @@ function populateWalletDropdown(selector: string, currentSelection?: string) {
 
 function render() {
     const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
+    const balancesTableBody = document.querySelector(transferSelectors.SourceBalancesTableBody) as HTMLTableSectionElement;
     populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWallet);
     populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWallet);
+    htmlHelpers.setPlaceholder(transferSelectors.DisplaySourceWallet, htmlHelpers.text(viewState.sourceWallet || '(unknown)'));
     htmlHelpers.setPlaceholder(transferSelectors.ResultText, htmlHelpers.text(viewState.result));
+    htmlHelpers.showHide(transferSelectors.ErrorBalanceRetrievalFailure, viewState.sourceWalletBalancesError);
+    htmlHelpers.showHide(transferSelectors.ErrorSourceWalletEmpty, viewState.sourceWallet && !viewState.sourceWalletBalancesError && !viewState.sourceWalletBalances.length);
+    htmlHelpers.showHide(transferSelectors.SourceBalancesTable, viewState.sourceWalletBalances.length);
     htmlHelpers.showHide(transferSelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(transferSelectors.ViewResults, viewState.showSuccess);
     htmlHelpers.showHide(transferSelectors.ViewDataEntry, !viewState.showSuccess);
+    htmlHelpers.clearChildren(balancesTableBody);
+    for (let i = 0; i < viewState.sourceWalletBalances.length; i++) {
+        const assetDetails = viewState.sourceWalletBalances[i];
+        const row = htmlHelpers.newTableRow(
+            htmlHelpers.text(assetDetails.asset + ':'),
+            htmlHelpers.text(htmlHelpers.number(assetDetails.value)));
+        balancesTableBody.appendChild(row);
+    }
     transferButton.disabled = !viewState.isValid;
 }
 
@@ -58,8 +71,10 @@ function handleMessage(message: any) {
 function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
+    const refreshLink = document.querySelector(transferSelectors.RefreshBalancesLink) as HTMLAnchorElement;
     const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
     const destinationWalletDropdown = document.querySelector(transferSelectors.DestinationWalletDropdown) as HTMLSelectElement;
+    refreshLink.addEventListener('click', postViewState);
     sourceWalletDropdown.addEventListener('change', _ => {
         viewState.sourceWallet = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value;
         postViewState();
