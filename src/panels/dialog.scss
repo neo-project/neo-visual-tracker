@@ -23,15 +23,24 @@ body {
 }
 
 /* Input box styling: */
-input {
+input, .select {
     margin: 10px 0 10px 0;
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
     border: 1px solid var(--vscode-input-foreground);
     padding: 8px 5px 8px 5px;
-    &[type=text] {
+    &[type=text], &.select {
         width: 100%;
         box-sizing: border-box;
+    }
+    select {
+        &:focus {
+            outline: none;
+        }
+        width: 100%;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        border: none;
     }
 }
 

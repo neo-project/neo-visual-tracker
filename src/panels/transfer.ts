@@ -19,11 +19,32 @@ function postViewState() {
     console.log('->', viewState);
 }
 
+function populateWalletDropdown(selector: string, currentSelection?: string) {
+    const dropdown = document.querySelector(selector) as HTMLSelectElement;
+    htmlHelpers.clearChildren(dropdown);
+    let index = 0;
+    dropdown.appendChild(document.createElement('option'));
+    for (let i = 0; i < viewState.wallets.length; i++) {
+        index++;
+        const option = document.createElement('option') as HTMLOptionElement;
+        option.value = viewState.wallets[i];
+        option.appendChild(htmlHelpers.text(viewState.wallets[i]));
+        dropdown.appendChild(option);
+        if (viewState.wallets[i] === currentSelection) {
+            dropdown.selectedIndex = index;
+        }
+    }
+}
+
 function render() {
+    const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
+    populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWallet);
+    populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWallet);
     htmlHelpers.setPlaceholder(transferSelectors.ResultText, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(transferSelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(transferSelectors.ViewResults, viewState.showSuccess);
     htmlHelpers.showHide(transferSelectors.ViewDataEntry, !viewState.showSuccess);
+    transferButton.disabled = !viewState.isValid;
 }
 
 function handleMessage(message: any) {
@@ -37,9 +58,16 @@ function handleMessage(message: any) {
 function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
-    
-    // TODO
-
+    const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
+    const destinationWalletDropdown = document.querySelector(transferSelectors.DestinationWalletDropdown) as HTMLSelectElement;
+    sourceWalletDropdown.addEventListener('change', _ => {
+        viewState.sourceWallet = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value;
+        postViewState();
+    });
+    destinationWalletDropdown.addEventListener('change', _ => {
+        viewState.destinationWallet = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].value;
+        postViewState();
+    });
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: transferEvents.Init });
 }

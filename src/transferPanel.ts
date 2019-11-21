@@ -17,6 +17,7 @@ class ViewState {
     showError: boolean = false;
     showSuccess: boolean = false;
     result: string = '';
+    isValid: boolean = false;
 }
 
 export class TransferPanel {
@@ -79,7 +80,7 @@ export class TransferPanel {
 
     private async updateWallets() {
         this.viewState.wallets = [ 'genesis' ];
-        
+
         try {
             const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
@@ -100,6 +101,10 @@ export class TransferPanel {
         if (this.viewState.destinationWallet && this.viewState.wallets.indexOf(this.viewState.destinationWallet) === -1) {
             this.viewState.destinationWallet = undefined;
         }
+
+        this.viewState.isValid =
+            !!this.viewState.sourceWallet &&
+            !!this.viewState.destinationWallet;
     }
 
 }
