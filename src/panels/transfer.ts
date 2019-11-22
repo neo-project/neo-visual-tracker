@@ -14,8 +14,8 @@ let viewState: any = {};
 
 let vsCodePostMessage: Function;
 
-function postViewState(skipValidation?: boolean) {
-    vsCodePostMessage({ e: transferEvents.Update, c: viewState, v: !skipValidation });
+function postViewState(shouldRefresh?: boolean) {
+    vsCodePostMessage({ e: transferEvents.Update, c: viewState, r: shouldRefresh });
     console.log('->', viewState);
 }
 
@@ -107,11 +107,11 @@ function initializePanel() {
         vscode.postMessage({ e: transferEvents.Close });
     });
     refreshLink.addEventListener('click', _ => {
-        postViewState();
+        vscode.postMessage({ e: transferEvents.Refresh });
     });
     sourceWalletDropdown.addEventListener('change', _ => {
         viewState.sourceWallet = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value;
-        postViewState();
+        postViewState(true);
     });
     destinationWalletDropdown.addEventListener('change', _ => {
         viewState.destinationWallet = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].value;
@@ -125,9 +125,9 @@ function initializePanel() {
         viewState.amount = amountInput.value;
         postViewState();
     });
-    amountInput.addEventListener('keypress', _ => {
+    amountInput.addEventListener('keyup', _ => {
         viewState.amount = amountInput.value;
-        postViewState(true);
+        postViewState();
     });
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: transferEvents.Init });

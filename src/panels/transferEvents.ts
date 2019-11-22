@@ -3,6 +3,7 @@
 const transferEvents = {
     Close: 'close',
     Init: 'init',
+    Refresh: 'refresh',
     Transfer: 'transfer',
     Update: 'update',
 };

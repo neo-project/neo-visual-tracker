@@ -94,16 +94,19 @@ export class TransferPanel {
 
     private async onMessage(message: any) {
         if (message.e === transferEvents.Init) {
-            await this.updateWallets();
+            await this.refresh();
+            await this.panel.webview.postMessage({ viewState: this.viewState });
+        } else if (message.e === transferEvents.Refresh) {
+            await this.refresh();
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Update) {
             this.viewState = message.c;
-            if (message.v) {
-                await this.updateWallets();
-                await this.panel.webview.postMessage({ viewState: this.viewState });
+            if (message.r) {
+                await this.refresh();
             }
+            this.validate();
+            await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Transfer) {
-            await this.updateWallets();
             await this.doTransfer();
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Close) {
@@ -111,7 +114,22 @@ export class TransferPanel {
         }
     }
 
-    private async updateBalances() {
+    private async refresh() {
+        this.viewState.wallets = [ 'genesis' ];
+
+        try {
+            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
+            const neoExpressConfig = JSON.parse(jsonFileContents);
+            const wallets = neoExpressConfig.wallets || [];
+            for (let i = 0; i < wallets.length; i++) {
+                if (wallets[i].name) {
+                    this.viewState.wallets.push(wallets[i].name);
+                }
+            }
+        } catch (e) {
+            console.error('TransferPanel encountered an error parsing ', this.viewState.neoExpressJsonFullPath, e);
+        }
+
         this.viewState.sourceWalletBalances = [];
         this.viewState.sourceWalletBalancesError = false;
         if (this.viewState.sourceWallet) {
@@ -150,24 +168,11 @@ export class TransferPanel {
                 console.error('Could not get balances for ', this.viewState.sourceWallet, e);
             }
         }
+        
+        this.validate();
     }
 
-    private async updateWallets() {
-        this.viewState.wallets = [ 'genesis' ];
-
-        try {
-            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
-            const neoExpressConfig = JSON.parse(jsonFileContents);
-            const wallets = neoExpressConfig.wallets || [];
-            for (let i = 0; i < wallets.length; i++) {
-                if (wallets[i].name) {
-                    this.viewState.wallets.push(wallets[i].name);
-                }
-            }
-        } catch (e) {
-            console.error('TransferPanel encountered an error parsing ', this.viewState.neoExpressJsonFullPath, e);
-        }
-
+    private validate() {
         if (this.viewState.sourceWallet && this.viewState.wallets.indexOf(this.viewState.sourceWallet) === -1) {
             this.viewState.sourceWallet = undefined;
         }
@@ -175,8 +180,6 @@ export class TransferPanel {
         if (this.viewState.destinationWallet && this.viewState.wallets.indexOf(this.viewState.destinationWallet) === -1) {
             this.viewState.destinationWallet = undefined;
         }
-
-        await this.updateBalances();
 
         if (this.viewState.assetName &&
             (this.viewState.sourceWalletBalances.map(_ => _.asset).indexOf(this.viewState.assetName) === -1)) {
