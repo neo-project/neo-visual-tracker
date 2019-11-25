@@ -19,7 +19,7 @@ function handleMessage(message: any) {
         trackerRenderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, vsCodePostMessage);
         trackerRenderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
         trackerRenderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
-        trackerRenderers.renderAddress(message.viewState.currentAddressUnspents, message.viewState.currentAddressClaimable, vsCodePostMessage);
+        trackerRenderers.renderAddress(message.viewState.currentAddressUnspents, message.viewState.currentAddressUnclaimed, message.viewState.currentAddressClaimable, vsCodePostMessage);
         trackerRenderers.setPage(message.viewState.activePage);
         htmlHelpers.showHide(trackerSelectors.StatusBar, !!message.viewState.blockChainInfo);
         const openingIndicator: any = document.querySelector(trackerSelectors.OpeningIndicator);

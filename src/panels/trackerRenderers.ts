@@ -25,7 +25,12 @@ const trackerRenderers = {
         return assetId;
     },
 
-    renderAddress: function(unspentsInfo: any | undefined, claimableInfo: any | undefined, postMessage: any) {
+    renderAddress: function(
+        unspentsInfo: any | undefined, 
+        unclaimedInfo: any | undefined, 
+        claimableInfo: any | undefined, 
+        postMessage: any) {
+
         if (unspentsInfo) {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(unspentsInfo.address));
             htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !unspentsInfo.getUnspentsSupport);
@@ -67,6 +72,17 @@ const trackerRenderers = {
                 }
             } 
         }
+
+        if (unclaimedInfo && unclaimedInfo.getUnclaimedSupport) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.available)));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unavailable)));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unclaimed)));
+        } else {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text('N/A'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text('N/A'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text('N/A'));
+        }
+
         if (claimableInfo) {
             htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableNotSupported, !claimableInfo.getClaimableSupport);
             htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, !!claimableInfo.getClaimableSupport);
