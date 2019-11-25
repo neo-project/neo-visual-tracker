@@ -31,6 +31,7 @@ export interface INeoRpcConnection {
     getClaimable(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     getTransaction(txid: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     getUnspents(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
+    getUnclaimed(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     subscribe(subscriber: INeoSubscription): void;
     unsubscribe(subscriber: INeoSubscription): void;
 }
@@ -239,6 +240,23 @@ export class NeoRpcConnection implements INeoRpcConnection {
                 return { address: address, getUnspentsSupport: false };
             } else {
                 console.error('NeoRpcConnection could not retrieve unspents (address=' + address + '): ' + e);
+                return undefined;
+            }
+        }        
+    }
+
+    public async getUnclaimed(address: string, statusReceiver: INeoStatusReceiver) {
+        try {
+            statusReceiver.updateStatus('Getting unclaimed GAS information for address ' + address);
+            const result = (await this.rpcClient.getUnclaimed(address));
+            result.getUnclaimedSupport = true;
+            return result;
+        } catch(e) {
+            if (e.message.toLowerCase().indexOf('method not found') !== -1) {
+                console.warn('NeoRpcConnection: getunclaimed unsupported by ' + this.rpcUrl + ' (address=' + address + '): ' + e);
+                return { address: address, getUnclaimedSupport: false };
+            } else {
+                console.error('NeoRpcConnection could not retrieve unclaimed GAS (address=' + address + '): ' + e);
                 return undefined;
             }
         }        

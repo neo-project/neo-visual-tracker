@@ -48,6 +48,10 @@ class MockRpcConnection implements INeoRpcConnection {
 		throw new Error("Method not implemented.");
 	}
 
+	public async getUnclaimed(address: string) {
+		throw new Error("Method not implemented.");
+	}
+
 	public subscribe(subscriber: INeoSubscription): void {
 		this.subscriptions++;
 	}
