@@ -96,10 +96,10 @@ const htmlHelpers = {
         this.setInnerPlaceholder(document, selector, value);
     },
 
-    showHide: function(selector: string, show: boolean, isTable?: boolean) {
+    showHide: function(selector: string, show: boolean, displayStyle: string = 'block') {
         const element: any = document.querySelector(selector);
         if (element) {
-            element.style.display = show ? (isTable ? 'table' : 'block') : 'none';
+            element.style.display = show ? displayStyle : 'none';
         }
     },
 

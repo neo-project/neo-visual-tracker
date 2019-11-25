@@ -224,11 +224,11 @@ const trackerRenderers = {
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false, postMessage);
-            htmlHelpers.showHide(trackerSelectors.TransactionValueTransferTable, valueTransferCount > 0, true);
+            htmlHelpers.showHide(trackerSelectors.TransactionValueTransferTable, valueTransferCount > 0, 'table');
             const scriptsTbody = document.querySelector(trackerSelectors.TransactionScriptsTableBody);
-            htmlHelpers.showHide(trackerSelectors.TransactionMainScriptArea, transaction.scriptDisassembled, true);
+            htmlHelpers.showHide(trackerSelectors.TransactionMainScriptArea, transaction.scriptDisassembled, 'table');
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionMainScriptBody, htmlHelpers.text(transaction.scriptDisassembled));
-            htmlHelpers.showHide(trackerSelectors.TransactionScriptsTable, transaction.scripts.length > 0, true);
+            htmlHelpers.showHide(trackerSelectors.TransactionScriptsTable, transaction.scripts.length > 0, 'table');
             if (scriptsTbody) {
                 htmlHelpers.clearChildren(scriptsTbody);
                 for (let i = 0; i < transaction.scripts.length; i++) {
@@ -240,14 +240,14 @@ const trackerRenderers = {
                 }
             }
             if (!transaction.applicationLogsSupported) {
-                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, true);
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, 'table');
                 htmlHelpers.setPlaceholder(
                     trackerSelectors.TransactionApplicationLogBody,
                     htmlHelpers.text('This RPC server does not support the getapplicationlog method.'));
             } else if (!transaction.applicationLog || !transaction.applicationLog.result) {
-                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, false, true);
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, false, 'table');
             } else {
-                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, true);
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, 'table');
                 htmlHelpers.setPlaceholder(
                     trackerSelectors.TransactionApplicationLogBody,
                     htmlHelpers.text(JSON.stringify(transaction.applicationLog.result.executions || [], undefined, 4)));

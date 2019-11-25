@@ -15,8 +15,7 @@ table {
 .table {
     text-align: center;
     width: 100%;
-    td,
-    th {
+    td, th {
         padding: 5px 10px;
     }
     th {
@@ -27,13 +26,13 @@ table {
 
 .data-table {
     width: 100%;
-    td,
-    th {
+    td, th {
         padding: 5px 10px;
         vertical-align: top;
     }
     th {
         text-align: right;
+        width: 25%;
     }
 }
 
