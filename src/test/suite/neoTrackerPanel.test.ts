@@ -36,11 +36,19 @@ class MockRpcConnection implements INeoRpcConnection {
 		return this.blocks;
 	}
 
+	public async getClaimable(address: string) {
+		throw new Error("Method not implemented.");
+	}
+
 	public async getTransaction(txid: string) {
 		throw new Error("Method not implemented.");
 	}
 
 	public async getUnspents(address: string) {
+		throw new Error("Method not implemented.");
+	}
+
+	public async getUnclaimed(address: string) {
 		throw new Error("Method not implemented.");
 	}
 

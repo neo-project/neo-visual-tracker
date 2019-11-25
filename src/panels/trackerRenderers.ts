@@ -25,32 +25,37 @@ const trackerRenderers = {
         return assetId;
     },
 
-    renderAddress: function(address: any | undefined, postMessage: any) {
-        if (address) {
-            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(address.address));
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !address.getUnspentsSupport);
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsSupported, !!address.getUnspentsSupport);
-            if (address.getUnspentsSupport) {
+    renderAddress: function(
+        unspentsInfo: any | undefined, 
+        unclaimedInfo: any | undefined, 
+        claimableInfo: any | undefined, 
+        postMessage: any) {
+
+        if (unspentsInfo) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(unspentsInfo.address));
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !unspentsInfo.getUnspentsSupport);
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsSupported, !!unspentsInfo.getUnspentsSupport);
+            if (unspentsInfo.getUnspentsSupport) {
                 const unspentAssetTemplate = document.querySelector(trackerSelectors.AddressDetailsUnspentAssetTemplate);
                 const placeholderArea = document.querySelector(trackerSelectors.AddressDetailsGetUnspentsSupported);
                 if (unspentAssetTemplate && placeholderArea) {
                     htmlHelpers.clearChildren(placeholderArea);
-                    for (let assetName in address.assets) {
+                    for (let assetName in unspentsInfo.assets) {
                         const unspentAsset = document.createElement('div');
                         unspentAsset.innerHTML = unspentAssetTemplate.innerHTML;
                         const assetNameElement = unspentAsset.querySelector(trackerSelectors.AddressDetailsUnspentAssetName);
                         const tbody = unspentAsset.querySelector('tbody');
                         if (assetNameElement && tbody) {
                             let assetBalance = 0;
-                            if (address.assets[assetName].unspent) {
-                                for (let i = 0; i < address.assets[assetName].unspent.length; i++) {
-                                    const txid = address.assets[assetName].unspent[i].txid;
-                                    const value = parseFloat(address.assets[assetName].unspent[i].value);
+                            if (unspentsInfo.assets[assetName].unspent) {
+                                for (let i = 0; i < unspentsInfo.assets[assetName].unspent.length; i++) {
+                                    const txid = unspentsInfo.assets[assetName].unspent[i].txid;
+                                    const value = parseFloat(unspentsInfo.assets[assetName].unspent[i].value);
                                     assetBalance += value;
                                     const row = htmlHelpers.newTableRow(
                                         htmlHelpers.newEventLink(txid, trackerEvents.ShowTransaction, txid, postMessage),
                                         htmlHelpers.text(htmlHelpers.number(value) + ' ' + assetName),
-                                        htmlHelpers.newCopyLink(JSON.stringify(address.assets[assetName].unspent[i]), postMessage));
+                                        htmlHelpers.newCopyLink(JSON.stringify(unspentsInfo.assets[assetName].unspent[i]), postMessage));
                                     tbody.appendChild(row);
                                 }
                                 tbody.appendChild(
@@ -62,6 +67,42 @@ const trackerRenderers = {
                             htmlHelpers.clearChildren(assetNameElement);
                             assetNameElement.appendChild(htmlHelpers.text(assetName));
                             placeholderArea.appendChild(unspentAsset);
+                        }
+                    }
+                }
+            } 
+        }
+
+        if (unclaimedInfo && unclaimedInfo.getUnclaimedSupport) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.available) + ' GAS'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unavailable) + ' GAS'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unclaimed) + ' GAS'));
+        } else {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text('N/A'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text('N/A'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text('N/A'));
+        }
+
+        if (claimableInfo) {
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableNotSupported, !claimableInfo.getClaimableSupport);
+            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, !!claimableInfo.getClaimableSupport);
+            if (claimableInfo.getClaimableSupport) {
+                const placeholderArea = document.querySelector(trackerSelectors.AddressDetailsGetClaimableSupported);
+                if (placeholderArea) {
+                    const tbody = placeholderArea.querySelector('tbody');
+                    if (tbody) {
+                        htmlHelpers.clearChildren(tbody);
+                        if (claimableInfo.claimable && claimableInfo.claimable.length) {
+                            for (let i = 0; i < claimableInfo.claimable.length; i++) {
+                                const txid = claimableInfo.claimable[i].txid;
+                                const value = parseFloat(claimableInfo.claimable[i].unclaimed);
+                                const row = htmlHelpers.newTableRow(
+                                    htmlHelpers.newEventLink(txid, trackerEvents.ShowTransaction, txid, postMessage),
+                                    htmlHelpers.text(htmlHelpers.number(value) + ' GAS'));
+                                tbody.appendChild(row);
+                            }
+                        } else {
+                            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, false);
                         }
                     }
                 }
@@ -183,11 +224,11 @@ const trackerRenderers = {
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailOutputsTable, transaction.vout, transaction.assets, true, false, postMessage);
-            htmlHelpers.showHide(trackerSelectors.TransactionValueTransferTable, valueTransferCount > 0, true);
+            htmlHelpers.showHide(trackerSelectors.TransactionValueTransferTable, valueTransferCount > 0, 'table');
             const scriptsTbody = document.querySelector(trackerSelectors.TransactionScriptsTableBody);
-            htmlHelpers.showHide(trackerSelectors.TransactionMainScriptArea, transaction.scriptDisassembled, true);
+            htmlHelpers.showHide(trackerSelectors.TransactionMainScriptArea, transaction.scriptDisassembled, 'table');
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionMainScriptBody, htmlHelpers.text(transaction.scriptDisassembled));
-            htmlHelpers.showHide(trackerSelectors.TransactionScriptsTable, transaction.scripts.length > 0, true);
+            htmlHelpers.showHide(trackerSelectors.TransactionScriptsTable, transaction.scripts.length > 0, 'table');
             if (scriptsTbody) {
                 htmlHelpers.clearChildren(scriptsTbody);
                 for (let i = 0; i < transaction.scripts.length; i++) {
@@ -199,14 +240,14 @@ const trackerRenderers = {
                 }
             }
             if (!transaction.applicationLogsSupported) {
-                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, true);
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, 'table');
                 htmlHelpers.setPlaceholder(
                     trackerSelectors.TransactionApplicationLogBody,
                     htmlHelpers.text('This RPC server does not support the getapplicationlog method.'));
             } else if (!transaction.applicationLog || !transaction.applicationLog.result) {
-                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, false, true);
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, false, 'table');
             } else {
-                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, true);
+                htmlHelpers.showHide(trackerSelectors.TransactionApplicationLog, true, 'table');
                 htmlHelpers.setPlaceholder(
                     trackerSelectors.TransactionApplicationLogBody,
                     htmlHelpers.text(JSON.stringify(transaction.applicationLog.result.executions || [], undefined, 4)));

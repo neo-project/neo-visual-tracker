@@ -49,6 +49,12 @@ export class CachedRpcClient {
     private readonly memoizedGetUnspents: 
         ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
 
+    private readonly memoizedGetClaimable: 
+        ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
+
+    private readonly memoizedGetUnclaimed: 
+        ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
+
     private readonly memoizedGetApplicationLog: 
         ((txid: string) => Promise<any>) & memoize.Memoized<(txid: string) => Promise<any>>;
 
@@ -78,6 +84,16 @@ export class CachedRpcClient {
             memoize(
                 (address: string) => this.rpcClient.getUnspents(address),
                 labeledCacheOptions('getUnspents'));
+
+        this.memoizedGetClaimable =
+            memoize(
+                (address: string) => this.rpcClient.query({ method: 'getclaimable', params: [ address ] }),
+                labeledCacheOptions('getClaimable'));
+        
+        this.memoizedGetUnclaimed =
+            memoize(
+                (address: string) => this.rpcClient.getUnclaimed(address),
+                labeledCacheOptions('getUnclaimed'));
 
         this.memoizedGetApplicationLog =
             memoize(
@@ -125,6 +141,14 @@ export class CachedRpcClient {
 
     public getUnspents(address: string): Promise<any> {
         return this.memoizedGetUnspents(address);
+    }
+
+    public getClaimable(address: string): Promise<any> {
+        return this.memoizedGetClaimable(address);
+    }
+
+    public getUnclaimed(address: string): Promise<any> {
+        return this.memoizedGetUnclaimed(address);
     }
 
     public getApplicationLog(txid: string): Promise<any> {
