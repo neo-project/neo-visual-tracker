@@ -7,6 +7,7 @@ const trackerSelectors = {
     RpcUrl: '#rpcUrl',
     RpcStatus: '#rpcStatus',
     HideEmptyBlocksCheckbox: '#hideEmpty',
+    HideEmptyBlocksCheckboxArea: '#hideEmptyArea',
     BlocksTableBody: '#blocks tbody',
     BlocksPaginationFirst: '#blocks .first',
     BlocksPaginationNext: '#blocks .next',

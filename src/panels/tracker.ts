@@ -31,6 +31,7 @@ function handleMessage(message: any) {
         openingIndicator.style.display = (!message.viewState.blockChainInfo || !message.viewState.blockChainInfo.online) ? 'block' : 'none';
         const checkbox: any = document.querySelector(trackerSelectors.HideEmptyBlocksCheckbox);
         checkbox.checked = message.viewState.hideEmptyBlocks;
+        htmlHelpers.showHide(trackerSelectors.HideEmptyBlocksCheckboxArea, message.viewState.blockChainInfo.populatedBlocksKnown);
     } else if (message.status) {
         const loadingIndicator: any = document.querySelector(trackerSelectors.LoadingIndicator);
         loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';

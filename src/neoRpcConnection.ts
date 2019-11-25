@@ -9,11 +9,24 @@ const BlocksPerPage = 20;
 const PollingInterval = 1000;
 
 export class BlockchainInfo {
+    public readonly populatedBlocksKnown: boolean;
+    public readonly populatedBlocks: BitSet;
     constructor(
         public height: number,
         public url: string,
         public online: boolean,
-        public chainIdentifier?: string) {
+        public chainIdentifier?: string,
+        populatedBlockList?: number[]) {
+
+        this.populatedBlocks = new BitSet();
+        if (populatedBlockList) {
+            this.populatedBlocksKnown = true;
+            for (let i = 0; i < populatedBlockList.length; i++) {
+                this.populatedBlocks.set(populatedBlockList[i]);
+            }
+        } else {
+            this.populatedBlocksKnown = false;
+        }
     }
 }
 
@@ -49,22 +62,16 @@ export class NeoRpcConnection implements INeoRpcConnection {
     public readonly rpcUrl: string;
 
     private readonly rpcClient: CachedRpcClient;
-    private readonly globalState: Memento;
-    
-    private knownEmptyBlocks: BitSet;
-    private knownEmptyBlocksDirty: boolean;
+
     private lastKnownChainIdentifier?: string;
     private lastKnownHeight: number;
     private subscriptions: INeoSubscription[];
     private timeout?: NodeJS.Timeout;
     private online: boolean = true;
 
-    constructor(rpcUrl: string, globalState: Memento) {
+    constructor(rpcUrl: string) {
         this.rpcUrl = rpcUrl;
-        this.globalState = globalState;
         this.rpcClient = new CachedRpcClient(this.rpcUrl);
-        this.knownEmptyBlocks = new BitSet();
-        this.knownEmptyBlocksDirty = false;
         this.lastKnownHeight = 0;
         this.lastKnownChainIdentifier = undefined;
         this.subscriptions = [];
@@ -91,6 +98,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
     public async getBlockchainInfo(statusReceiver?: INeoStatusReceiver) {
         let height = this.lastKnownHeight;
         let chainIdentifier = this.lastKnownChainIdentifier;
+        let populatedBlocks: number[] | undefined = undefined;
         try {
             if (statusReceiver) {
                 statusReceiver.updateStatus('Determining current blockchain height');
@@ -101,6 +109,16 @@ export class NeoRpcConnection implements INeoRpcConnection {
                     statusReceiver.updateStatus('Determining blockchain identifier');
                 }
                 chainIdentifier = await this.rpcClient.getBlockChainId();
+                try {
+                    if (statusReceiver) {
+                        statusReceiver.updateStatus('Determining populated blocks');
+                    }
+                    populatedBlocks = (await this.rpcClient.getPopulatedBlocks()).result;
+                } catch (e) {
+                    if (e.message.toLowerCase().indexOf('method not found') === -1) {
+                        console.error('NeoRpcConnection could not determine known populated blocks: ' + e);
+                    }
+                }
                 this.online = true;
             } catch (e) {
                 console.error('NeoRpcConnection could not retrieve block 0 hash: ' + e);
@@ -110,17 +128,13 @@ export class NeoRpcConnection implements INeoRpcConnection {
             console.error('NeoRpcConnection could not retrieve block height: ' + e);
             this.online = false;
         }
-        return new BlockchainInfo(height, this.rpcUrl, this.online, chainIdentifier);
+        return new BlockchainInfo(height, this.rpcUrl, this.online, chainIdentifier, populatedBlocks);
     }
 
     public async getBlock(index: number, statusReceiver: INeoStatusReceiver) {
         try {
             statusReceiver.updateStatus('Retrieving block #' + index + '...');
             const result = await this.rpcClient.getBlock(index) as any;
-            if (result.tx && (result.tx.length <= 1) && !this.knownEmptyBlocks.get(index)) {
-                this.knownEmptyBlocks.set(index);
-                this.knownEmptyBlocksDirty = true;
-            }
             statusReceiver.updateStatus('Retrieved block #' + index);
             return result;
         } catch(e) {
@@ -154,7 +168,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
             const promises = [];
             for (let i = 0; i < BlocksPerPage; i++) {
                 if ((index >= 0) && (index < height)) {
-                    if (!this.knownEmptyBlocks.get(index) || !hideEmptyBlocks) {
+                    if (!blockchainInfo.populatedBlocksKnown || blockchainInfo.populatedBlocks.get(index) || !hideEmptyBlocks) {
                         const promise = (async (batchIndex, blockIndex) => {
                             try {
                                 blocksThisBatch[batchIndex] = await this.getBlock(blockIndex, statusReceiver);
@@ -176,10 +190,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
             await Promise.all(promises);
 
             for (let i = 0; i < blocksThisBatch.length; i++) {
-                if ((result.blocks.length < BlocksPerPage) &&
-                    blocksThisBatch[i] && 
-                    (!this.knownEmptyBlocks.get(blocksThisBatch[i].index) || !hideEmptyBlocks)) {
-
+                if ((result.blocks.length < BlocksPerPage) && blocksThisBatch[i]) {
                     result.blocks.push(blocksThisBatch[i]);
                 }
             }
@@ -354,25 +365,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     private async poll() : Promise<void> {
         this.timeout = undefined;
-
-        if (this.knownEmptyBlocksDirty && this.lastKnownChainIdentifier) {
-            await this.globalState.update(
-                'knownEmptyBlocks_' + this.lastKnownChainIdentifier,
-                this.knownEmptyBlocks.toString(16));
-            this.knownEmptyBlocksDirty = false;
-        }
-
         const blockchainInfo = await this.getBlockchainInfo();
-        if (blockchainInfo.chainIdentifier !== this.lastKnownChainIdentifier) {
-            const persistedKnownEmptyBlocks: string | undefined = this.globalState.get(
-                'knownEmptyBlocks_' + blockchainInfo.chainIdentifier);
-            if (persistedKnownEmptyBlocks) {
-                this.knownEmptyBlocks = BitSet.fromHexString(persistedKnownEmptyBlocks);
-            } else {
-                this.knownEmptyBlocks = new BitSet();
-            }
-        }
-
         this.lastKnownChainIdentifier = blockchainInfo.chainIdentifier;
         if ((blockchainInfo.height !== this.lastKnownHeight) || !blockchainInfo.online) {
             this.lastKnownHeight = blockchainInfo.height;

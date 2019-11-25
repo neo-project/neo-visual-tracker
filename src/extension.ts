@@ -11,7 +11,7 @@ import { TransferPanel } from './transferPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	const rpcConnectionPool = new RpcConnectionPool(context.globalState);
+	const rpcConnectionPool = new RpcConnectionPool();
 
 	const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
 
