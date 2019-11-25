@@ -90,27 +90,26 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     public async getBlockchainInfo(statusReceiver?: INeoStatusReceiver) {
         let height = this.lastKnownHeight;
+        let chainIdentifier = this.lastKnownChainIdentifier;
         try {
             if (statusReceiver) {
                 statusReceiver.updateStatus('Determining current blockchain height');
             }
             height = await this.rpcClient.getBlockCount();
-            this.online = true;
+            try {
+                if (statusReceiver) {
+                    statusReceiver.updateStatus('Determining blockchain identifier');
+                }
+                chainIdentifier = await this.rpcClient.getBlockChainId();
+                this.online = true;
+            } catch (e) {
+                console.error('NeoRpcConnection could not retrieve block 0 hash: ' + e);
+                this.online = false;
+            }
         } catch (e) {
             console.error('NeoRpcConnection could not retrieve block height: ' + e);
             this.online = false;
         }
-
-        let chainIdentifier = this.lastKnownChainIdentifier;
-        try {
-            if (statusReceiver) {
-                statusReceiver.updateStatus('Determining blockchain identifier');
-            }
-            chainIdentifier = await this.rpcClient.getBlockChainId();
-        } catch (e) {
-            console.error('NeoRpcConnection could not retrieve block 0 hash: ' + e);
-        }
-
         return new BlockchainInfo(height, this.rpcUrl, this.online, chainIdentifier);
     }
 
@@ -144,6 +143,9 @@ export class NeoRpcConnection implements INeoRpcConnection {
         }
 
         const result = new Blocks();
+        if (!blockchainInfo.online) {
+            return result;
+        }
         
         while ((result.blocks.length < BlocksPerPage) && 
             ((forwards && (index >= 0)) || (!forwards && (index < height)))) {
