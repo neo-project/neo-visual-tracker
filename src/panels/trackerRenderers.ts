@@ -74,9 +74,9 @@ const trackerRenderers = {
         }
 
         if (unclaimedInfo && unclaimedInfo.getUnclaimedSupport) {
-            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.available)));
-            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unavailable)));
-            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unclaimed)));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.available) + ' GAS'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unavailable) + ' GAS'));
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text(htmlHelpers.number(unclaimedInfo.unclaimed) + ' GAS'));
         } else {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text('N/A'));
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text('N/A'));
@@ -98,15 +98,9 @@ const trackerRenderers = {
                                 const value = parseFloat(claimableInfo.claimable[i].unclaimed);
                                 const row = htmlHelpers.newTableRow(
                                     htmlHelpers.newEventLink(txid, trackerEvents.ShowTransaction, txid, postMessage),
-                                    htmlHelpers.text(htmlHelpers.number(value) + ' GAS'),
-                                    htmlHelpers.newCopyLink(JSON.stringify(claimableInfo.claimable[i]), postMessage));
+                                    htmlHelpers.text(htmlHelpers.number(value) + ' GAS'));
                                 tbody.appendChild(row);
                             }
-                            tbody.appendChild(
-                                htmlHelpers.newTableHead(
-                                    htmlHelpers.text('Total'), 
-                                    htmlHelpers.text(htmlHelpers.number(claimableInfo.unclaimed) + ' GAS'),
-                                    htmlHelpers.text(' ')));
                         } else {
                             htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, false);
                         }
