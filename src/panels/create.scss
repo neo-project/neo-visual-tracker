@@ -1,28 +1,6 @@
 @import 'common';
 
-/* Make the entire page look like a horizontally and vertically centered dialog box: */
-body {
-    background-color: var(--vscode-sideBar-background);
-    .dialog {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 15px;
-        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
-        border: 1px solid var(--vscode-editorWidget-border);
-        background-color: var(--vscode-editor-background);
-        h1 {
-            text-align: center;
-            font-size: 1.2em;
-            margin-top: 0;
-        }
-        h2 {
-            font-size: 1.1em;
-            
-        }
-    }
-}
+@import 'dialog';
 
 /* Show the currently selected path, and allow the user to change it: */
 #path-selection {
@@ -36,23 +14,6 @@ body {
     }
     #custom-path-picker {
         display: none;
-    }
-}
-
-.combined-path {
-    font-style: italic;
-}
-
-/* Input boxes should have similar styling to the path-selection pseudo-input: */
-input {
-    margin: 10px 0 10px 0;
-    background-color: var(--vscode-input-background);
-    color: var(--vscode-input-foreground);
-    border: 1px solid var(--vscode-input-foreground);
-    padding: 8px 5px 8px 5px;
-    &[type=text] {
-        width: 100%;
-        box-sizing: border-box;
     }
 }
 
@@ -73,18 +34,5 @@ input {
             background-color: var(--vscode-button-background);
             color: var(--vscode-button-foreground);
         }
-    }
-}
-
-/* More prominent main action buttons: */
-#create, #close {
-    margin-top: 15px;
-    padding: 12px;
-}
-
-/* Spacing for text in results dialog: */
-#results-view {
-    div {
-        margin-top: 10px;
     }
 }
