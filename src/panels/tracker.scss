@@ -37,6 +37,14 @@ table {
     }
 }
 
+.gas-expando table {
+    border: 1px solid var(--vscode-editor-foreground);
+    margin: 5px;
+    td:nth-child(2) {
+        text-align: right;
+    }
+}
+
 #loading-indicator {
     background-color: rgba(255, 255, 255, 0.5);
     z-index: 98;

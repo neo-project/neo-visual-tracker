@@ -216,14 +216,16 @@
                 <th>Available GAS</th>
                 <td>
                     <div class="availableGas"></div>
-                    <div class="claimableSupported">
-                        <table>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="error claimableNotSupported">
-                        This Neo RPC server does not support the 'getclaimable' method, so unclaimed GAS cannot be shown.
+                    <div class="gas-expando">
+                        <div class="claimableSupported">
+                            <table>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="error claimableNotSupported">
+                            This Neo RPC server does not support the 'getclaimable' method, so unclaimed GAS cannot be shown.
+                        </div>
                     </div>
                 </td>
             </tr>
