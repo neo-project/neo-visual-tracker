@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="dialog">
+
+        <div id="data-entry-view">
+
+            <h1>Transfer assets</h1>
+
+            <a href="#" 
+                id="refreshBalancesLink" 
+                class="right"
+                title="Click to update source wallet list and  balances">Refresh</a>
+
+            <h2>
+                Source wallet
+            </h2>
+            <div>
+                Select the account to transfer assets from:
+            </div>
+            <div>
+                <div class="select"><select id="sourceWalletDropdown"></select></div>
+            </div>
+            <div class="error" id="errorBalanceRetrievalFailure">
+                There was an error when attempting to retrieve current balances for 
+                <span class="display-source-wallet emphasis"></span>.
+                Is Neo Express running?
+            </div>
+            <div class="error" id="errorSourceWalletEmpty">
+                The
+                <span class="display-source-wallet emphasis"></span>
+                account does not contain any assets.
+            </div>
+
+            <h2>Transfer amount</h2>
+            <div id="sourceBalancesTable">
+                <div>
+                    The <span class="display-source-wallet emphasis"></span> account
+                    contains the following assets:
+                </div>
+                <table class="table">
+                    <tbody id="sourceBalancesTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                Select an asset and enter the amount to transfer:
+            </div>
+            <div>
+                <span class="col-2">
+                    <input type="text" id="amount" placeholder="Amount" />
+                </span>
+                <span class="col-2">
+                    <div class="select"><select id="assetDropdown"></select></div>
+                </span>
+            </div>
+            
+            <h2>Destination wallet</h2>
+            <div>
+                Select the account to receive the assets:
+            </div>
+            <div>
+                <div class="select"><select id="destinationWalletDropdown"></select></div>
+            </div>
+
+            <div id="error-message" class="result-text error">
+            </div>
+
+            <div class="text-center">
+                <button id="transfer" class="action-btn">Transfer</button>
+            </div>
+
+        </div>
+
+        <div id="results-view" class="results">
+
+            <h1>Assets transferred</h1>
+
+            <div>
+                The following transfer was made:
+            </div>
+
+            <div>
+                <pre class="result-text"></pre>
+            </div>
+
+            <div class="text-center">
+                <button id="close" class="action-btn">OK</button>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>

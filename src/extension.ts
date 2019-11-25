@@ -7,6 +7,7 @@ import { NeoTrackerPanel } from './neoTrackerPanel';
 import { NewWalletPanel } from './newWalletPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
+import { TransferPanel } from './transferPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -62,6 +63,17 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', (server) => {
+		try {
+			const panel = new TransferPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				context.subscriptions);
+		} catch (e) {
+			console.error('Error opening transfer panel ', e);
+		}
+	});
+
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
 		try {
 			const panel = new InvocationPanel(
@@ -100,6 +112,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(startServerCommand);
 	context.subscriptions.push(stopServerCommand);
 	context.subscriptions.push(createWalletCommand);
+	context.subscriptions.push(transferCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(serverExplorer);

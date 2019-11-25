@@ -118,24 +118,9 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
     }
 
 	public async refresh() {
-
-        const mainNetRpcServer = await RpcServerExplorer.getBestRpcServer(
-            'https://api.neoscan.io/api/main_net/v1/get_all_nodes', 
-            'Neo Main Net');
-
-        const testNetRpcServer = await RpcServerExplorer.getBestRpcServer(
-            'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes', 
-            'Neo Test Net');
-
         this.rootItems = [];
 
-        if (mainNetRpcServer) {
-            this.rootItems.push(mainNetRpcServer);
-        }
-
-        if (testNetRpcServer) {
-            this.rootItems.push(testNetRpcServer);
-        }
+        this.onDidChangeTreeDataEmitter.fire();
 
         let allRootPaths: string[] = [];
         if (vscode.workspace.workspaceFolders) {
@@ -149,10 +134,25 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
                 allJsonFiles[i].fsPath);
             if (rpcServerFromJson) {
                 this.rootItems.push(rpcServerFromJson);
+                this.onDidChangeTreeDataEmitter.fire();
             }
         }
+        
+        const testNetRpcServer = await RpcServerExplorer.getBestRpcServer(
+            'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes', 
+            'Neo Test Net');
+        if (testNetRpcServer) {
+            this.rootItems.unshift(testNetRpcServer);
+            this.onDidChangeTreeDataEmitter.fire();
+        }
 
-		this.onDidChangeTreeDataEmitter.fire();
+        const mainNetRpcServer = await RpcServerExplorer.getBestRpcServer(
+            'https://api.neoscan.io/api/main_net/v1/get_all_nodes', 
+            'Neo Main Net');
+        if (mainNetRpcServer) {
+            this.rootItems.unshift(mainNetRpcServer);
+            this.onDidChangeTreeDataEmitter.fire();
+        }
 	}
 
 	public getTreeItem(element: RpcServerTreeItemIdentifier): vscode.TreeItem {
