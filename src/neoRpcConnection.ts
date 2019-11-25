@@ -14,7 +14,6 @@ export class BlockchainInfo {
         public height: number,
         public url: string,
         public online: boolean,
-        public chainIdentifier?: string,
         populatedBlockList?: number[]) {
 
         this.populatedBlocks = new BitSet();
@@ -62,7 +61,6 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     private readonly rpcClient: CachedRpcClient;
 
-    private lastKnownChainIdentifier?: string;
     private lastKnownHeight: number;
     private subscriptions: INeoSubscription[];
     private timeout?: NodeJS.Timeout;
@@ -72,7 +70,6 @@ export class NeoRpcConnection implements INeoRpcConnection {
         this.rpcUrl = rpcUrl;
         this.rpcClient = new CachedRpcClient(this.rpcUrl);
         this.lastKnownHeight = 0;
-        this.lastKnownChainIdentifier = undefined;
         this.subscriptions = [];
         this.timeout = undefined;
     }
@@ -96,38 +93,28 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     public async getBlockchainInfo(statusReceiver?: INeoStatusReceiver) {
         let height = this.lastKnownHeight;
-        let chainIdentifier = this.lastKnownChainIdentifier;
         let populatedBlocks: number[] | undefined = undefined;
         try {
             if (statusReceiver) {
                 statusReceiver.updateStatus('Determining current blockchain height');
             }
             height = await this.rpcClient.getBlockCount();
+            this.online = true;
             try {
                 if (statusReceiver) {
-                    statusReceiver.updateStatus('Determining blockchain identifier');
+                    statusReceiver.updateStatus('Determining populated blocks');
                 }
-                chainIdentifier = await this.rpcClient.getBlockChainId();
-                try {
-                    if (statusReceiver) {
-                        statusReceiver.updateStatus('Determining populated blocks');
-                    }
-                    populatedBlocks = (await this.rpcClient.getPopulatedBlocks()).result;
-                } catch (e) {
-                    if (e.message.toLowerCase().indexOf('method not found') === -1) {
-                        console.error('NeoRpcConnection could not determine known populated blocks: ' + e);
-                    }
-                }
-                this.online = true;
+                populatedBlocks = (await this.rpcClient.getPopulatedBlocks()).result;
             } catch (e) {
-                console.error('NeoRpcConnection could not retrieve block 0 hash: ' + e);
-                this.online = false;
+                if (e.message.toLowerCase().indexOf('method not found') === -1) {
+                    console.error('NeoRpcConnection could not determine known populated blocks: ' + e);
+                }
             }
         } catch (e) {
             console.error('NeoRpcConnection could not retrieve block height: ' + e);
             this.online = false;
         }
-        return new BlockchainInfo(height, this.rpcUrl, this.online, chainIdentifier, populatedBlocks);
+        return new BlockchainInfo(height, this.rpcUrl, this.online, populatedBlocks);
     }
 
     public async getBlock(index: number, statusReceiver: INeoStatusReceiver) {
@@ -365,7 +352,6 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private async poll() : Promise<void> {
         this.timeout = undefined;
         const blockchainInfo = await this.getBlockchainInfo();
-        this.lastKnownChainIdentifier = blockchainInfo.chainIdentifier;
         if ((blockchainInfo.height !== this.lastKnownHeight) || !blockchainInfo.online) {
             this.lastKnownHeight = blockchainInfo.height;
             for (let i = 0; i < this.subscriptions.length; i++) {
