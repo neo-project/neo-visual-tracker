@@ -1,6 +1,5 @@
 import { BitSet } from 'bitset';
 import { disassembleByteCode } from '@neo-one/node-core/disassembleByteCode';
-import { Memento } from 'vscode';
 
 import { CachedRpcClient } from "./cachedRpcClient";
 
