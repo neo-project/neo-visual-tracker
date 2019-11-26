@@ -9,6 +9,7 @@ const transferSelectors = {
     ErrorBalanceRetrievalFailure: '#errorBalanceRetrievalFailure',
     ErrorMessage: '#error-message',
     ErrorSourceWalletEmpty: '#errorSourceWalletEmpty',
+    LoadingIndicator: '.loading',
     RefreshBalancesLink: '#refreshBalancesLink',
     ResultText: '.result-text',
     SourceBalancesTable: '#sourceBalancesTable',
