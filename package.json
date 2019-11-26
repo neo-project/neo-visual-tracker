@@ -92,6 +92,12 @@
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
             {
+                "command": "neo-visual-devtracker.claim",
+                "title": "Claim GAS",
+                "category": "Neo Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
                 "command": "neo-visual-devtracker.invokeContract",
                 "title": "Invoke contract",
                 "category": "Neo Express",
@@ -145,6 +151,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.transferAssets",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "neo-visual-devtracker.claim",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {

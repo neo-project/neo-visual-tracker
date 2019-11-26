@@ -74,6 +74,14 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', (server) => {
+		try {
+			// TODO
+		} catch (e) {
+			console.error('Error opening claim panel ', e);
+		}
+	});
+
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
 		try {
 			const panel = new InvocationPanel(
@@ -113,6 +121,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(stopServerCommand);
 	context.subscriptions.push(createWalletCommand);
 	context.subscriptions.push(transferCommand);
+	context.subscriptions.push(claimCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(serverExplorer);
