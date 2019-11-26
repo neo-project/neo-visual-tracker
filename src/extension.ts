@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { ClaimPanel } from './claimPanel';
 import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
@@ -76,7 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', (server) => {
 		try {
-			// TODO
+			const panel = new ClaimPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				context.subscriptions);
 		} catch (e) {
 			console.error('Error opening claim panel ', e);
 		}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="dialog">
+
+        <div id="data-entry-view">
+
+            <h1>Claim GAS</h1>
+
+            <a href="#" 
+                id="refreshClaimableLink" 
+                class="right"
+                title="Click to refresh the claimable GAS for the selected wallet">Refresh</a>
+
+            <!-- 'Loading' animation courtesy of loading.io; see: https://loading.io/license/#free-license -->
+            <svg class="loading right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34px" height="34px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <rect x="17.5" y="0" width="15" height="40" fill="#85a2b6">
+                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="0;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="64;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                </rect>
+                <rect x="42.5" y="0" width="15" height="40" fill="#bbcedd">
+                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                </rect>
+                <rect x="67.5" y="0" width="15" height="40" fill="#dce4eb">
+                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                </rect>
+            </svg>
+
+            <div>
+                Select the account that you wish to claim GAS for:
+            </div>
+            <div>
+                <div class="select"><select id="walletDropdown"></select></div>
+            </div>
+            <div class="error" id="errorClaimableRetrievalFailure">
+                There was an error when checking claimable GAS for 
+                <span class="display-wallet emphasis"></span>.
+                Is Neo Express running?
+            </div>
+            <div class="error" id="errorWalletHasNoClaimableGas">
+                The
+                <span class="display-wallet emphasis"></span>
+                account does not have any claimable GAS.
+            </div>
+            <div id="claimableInfo">
+                The <span class="display-wallet emphasis"></span> account
+                can claim <span class="display-claimable"></span> GAS.
+            </div>
+            
+            <div id="error-message" class="result-text error m-t">
+            </div>
+
+            <div class="text-center">
+                <button id="claim" class="action-btn">
+                    Claim 
+                </button>
+            </div>
+
+        </div>
+
+        <div id="results-view" class="results">
+
+            <h1>Claim published</h1>
+
+            <div>
+                The following claim was made:
+            </div>
+
+            <div>
+                <pre class="result-text"></pre>
+            </div>
+
+            <div class="text-center">
+                <button id="close" class="action-btn">OK</button>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>
