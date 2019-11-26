@@ -29,7 +29,9 @@ function toggleLoadingState(isLoading: boolean) {
 }
 
 function postViewState(shouldRefresh?: boolean) {
-    toggleLoadingState(true);
+    if (shouldRefresh) {
+        toggleLoadingState(true);
+    }
     vsCodePostMessage({ e: transferEvents.Update, c: viewState, r: shouldRefresh });
     console.log('->', viewState);
 }
