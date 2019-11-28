@@ -14,7 +14,24 @@ let viewState: any = {};
 
 let vsCodePostMessage: Function;
 
+function toggleLoadingState(isLoading: boolean) {
+    htmlHelpers.showHide(transferSelectors.LoadingIndicator, isLoading, 'inline');
+    const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
+    const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
+    const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
+    const destinationWalletDropdown = document.querySelector(transferSelectors.DestinationWalletDropdown) as HTMLSelectElement;
+    const assetDropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
+    transferButton.disabled = isLoading;
+    amountInput.disabled = isLoading;
+    sourceWalletDropdown.disabled = isLoading;
+    destinationWalletDropdown.disabled = isLoading;
+    assetDropdown.disabled = isLoading;
+}
+
 function postViewState(shouldRefresh?: boolean) {
+    if (shouldRefresh) {
+        toggleLoadingState(true);
+    }
     vsCodePostMessage({ e: transferEvents.Update, c: viewState, r: shouldRefresh });
     console.log('->', viewState);
 }
@@ -83,6 +100,7 @@ function render() {
 }
 
 function handleMessage(message: any) {
+    toggleLoadingState(false);
     if (message.viewState) {
         console.log('<-', message.viewState);
         viewState = message.viewState;
@@ -91,6 +109,7 @@ function handleMessage(message: any) {
 }
 
 function initializePanel() {
+    toggleLoadingState(true);
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
     const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
@@ -101,12 +120,14 @@ function initializePanel() {
     const assetDropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
     const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
     transferButton.addEventListener('click', _ => {
+        toggleLoadingState(true);
         vscode.postMessage({ e: transferEvents.Transfer });
     });
     closeButton.addEventListener('click', _ => {
         vscode.postMessage({ e: transferEvents.Close });
     });
     refreshLink.addEventListener('click', _ => {
+        toggleLoadingState(true);
         vscode.postMessage({ e: transferEvents.Refresh });
     });
     sourceWalletDropdown.addEventListener('change', _ => {

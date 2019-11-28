@@ -14,26 +14,34 @@ for instructions on installing Neo-Express.
 
 ![Neo-Express config detection](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-detect.png)
 
-* Create a new Neo-Express instance from within vscode
+* Create a new Neo-Express instance 
 
 ![Create instance](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-create.png)
 
-* Start and stop Neo-Express instances from within vscode
+* Start and stop Neo-Express instances 
 
 ![Starting and stopping Neo-Express instances](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-start-stop.png)
 
-* View Neo-Express output within vscode
+* View Neo-Express output
 
 ![Neo-Express output shown in vscode terminal](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-terminal.png)
 
-* Explore the blockchain from within vscode (works for Neo-Express private blockchains and the public Neo blockchain)
+* Explore the blockchain (works for Neo-Express private blockchains and the public Neo blockchain)
 
 ![Built-in blockchain explorer](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-block-explorer.png)
 
-* Create a Neo-Express wallet from within within vscode
+* Create a Neo-Express wallet 
 
 ![Neo-Express wallet creation](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-create-wallet.png)
 
-* Invoke smart contracts on a Neo-Express instance from within vscode
+* Transfer assets between Neo-Express wallets
+
+![Transfer assets](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-transfer.png)
+
+* Claim GAS
+
+![Claiming GAS](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-claim.png)
+
+* Invoke smart contracts on a Neo-Express instance
 
 ![Contract invocation](https://raw.githubusercontent.com/neo-project/neo-visual-tracker/master/images/feature-invoke.png)

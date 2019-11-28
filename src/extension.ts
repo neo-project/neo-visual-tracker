@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { ClaimPanel } from './claimPanel';
 import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
@@ -74,6 +75,17 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', (server) => {
+		try {
+			const panel = new ClaimPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				context.subscriptions);
+		} catch (e) {
+			console.error('Error opening claim panel ', e);
+		}
+	});
+
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
 		try {
 			const panel = new InvocationPanel(
@@ -113,6 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(stopServerCommand);
 	context.subscriptions.push(createWalletCommand);
 	context.subscriptions.push(transferCommand);
+	context.subscriptions.push(claimCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(serverExplorer);
