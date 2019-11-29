@@ -48,7 +48,7 @@ export class NewWalletPanel {
         const htmlFileContents = fs.readFileSync(
             path.join(extensionPath, 'src', 'panels', 'newwallet.html'), { encoding: 'utf8' });
         const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'newwalletBundle.js'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'bundles', 'newwallet.main.js'))) + '';
         const cssHref : string = this.panel.webview.asWebviewUri(
             vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'newwallet.css'))) + '';
         this.panel.webview.html = htmlFileContents
