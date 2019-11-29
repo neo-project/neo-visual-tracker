@@ -3,6 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 async function run(command, args) {
+    if (process.platform === 'win32') {
+        args.unshift(command);
+        args.unshift('/c');
+        command = 'cmd.exe';
+    }
     const argsAsString = args.join(' ');
     console.log('>', command, argsAsString);
     await new Promise((resolve, reject) => {
@@ -52,7 +57,7 @@ function createIfNotExists(folder) {
         await forAllFiles('src/panels', '.scss', file => tasks.push(run('node-sass', [ file, '-wo', 'out/panels' ])));
         await forAllFiles('out/panels', '.main.js', (file, basename) => tasks.push(run('watchify', [ file, '-o', 'out/panels/bundles/' + basename ])));
         await Promise.all(tasks);
-        
+
     }
 
 })();
