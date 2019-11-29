@@ -47,10 +47,14 @@ function createIfNotExists(folder) {
 
     if (watchMode) {
 
-        // This exact string is matched by tasks.json. It signals that the initial compilation is finished
+        // These exact strings are matched by tasks.json. They signals that the initial compilation is finished
         // and that the debugger can be launched:
-        console.log('neo-visual-tracker can now be launched')
-        setInterval(() => console.log('neo-visual-tracker can now be launched'), 2000);
+        const canary = function() {
+            console.log('neo-visual-tracker can now be launched');
+            console.log('neo-visual-tracker watching for incremental changes');
+        };
+        canary();
+        setInterval(canary, 2000);
         
         const tasks = [];
         tasks.push(run('tsc', [ '-watch', '-p', './' ]));
