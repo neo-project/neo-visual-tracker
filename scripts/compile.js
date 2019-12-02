@@ -37,7 +37,7 @@ function createIfNotExists(folder) {
 
 (async function() {
 
-    const watchMode = process.argv[2].trim() === '-w';
+    const watchMode = (process.argv[2] || '').trim() === '-w';
 
     await run('npm', [ 'install' ]);
     await run('tsc', [ '-p',  './' ]);
