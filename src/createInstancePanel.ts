@@ -1,10 +1,9 @@
-import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as shellEscape from 'shell-escape';
 import * as vscode from 'vscode';
 
 import { createEvents } from './panels/createEvents';
+import { NeoExpressHelper } from './neoExpressHelper';
 import { RpcServerExplorer } from './rpcServerExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
@@ -87,7 +86,7 @@ export class CreateInstancePanel {
             this.viewState.showError = false;
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === createEvents.Create) {
-            this.doCreate();
+            await this.doCreate();
         } else if (message.e === createEvents.Close) {
             this.dispose();
         }
@@ -101,32 +100,20 @@ export class CreateInstancePanel {
         }
     }
 
-    private doCreate() {
-        let command = shellEscape.default([
-            'neo-express', 
-            'create', 
-            '-c', this.viewState.nodeCount + '', 
-            this.viewState.allowOverwrite ? '-f' : '']);
-        // Hack to use double quotes instead of single quotes to wrap the path (needed on Windows):
-        command += ' -o ' + shellEscape.default([this.viewState.combinedPath]).replace(/'/g, '"');
-        this.viewState.showError = false;
-        this.viewState.showSuccess = false;
-        childProcess.exec(command, (error, stdout, stderr) => {
-            if (error) {
-                this.viewState.showError = true;
-                this.viewState.result = error.message;
-            } else if (stderr) {
-                this.viewState.showError = true;
-                this.viewState.result = stderr;
-            } else {
-                this.created = true;
-                this.viewState.showSuccess = true;
-                this.viewState.result = stdout;
-                this.rpcServerExplorer.refresh();
-            }
-            this.updateViewState();
-            this.panel.webview.postMessage({ viewState: this.viewState });
-        });
+    private async doCreate() {
+        const result = await NeoExpressHelper.createInstance(
+            this.viewState.combinedPath,
+            this.viewState.nodeCount,
+            this.viewState.allowOverwrite);
+        this.viewState.showError = result.isError;
+        this.viewState.showSuccess = !result.isError;
+        this.viewState.result = result.output;
+        if (!result.isError) {
+            this.created = true;
+            this.rpcServerExplorer.refresh();
+        }
+        this.updateViewState();
+        this.panel.webview.postMessage({ viewState: this.viewState });
     }
 
     dispose() {

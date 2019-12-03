@@ -1,10 +1,9 @@
-import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as shellEscape from 'shell-escape';
 import * as vscode from 'vscode';
 
 import { newwalletEvents } from './panels/newwalletEvents';
+import { NeoExpressHelper } from './neoExpressHelper';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -61,29 +60,14 @@ export class NewWalletPanel {
     }
 
     private async doCreate() {
-        let command = shellEscape.default([
-            'neo-express',
-            'wallet',
-            'create', 
-            this.viewState.allowOverwrite ? '-f' : '']);
-        // Hack to use double quotes instead of single quotes to wrap strings (needed on Windows):
-        command += ' -i ' + shellEscape.default([this.viewState.neoExpressJsonFullPath]).replace(/'/g, '"');
-        command += ' ' + shellEscape.default([this.viewState.walletName]).replace(/'/g, '"');
-        this.viewState.showError = false;
-        this.viewState.showSuccess = false;
-        childProcess.exec(command, (error, stdout, stderr) => {
-            if (error) {
-                this.viewState.showError = true;
-                this.viewState.result = error.message;
-            } else if (stderr) {
-                this.viewState.showError = true;
-                this.viewState.result = stderr;
-            } else {
-                this.viewState.showSuccess = true;
-                this.viewState.result = stdout;
-            }
-            this.panel.webview.postMessage({ viewState: this.viewState });
-        });
+        const result = await NeoExpressHelper.createWallet(
+            this.viewState.neoExpressJsonFullPath,
+            this.viewState.walletName,
+            this.viewState.allowOverwrite);
+        this.viewState.showError = result.isError;
+        this.viewState.showSuccess = !result.isError;
+        this.viewState.result = result.output;
+        this.panel.webview.postMessage({ viewState: this.viewState });
     }
 
     private async onMessage(message: any) {

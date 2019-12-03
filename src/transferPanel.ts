@@ -1,9 +1,8 @@
-import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as shellEscape from 'shell-escape';
 import * as vscode from 'vscode';
 
+import { NeoExpressHelper } from './neoExpressHelper';
 import { transferEvents } from './panels/transferEvents';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
@@ -62,33 +61,17 @@ export class TransferPanel {
     }
 
     private async doTransfer() {
-        try {
-            this.viewState.showError = false;
-            this.viewState.showSuccess = false;
-            let command = shellEscape.default(['neo-express', 'transfer']);
-            command += ' -i ' + TransferPanel.doubleQuoteEscape(this.viewState.neoExpressJsonFullPath);
-            command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.assetName || 'unknown');
-            command += ' ' + (parseFloat(this.viewState.amount || '0') || 0);
-            command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.sourceWallet || 'unknown');
-            command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.destinationWallet || 'unknown');
-            const output = await new Promise((resolve, reject) => {
-                childProcess.exec(command, (error, stdout, stderr) => {
-                    if (error) {
-                        reject(error);
-                    } else if (stderr) {
-                        reject(stderr);
-                    } else {
-                        resolve(stdout);
-                    }
-                });
-            });
-            console.info('Transfer completed', command, output);
-            this.viewState.showSuccess = true;
-            this.viewState.result = command;
-        } catch (e) {
-            this.viewState.showError = true;
+        const result = await NeoExpressHelper.transfer(
+            this.viewState.neoExpressJsonFullPath,
+            this.viewState.assetName || 'unknown',
+            parseFloat(this.viewState.amount || '0') || 0,
+            this.viewState.sourceWallet || 'unknown',
+            this.viewState.destinationWallet || 'unknown');
+        this.viewState.showError = result.isError;
+        this.viewState.showSuccess = !result.isError;
+        this.viewState.result = result.output;
+        if (result.isError) {
             this.viewState.result = 'The transfer failed. Please check that the values entered are valid and try again.';
-            console.error('Transfer failed ', e);
         }
     }
 
@@ -131,24 +114,15 @@ export class TransferPanel {
         }
 
         this.viewState.sourceWalletBalances = [];
-        this.viewState.sourceWalletBalancesError = false;
         if (this.viewState.sourceWallet) {
-            try {
-                let command = shellEscape.default(['neo-express', 'show', 'account']);
-                command += ' ' + TransferPanel.doubleQuoteEscape(this.viewState.sourceWallet);
-                command += ' -i ' + TransferPanel.doubleQuoteEscape(this.viewState.neoExpressJsonFullPath);
-                const accountJson = await new Promise((resolve, reject) => {
-                    childProcess.exec(command, (error, stdout, stderr) => {
-                        if (error) {
-                            reject(error);
-                        } else if (stderr) {
-                            reject(stderr);
-                        } else {
-                            resolve(stdout);
-                        }
-                    });
-                });
-                const account = JSON.parse(accountJson as string);
+            const accountResult = await NeoExpressHelper.showAccount(
+                this.viewState.neoExpressJsonFullPath,
+                this.viewState.sourceWallet);
+            if (accountResult.isError) {
+                this.viewState.sourceWalletBalancesError = true;
+            } else {    
+                this.viewState.sourceWalletBalancesError = false;
+                const account = accountResult.result;
                 if (account.balances && account.balances.length) {
                     for (let i = 0; i < account.balances.length; i++) {
                         let assetName = account.balances[i].asset;
@@ -163,9 +137,6 @@ export class TransferPanel {
                         });
                     }
                 }
-            } catch (e) {
-                this.viewState.sourceWalletBalancesError = true;
-                console.error('Could not get balances for ', this.viewState.sourceWallet, e);
             }
         }
         
@@ -194,15 +165,4 @@ export class TransferPanel {
             !!this.viewState.sourceWalletBalances.length &&
             !!this.viewState.assetName;
     }
-
-    private static doubleQuoteEscape(argument: string) {
-        let escaped = shellEscape.default([ argument ]);
-        if ((escaped.length >= 2) && 
-            (escaped[0] === '\'') && 
-            (escaped[escaped.length - 1] === '\'')) {
-            escaped = '"' + escaped.substring(1, escaped.length - 1).replace(/"/g, '\\"') + '"';
-        }
-        return escaped;
-    }
-
 }
