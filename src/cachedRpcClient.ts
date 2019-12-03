@@ -147,6 +147,13 @@ export class CachedRpcClient {
         return this.memoizedGetClaimable(address);
     }
 
+    public getPopulatedBlocks(): Promise<any> {
+        // Note that this method is not cached. The list of populated blocks could potentially
+        // change every time a new block is generated.
+
+        return this.rpcClient.query({ method: 'express-get-populated-blocks' });
+    }
+
     public getUnclaimed(address: string): Promise<any> {
         return this.memoizedGetUnclaimed(address);
     }
