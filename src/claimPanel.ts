@@ -41,6 +41,7 @@ export class ClaimPanel {
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
+        this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);
 
         const htmlFileContents = fs.readFileSync(
@@ -68,6 +69,10 @@ export class ClaimPanel {
         if (result.isError) {
             this.viewState.result = 'The claim failed. Please confirm that the account has claimable GAS and the correct Neo Express instance is running, then try again.';
         }
+    }
+
+    private onClose() {
+        this.dispose();
     }
 
     private async onMessage(message: any) {

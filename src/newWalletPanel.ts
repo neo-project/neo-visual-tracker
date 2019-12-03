@@ -42,6 +42,7 @@ export class NewWalletPanel {
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
+        this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);
 
         const htmlFileContents = fs.readFileSync(
@@ -68,6 +69,10 @@ export class NewWalletPanel {
         this.viewState.showSuccess = !result.isError;
         this.viewState.result = result.output;
         this.panel.webview.postMessage({ viewState: this.viewState });
+    }
+
+    private onClose() {
+        this.dispose();
     }
 
     private async onMessage(message: any) {

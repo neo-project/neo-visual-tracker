@@ -43,6 +43,7 @@ export class TransferPanel {
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
+        this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);
 
         const htmlFileContents = fs.readFileSync(
@@ -73,6 +74,10 @@ export class TransferPanel {
         if (result.isError) {
             this.viewState.result = 'The transfer failed. Please check that the values entered are valid and try again.';
         }
+    }
+
+    private onClose() {
+        this.dispose();
     }
 
     private async onMessage(message: any) {
