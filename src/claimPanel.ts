@@ -47,7 +47,7 @@ export class ClaimPanel {
         const htmlFileContents = fs.readFileSync(
             path.join(extensionPath, 'src', 'panels', 'claim.html'), { encoding: 'utf8' });
         const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'claimBundle.js'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'bundles', 'claim.main.js'))) + '';
         const cssHref : string = this.panel.webview.asWebviewUri(
             vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'claim.css'))) + '';
         this.panel.webview.html = htmlFileContents

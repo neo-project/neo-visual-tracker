@@ -58,7 +58,7 @@ export class CreateInstancePanel {
         const htmlFileContents = fs.readFileSync(
             path.join(extensionPath, 'src', 'panels', 'create.html'), { encoding: 'utf8' });
         const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'createBundle.js'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'bundles', 'create.main.js'))) + '';
         const cssHref : string = this.panel.webview.asWebviewUri(
             vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'create.css'))) + '';
         this.panel.webview.html = htmlFileContents

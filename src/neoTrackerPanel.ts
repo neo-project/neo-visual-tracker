@@ -68,7 +68,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         const htmlFileContents = fs.readFileSync(
             path.join(extensionPath, 'src', 'panels', 'tracker.html'), { encoding: 'utf8' });
         const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'trackerBundle.js'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'bundles', 'tracker.main.js'))) + '';
         const cssHref : string = this.panel.webview.asWebviewUri(
             vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'tracker.css'))) + '';
         this.panel.webview.html = htmlFileContents
