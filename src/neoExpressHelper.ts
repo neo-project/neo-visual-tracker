@@ -128,6 +128,7 @@ export class NeoExpressHelper {
         let command = shellEscape.default(['neo-express', 'show', 'account']);
         command += ' ' + NeoExpressHelper.doubleQuoteEscape(wallet);
         command += ' -i ' + NeoExpressHelper.doubleQuoteEscape(neoExpressJsonFullPath);
+        command += ' -j';
         return await new Promise((resolve) => {
             childProcess.exec(command, (error, stdout, stderr) => {
                 if (error) {
@@ -150,6 +151,7 @@ export class NeoExpressHelper {
         let command = shellEscape.default(['neo-express', 'show', 'claimable']);
         command += ' ' + NeoExpressHelper.doubleQuoteEscape(wallet);
         command += ' -i ' + NeoExpressHelper.doubleQuoteEscape(neoExpressJsonFullPath);
+        command += ' -j';
         return await new Promise((resolve) => {
             childProcess.exec(command, (error, stdout, stderr) => {
                 if (error) {
