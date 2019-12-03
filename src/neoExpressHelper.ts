@@ -106,6 +106,21 @@ export class NeoExpressHelper {
         });
     }
 
+    public static async isNeoExpressInstalled(): Promise<boolean> {
+        let command = shellEscape.default([ 'neo-express', '-v' ]);
+        return await new Promise((resolve) => {
+            childProcess.exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    resolve(false);
+                } else if (stderr) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
     public static async showAccount(
         neoExpressJsonFullPath: string,
         wallet: string): Promise<JsonResult> {
