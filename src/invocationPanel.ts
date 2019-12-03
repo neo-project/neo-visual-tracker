@@ -93,7 +93,7 @@ export class InvocationPanel {
         const htmlFileContents = fs.readFileSync(
             path.join(extensionPath, 'src', 'panels', 'invoke.html'), { encoding: 'utf8' });
         const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'invokeBundle.js'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'bundles', 'invoke.main.js'))) + '';
         const cssHref : string = this.panel.webview.asWebviewUri(
             vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'invoke.css'))) + '';
         this.panel.webview.html = htmlFileContents

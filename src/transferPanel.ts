@@ -48,7 +48,7 @@ export class TransferPanel {
         const htmlFileContents = fs.readFileSync(
             path.join(extensionPath, 'src', 'panels', 'transfer.html'), { encoding: 'utf8' });
         const javascriptHref : string = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'transferBundle.js'))) + '';
+            vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'bundles', 'transfer.main.js'))) + '';
         const cssHref : string = this.panel.webview.asWebviewUri(
             vscode.Uri.file(path.join(extensionPath, 'out', 'panels', 'transfer.css'))) + '';
         this.panel.webview.html = htmlFileContents
