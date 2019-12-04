@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { ClaimPanel } from './claimPanel';
 import { ContractDetector } from './contractDetector';
 import { CreateInstancePanel } from './createInstancePanel';
+import { DeployPanel } from './deployPanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
@@ -91,7 +92,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', (server) => {
 		try {
-			// TODO
+			const panel = new DeployPanel(
+				context.extensionPath, 
+				server.jsonFile,
+				contractDetector,
+				context.subscriptions);
 		} catch (e) {
 			console.error('Error opening contract deployment panel ', e);
 		}

@@ -10,7 +10,7 @@ export class ContractDetector {
     private readonly fileSystemWatcher: vscode.FileSystemWatcher;
     private readonly searchPattern: vscode.GlobPattern = '**/*.avm';
 
-    private contracts: Contract[];
+    public contracts: Contract[];
 
     constructor() {
         this.contracts = [];
