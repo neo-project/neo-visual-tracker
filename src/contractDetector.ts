@@ -16,6 +16,7 @@ export class ContractDetector {
         this.contracts = [];
         this.refresh();
         this.fileSystemWatcher = vscode.workspace.createFileSystemWatcher(this.searchPattern);
+        this.fileSystemWatcher.onDidChange(this.refresh, this);
         this.fileSystemWatcher.onDidCreate(this.refresh, this);
         this.fileSystemWatcher.onDidDelete(this.refresh, this);
     }
