@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { ClaimPanel } from './claimPanel';
+import { ContractDetector } from './contractDetector';
 import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
@@ -17,6 +18,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
 
 	const neoExpressInstanceManager = new NeoExpressInstanceManager();
+
+	const contractDetector = new ContractDetector();
 
 	let createInstancePanel: CreateInstancePanel | null = null;
 
@@ -129,6 +132,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(serverExplorer);
+	context.subscriptions.push(contractDetector);
 }
 
 export function deactivate() {
