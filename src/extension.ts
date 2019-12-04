@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import { ClaimPanel } from './claimPanel';
 import { CreateInstancePanel } from './createInstancePanel';
-import { InstallRequiredPanel } from './installRequiredPanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressHelper } from './neoExpressHelper';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
@@ -21,16 +20,19 @@ export function activate(context: vscode.ExtensionContext) {
 	const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
 	let createInstancePanel: CreateInstancePanel | null = null;
-	let installRequiredPanel: InstallRequiredPanel | null = null;
 
 	const requireNeoExpress = async (then: Function) => {
 		if (await NeoExpressHelper.isNeoExpressInstalled()) {
 			then();
 		} else {
-			if ((installRequiredPanel === null) || installRequiredPanel.isDisposed()) {
-				installRequiredPanel = new InstallRequiredPanel(context.extensionPath, context.subscriptions);
+			const showInstructions = 'Show installation instructions';
+			const dialogResponse = await vscode.window.showInformationMessage(
+				'Neo Express Required\n\nNeo Express was not detected on your machine. Neo Express must be installed in order to use this functionality.\n',
+				{ modal: true },
+				showInstructions);
+			if (dialogResponse === showInstructions) {
+				vscode.env.openExternal(vscode.Uri.parse('https://github.com/neo-project/neo-express#Installation'));
 			}
-			installRequiredPanel.reveal();
 		}
 	};
 
