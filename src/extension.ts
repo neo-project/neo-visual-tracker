@@ -89,6 +89,14 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
+	const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', (server) => {
+		try {
+			// TODO
+		} catch (e) {
+			console.error('Error opening contract deployment panel ', e);
+		}
+	});
+
 	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
 		try {
 			const panel = new InvocationPanel(
@@ -129,6 +137,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(createWalletCommand);
 	context.subscriptions.push(transferCommand);
 	context.subscriptions.push(claimCommand);
+	context.subscriptions.push(deployContractCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(serverExplorer);
