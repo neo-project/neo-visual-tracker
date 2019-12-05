@@ -122,7 +122,7 @@ export class CachedRpcClient {
 
     public getClaimable(address: string): Promise<any> {
         // Note that this method is not cached. The state of an address can change in-between calls.
-        return this.rpcClient.getClaimable(address);
+        return this.rpcClient.query({ method: 'getclaimable', params: [ address ] });
     }
 
     public getPopulatedBlocks(): Promise<any> {

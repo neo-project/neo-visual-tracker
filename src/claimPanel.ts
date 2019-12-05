@@ -4,8 +4,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { claimEvents } from './panels/claimEvents';
+import { INeoRpcConnection } from './neoRpcConnection';
 import { NeoExpressConfig } from './neoExpressConfig';
-import { NeoExpressHelper } from './neoExpressHelper';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -27,6 +27,7 @@ export class ClaimPanel {
     private readonly neoExpressConfig: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
     private readonly rpcUri: string;
+    private readonly rpcConnection: INeoRpcConnection;
 
     private viewState: ViewState;
     private initialized: boolean = false;
@@ -35,12 +36,12 @@ export class ClaimPanel {
         extensionPath: string,
         neoExpressConfig: NeoExpressConfig,
         rpcUri: string,
+        rpcConnection: INeoRpcConnection,
         disposables: vscode.Disposable[]) {
 
         this.rpcUri = rpcUri;
-
+        this.rpcConnection = rpcConnection;
         this.neoExpressConfig = neoExpressConfig;
-
         this.viewState = new ViewState();
 
         this.panel = vscode.window.createWebviewPanel(
@@ -67,9 +68,14 @@ export class ClaimPanel {
         this.panel.dispose();
     }
 
+    public updateStatus(status: string) {
+        console.info('ClaimPanel status:', status);
+    }
+
     private async doClaim() {
         this.viewState.showError = false;
         this.viewState.showSuccess = false;
+        this.viewState.getClaimableError = false;
         try {
             const api = new neon.api.neoCli.instance(this.rpcUri);
             const config = {
@@ -125,16 +131,20 @@ export class ClaimPanel {
 
         this.viewState.claimable = 0;
         const walletConfig = this.viewState.wallets.filter(_=>_.privateKey === this.viewState.walletKey)[0];
-        const walletName = walletConfig ? walletConfig.walletName : undefined;
-        if (walletName) {
-            const showClaimableResult = await NeoExpressHelper.showClaimable(
-                this.neoExpressConfig.neoExpressJsonFullPath,
-                walletName);
-            this.viewState.claimable = showClaimableResult.result.unclaimed || 0;
-            this.viewState.getClaimableError = showClaimableResult.isError;
+        const walletAddress = walletConfig ? walletConfig.address : undefined;
+        if (walletAddress) {
+            try {
+                const claimable = await this.rpcConnection.getClaimable(walletAddress, this);
+                this.viewState.claimable = claimable.unclaimed || 0;
+                this.viewState.getClaimableError = !claimable.getClaimableSupport;
+            } catch (e) {
+                console.error('ClaimPanel could not query claimable GAS', walletAddress, this.rpcUri, e);
+                this.viewState.claimable = 0;
+                this.viewState.getClaimableError = true;
+            }
         }
         
-        if (this.viewState.walletKey && !this.viewState.wallets.filter(_ => _.privateKey === this.viewState.walletKey).length) {
+        if (!walletConfig) {
             this.viewState.walletKey = undefined;
             this.viewState.walletDescription = undefined;
             this.viewState.claimable = 0;
@@ -142,8 +152,7 @@ export class ClaimPanel {
 
         this.viewState.isValid =
             !!this.viewState.walletKey &&
-            (this.viewState.claimable > 0) &&
-            !this.viewState.getClaimableError;
+            ((this.viewState.claimable > 0) || this.viewState.getClaimableError);
 
         this.initialized = true;
     }

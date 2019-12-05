@@ -52,7 +52,7 @@ function render() {
     htmlHelpers.setPlaceholder(claimSelectors.ResultText, htmlHelpers.text(viewState.result));
     htmlHelpers.setPlaceholder(claimSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(claimSelectors.ErrorClaimableRetrievalFailure, viewState.getClaimableError);
-    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletKey && !viewState.getClaimableError && !(viewState.claimable > 0));
+    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletKey && !viewState.showError && !(viewState.getClaimableError || (viewState.claimable > 0)));
     htmlHelpers.showHide(claimSelectors.ClaimableInfo, viewState.claimable > 0);
     htmlHelpers.showHide(claimSelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(claimSelectors.ViewResults, viewState.showSuccess);

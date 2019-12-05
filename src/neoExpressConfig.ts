@@ -7,6 +7,7 @@ class Wallet {
         public readonly walletName: string,
         public readonly accountLabel: string | null,
         public readonly isDefault: boolean,
+        public readonly address: string,
         public readonly privateKey: string) {
         this.description = 
             walletName + (accountLabel ? ' - ' + accountLabel + (isDefault ? ' (default)' : '') : '');
@@ -40,8 +41,9 @@ export class NeoExpressConfig {
                     const accountLabel: string | null = accountConfig['label'];
                     const isDefault: boolean = !!accountConfig['is-default'];
                     const privateKey: string | null = accountConfig['private-key'];
-                    if (privateKey) {
-                        this.wallets.push(new Wallet(walletName, accountLabel, isDefault, privateKey));
+                    const address: string | null = accountConfig['script-hash'];
+                    if (privateKey && address) {
+                        this.wallets.push(new Wallet(walletName, accountLabel, isDefault, address, privateKey));
                     }
                 });
             }

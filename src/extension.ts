@@ -117,6 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
 					context.extensionPath, 
 					new NeoExpressConfig(server.jsonFile),
 					server.rpcUri,
+					rpcConnectionPool.getConnection(server.rpcUri),
 					context.subscriptions);
 			} catch (e) {
 				console.error('Error opening claim panel ', e);
