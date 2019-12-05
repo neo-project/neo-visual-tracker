@@ -26,13 +26,23 @@ export function activate(context: vscode.ExtensionContext) {
 		if (await NeoExpressHelper.isNeoExpressInstalled()) {
 			then();
 		} else {
-			const showInstructions = 'Show installation instructions';
+			const moreInfo = 'More Information';
+			const install = 'Install';
 			const dialogResponse = await vscode.window.showInformationMessage(
 				'Neo Express Required\n\nNeo Express was not detected on your machine. Neo Express must be installed in order to use this functionality.\n',
 				{ modal: true },
-				showInstructions);
-			if (dialogResponse === showInstructions) {
+				install,
+				moreInfo);
+			if (dialogResponse === moreInfo) {
 				vscode.env.openExternal(vscode.Uri.parse('https://github.com/neo-project/neo-express#Installation'));
+			} else if (dialogResponse === install) {
+				vscode.tasks.executeTask(
+					new vscode.Task(
+						{ type: 'install-neo-express' },
+						vscode.TaskScope.Global,
+						'Install Neo Express',
+						'dotnet',
+						new vscode.ShellExecution('dotnet tool install Neo.Express -g')));
 			}
 		}
 	};
