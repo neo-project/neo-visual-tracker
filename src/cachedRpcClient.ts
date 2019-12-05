@@ -46,15 +46,6 @@ export class CachedRpcClient {
     private readonly memoizedGetAssetState: 
         ((assetId: string) => Promise<any>) & memoize.Memoized<(assetId: string) => Promise<any>>;
 
-    private readonly memoizedGetUnspents: 
-        ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
-
-    private readonly memoizedGetClaimable: 
-        ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
-
-    private readonly memoizedGetUnclaimed: 
-        ((address: string) => Promise<any>) & memoize.Memoized<(address: string) => Promise<any>>;
-
     private readonly memoizedGetApplicationLog: 
         ((txid: string) => Promise<any>) & memoize.Memoized<(txid: string) => Promise<any>>;
 
@@ -79,21 +70,6 @@ export class CachedRpcClient {
             memoize(
                 (assetId: string) => this.rpcClient.getAssetState(assetId),
                 labeledCacheOptions('getAssetState'));
-
-        this.memoizedGetUnspents =
-            memoize(
-                (address: string) => this.rpcClient.getUnspents(address),
-                labeledCacheOptions('getUnspents'));
-
-        this.memoizedGetClaimable =
-            memoize(
-                (address: string) => this.rpcClient.query({ method: 'getclaimable', params: [ address ] }),
-                labeledCacheOptions('getClaimable'));
-        
-        this.memoizedGetUnclaimed =
-            memoize(
-                (address: string) => this.rpcClient.getUnclaimed(address),
-                labeledCacheOptions('getUnclaimed'));
 
         this.memoizedGetApplicationLog =
             memoize(
@@ -140,11 +116,13 @@ export class CachedRpcClient {
     }
 
     public getUnspents(address: string): Promise<any> {
-        return this.memoizedGetUnspents(address);
+        // Note that this method is not cached. The state of an address can change in-between calls.
+        return this.rpcClient.getUnspents(address);
     }
 
     public getClaimable(address: string): Promise<any> {
-        return this.memoizedGetClaimable(address);
+        // Note that this method is not cached. The state of an address can change in-between calls.
+        return this.rpcClient.getClaimable(address);
     }
 
     public getPopulatedBlocks(): Promise<any> {
@@ -155,7 +133,8 @@ export class CachedRpcClient {
     }
 
     public getUnclaimed(address: string): Promise<any> {
-        return this.memoizedGetUnclaimed(address);
+        // Note that this method is not cached. The state of an address can change in-between calls.
+        return this.rpcClient.getUnclaimed(address);
     }
 
     public getApplicationLog(txid: string): Promise<any> {
