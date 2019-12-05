@@ -63,6 +63,8 @@ export class DeployPanel {
     }
 
     private async doDeploy() {
+        // TODO
+        //   See: https://github.com/Moonlight-io/moonlight-ico-template/blob/master/lib/nep5-interface.js#L191
         this.viewState.result = 'Code not written yet';
         this.viewState.showError = true;
         this.viewState.showSuccess = false;
