@@ -34,10 +34,10 @@ function populateWalletDropdown() {
     for (let i = 0; i < viewState.wallets.length; i++) {
         index++;
         const option = document.createElement('option') as HTMLOptionElement;
-        option.value = viewState.wallets[i];
-        option.appendChild(htmlHelpers.text(viewState.wallets[i]));
+        option.value = viewState.wallets[i].privateKey;
+        option.appendChild(htmlHelpers.text(viewState.wallets[i].description));
         dropdown.appendChild(option);
-        if (viewState.wallets[i] === viewState.wallet) {
+        if (viewState.wallets[i].privateKey === viewState.walletKey) {
             dropdown.selectedIndex = index;
         }
     }
@@ -47,12 +47,12 @@ function render() {
     const claimButton = document.querySelector(claimSelectors.ClaimButton) as HTMLButtonElement;
     const walletDropdown = document.querySelector(claimSelectors.WalletDropdown) as HTMLSelectElement;
     populateWalletDropdown();
-    htmlHelpers.setPlaceholder(claimSelectors.DisplayWallet, htmlHelpers.text(viewState.wallet || '(unknown)'));
+    htmlHelpers.setPlaceholder(claimSelectors.DisplayWallet, htmlHelpers.text(viewState.walletDescription || '(unknown)'));
     htmlHelpers.setPlaceholder(claimSelectors.DisplayClaimable, htmlHelpers.text(htmlHelpers.number(viewState.claimable || 0)));
     htmlHelpers.setPlaceholder(claimSelectors.ResultText, htmlHelpers.text(viewState.result));
     htmlHelpers.setPlaceholder(claimSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(claimSelectors.ErrorClaimableRetrievalFailure, viewState.getClaimableError);
-    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.wallet && !viewState.getClaimableError && !(viewState.claimable > 0));
+    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletKey && !viewState.getClaimableError && !(viewState.claimable > 0));
     htmlHelpers.showHide(claimSelectors.ClaimableInfo, viewState.claimable > 0);
     htmlHelpers.showHide(claimSelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(claimSelectors.ViewResults, viewState.showSuccess);
@@ -91,7 +91,8 @@ function initializePanel() {
         vscode.postMessage({ e: claimEvents.Refresh });
     });
     walletDropdown.addEventListener('change', _ => {
-        viewState.wallet = walletDropdown.options[walletDropdown.selectedIndex].value;
+        viewState.walletKey = walletDropdown.options[walletDropdown.selectedIndex].value;
+        viewState.walletDescription = walletDropdown.options[walletDropdown.selectedIndex].textContent;
         enterLoadingState();
         vsCodePostMessage({ e: claimEvents.Update, c: viewState });
         console.log('->', viewState);

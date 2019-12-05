@@ -1,8 +1,10 @@
 import * as fs from 'fs';
+import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { claimEvents } from './panels/claimEvents';
+import { NeoExpressConfig } from './neoExpressConfig';
 import { NeoExpressHelper } from './neoExpressHelper';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
@@ -12,32 +14,38 @@ class ViewState {
     claimable: number = 0;
     getClaimableError: boolean = false;
     isValid: boolean = false;
-    neoExpressJsonFullPath: string = '';
     result: string = '';
     showError: boolean = false;
     showSuccess: boolean = false;
-    wallet?: string = undefined;
-    wallets: string[] = [];
+    walletKey?: string = undefined;
+    walletDescription?: string = undefined;
+    wallets: any[] = [];
 }
 
 export class ClaimPanel {
 
+    private readonly neoExpressConfig: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
+    private readonly rpcUri: string;
 
     private viewState: ViewState;
     private initialized: boolean = false;
 
     constructor(
         extensionPath: string,
-        neoExpressJsonFullPath: string,
+        neoExpressConfig: NeoExpressConfig,
+        rpcUri: string,
         disposables: vscode.Disposable[]) {
 
+        this.rpcUri = rpcUri;
+
+        this.neoExpressConfig = neoExpressConfig;
+
         this.viewState = new ViewState();
-        this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
 
         this.panel = vscode.window.createWebviewPanel(
             'claimPanel',
-            path.basename(neoExpressJsonFullPath) + ' - Claim GAS',
+            this.neoExpressConfig.basename + ' - Claim GAS',
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
@@ -60,14 +68,25 @@ export class ClaimPanel {
     }
 
     private async doClaim() {
-        const result = await NeoExpressHelper.claimGas(
-            this.viewState.neoExpressJsonFullPath,
-            this.viewState.wallet || 'unknown');
-        this.viewState.showError = result.isError;
-        this.viewState.showSuccess = !result.isError;
-        this.viewState.result = result.output;
-        if (result.isError) {
-            this.viewState.result = 'The claim failed. Please confirm that the account has claimable GAS and the correct Neo Express instance is running, then try again.';
+        this.viewState.showError = false;
+        this.viewState.showSuccess = false;
+        try {
+            const api = new neon.api.neoCli.instance(this.rpcUri);
+            const config = {
+                api: api,
+                account: new neon.wallet.Account(this.viewState.walletKey),
+            };
+            const result = await neon.default.claimGas(config);
+            if (result.response && result.response.txid) {
+                this.viewState.showSuccess = true;
+                this.viewState.result = result.response.txid;
+            } else {
+                this.viewState.showError = true;    
+                this.viewState.result = 'A claim transaction could not be created';
+            }
+        } catch (e) {
+            this.viewState.showError = true;
+            this.viewState.result = 'There was an error when trying to claim GAS: ' + e;
         }
     }
 
@@ -102,36 +121,27 @@ export class ClaimPanel {
         this.viewState.showError = false;
         this.viewState.showSuccess = false;
 
-        this.viewState.wallets = [ 'genesis' ];
-        try {
-            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
-            const neoExpressConfig = JSON.parse(jsonFileContents);
-            const wallets = neoExpressConfig.wallets || [];
-            for (let i = 0; i < wallets.length; i++) {
-                if (wallets[i].name) {
-                    this.viewState.wallets.push(wallets[i].name);
-                }
-            }
-        } catch (e) {
-            console.error('ClaimPanel encountered an error parsing ', this.viewState.neoExpressJsonFullPath, e);
-        }
+        this.viewState.wallets = this.neoExpressConfig.wallets;
 
         this.viewState.claimable = 0;
-        if (this.viewState.wallet) {
+        const walletConfig = this.viewState.wallets.filter(_=>_.privateKey === this.viewState.walletKey)[0];
+        const walletName = walletConfig ? walletConfig.walletName : undefined;
+        if (walletName) {
             const showClaimableResult = await NeoExpressHelper.showClaimable(
-                this.viewState.neoExpressJsonFullPath,
-                this.viewState.wallet || 'unknown');
+                this.neoExpressConfig.neoExpressJsonFullPath,
+                walletName);
             this.viewState.claimable = showClaimableResult.result.unclaimed || 0;
             this.viewState.getClaimableError = showClaimableResult.isError;
         }
         
-        if (this.viewState.wallet && this.viewState.wallets.indexOf(this.viewState.wallet) === -1) {
-            this.viewState.wallet = undefined;
+        if (this.viewState.walletKey && !this.viewState.wallets.filter(_ => _.privateKey === this.viewState.walletKey).length) {
+            this.viewState.walletKey = undefined;
+            this.viewState.walletDescription = undefined;
             this.viewState.claimable = 0;
         }
 
         this.viewState.isValid =
-            !!this.viewState.wallet &&
+            !!this.viewState.walletKey &&
             (this.viewState.claimable > 0) &&
             !this.viewState.getClaimableError;
 

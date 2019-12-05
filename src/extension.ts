@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { ClaimPanel } from './claimPanel';
 import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
+import { NeoExpressConfig } from './neoExpressConfig';
 import { NeoExpressHelper } from './neoExpressHelper';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
@@ -104,7 +105,8 @@ export function activate(context: vscode.ExtensionContext) {
 			try {
 				const panel = new ClaimPanel(
 					context.extensionPath, 
-					server.jsonFile,
+					new NeoExpressConfig(server.jsonFile),
+					server.rpcUri,
 					context.subscriptions);
 			} catch (e) {
 				console.error('Error opening claim panel ', e);
