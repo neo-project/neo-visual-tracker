@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { claimEvents } from './panels/claimEvents';
+
 import { INeoRpcConnection } from './neoRpcConnection';
 import { NeoExpressConfig } from './neoExpressConfig';
 
