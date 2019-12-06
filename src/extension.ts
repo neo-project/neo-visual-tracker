@@ -22,9 +22,29 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let createInstancePanel: CreateInstancePanel | null = null;
 
+	const installationTaskName = 'Install Neo Express';
+	let postInstallAction: Function | null = null;
+	vscode.tasks.onDidEndTask(async e => {
+		if (postInstallAction && (e.execution.task.name === installationTaskName)) {
+			const action = postInstallAction;
+			postInstallAction = null;
+			if (await NeoExpressHelper.isNeoExpressInstalled()) {
+				action();
+			} else {
+				await vscode.window.showErrorMessage(
+					'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.\n',
+					{ modal: true });
+			}
+		}
+	});
+
 	const requireNeoExpress = async (then: Function) => {
 		if (await NeoExpressHelper.isNeoExpressInstalled()) {
 			then();
+		} else if(postInstallAction) {
+			await vscode.window.showErrorMessage(
+				'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.\n',
+				{ modal: true });
 		} else {
 			const moreInfo = 'More Information';
 			const install = 'Install';
@@ -36,11 +56,12 @@ export function activate(context: vscode.ExtensionContext) {
 			if (dialogResponse === moreInfo) {
 				vscode.env.openExternal(vscode.Uri.parse('https://github.com/neo-project/neo-express#Installation'));
 			} else if (dialogResponse === install) {
-				vscode.tasks.executeTask(
+				postInstallAction = then;
+				await vscode.tasks.executeTask(
 					new vscode.Task(
 						{ type: 'install-neo-express' },
 						vscode.TaskScope.Global,
-						'Install Neo Express',
+						installationTaskName,
 						'dotnet',
 						new vscode.ShellExecution('dotnet tool install Neo.Express -g')));
 			}
