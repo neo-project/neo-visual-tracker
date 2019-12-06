@@ -1,10 +1,9 @@
-import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as shellEscape from 'shell-escape';
 import * as vscode from 'vscode';
 
 import { claimEvents } from './panels/claimEvents';
+import { NeoExpressHelper } from './neoExpressHelper';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -42,6 +41,7 @@ export class ClaimPanel {
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
+        this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);
 
         const htmlFileContents = fs.readFileSync(
@@ -60,32 +60,19 @@ export class ClaimPanel {
     }
 
     private async doClaim() {
-        try {
-            this.viewState.showError = false;
-            this.viewState.showSuccess = false;
-            let command = shellEscape.default(['neo-express', 'claim']);
-            command += ' -i ' + ClaimPanel.doubleQuoteEscape(this.viewState.neoExpressJsonFullPath);
-            command += ' GAS';
-            command += ' ' + ClaimPanel.doubleQuoteEscape(this.viewState.wallet || 'unknown');
-            const output = await new Promise((resolve, reject) => {
-                childProcess.exec(command, (error, stdout, stderr) => {
-                    if (error) {
-                        reject(error);
-                    } else if (stderr) {
-                        reject(stderr);
-                    } else {
-                        resolve(stdout);
-                    }
-                });
-            });
-            console.info('Claim completed', command, output);
-            this.viewState.showSuccess = true;
-            this.viewState.result = command;
-        } catch (e) {
-            this.viewState.showError = true;
+        const result = await NeoExpressHelper.claimGas(
+            this.viewState.neoExpressJsonFullPath,
+            this.viewState.wallet || 'unknown');
+        this.viewState.showError = result.isError;
+        this.viewState.showSuccess = !result.isError;
+        this.viewState.result = result.output;
+        if (result.isError) {
             this.viewState.result = 'The claim failed. Please confirm that the account has claimable GAS and the correct Neo Express instance is running, then try again.';
-            console.error('Claim failed ', e);
         }
+    }
+
+    private onClose() {
+        this.dispose();
     }
 
     private async onMessage(message: any) {
@@ -131,27 +118,11 @@ export class ClaimPanel {
 
         this.viewState.claimable = 0;
         if (this.viewState.wallet) {
-            try {
-                let command = shellEscape.default(['neo-express', 'show', 'claimable']);
-                command += ' -i ' + ClaimPanel.doubleQuoteEscape(this.viewState.neoExpressJsonFullPath);
-                command += ' ' + ClaimPanel.doubleQuoteEscape(this.viewState.wallet);
-                const claimableJson = await new Promise((resolve, reject) => {
-                    childProcess.exec(command, (error, stdout, stderr) => {
-                        if (error) {
-                            reject(error);
-                        } else if (stderr) {
-                            reject(stderr);
-                        } else {
-                            resolve(stdout);
-                        }
-                    });
-                });
-                this.viewState.claimable = JSON.parse(claimableJson as string).unclaimed || 0;
-                this.viewState.getClaimableError = false;
-            } catch (e) {
-                this.viewState.getClaimableError = true;
-                console.error('Could not get claimable assets for ', this.viewState.wallet, e);
-            }
+            const showClaimableResult = await NeoExpressHelper.showClaimable(
+                this.viewState.neoExpressJsonFullPath,
+                this.viewState.wallet || 'unknown');
+            this.viewState.claimable = showClaimableResult.result.unclaimed || 0;
+            this.viewState.getClaimableError = showClaimableResult.isError;
         }
         
         if (this.viewState.wallet && this.viewState.wallets.indexOf(this.viewState.wallet) === -1) {
@@ -165,16 +136,6 @@ export class ClaimPanel {
             !this.viewState.getClaimableError;
 
         this.initialized = true;
-    }
-
-    private static doubleQuoteEscape(argument: string) {
-        let escaped = shellEscape.default([ argument ]);
-        if ((escaped.length >= 2) && 
-            (escaped[0] === '\'') && 
-            (escaped[escaped.length - 1] === '\'')) {
-            escaped = '"' + escaped.substring(1, escaped.length - 1).replace(/"/g, '\\"') + '"';
-        }
-        return escaped;
     }
 
 }
