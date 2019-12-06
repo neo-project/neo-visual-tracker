@@ -17,7 +17,7 @@ class ViewState {
     result: string = '';
     showError: boolean = false;
     showSuccess: boolean = false;
-    walletKey?: string = undefined;
+    walletAddress?: string = undefined;
     walletDescription?: string = undefined;
     wallets: any[] = [];
 }
@@ -77,11 +77,21 @@ export class ClaimPanel {
         this.viewState.showSuccess = false;
         this.viewState.getClaimableError = false;
         try {
+            const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
             const api = new neon.api.neoCli.instance(this.rpcUri);
-            const config = {
+            const config: any = {
                 api: api,
-                account: new neon.wallet.Account(this.viewState.walletKey),
+                account: walletConfig.account,
+                signingFunction: walletConfig.signingFunction,
             };
+            if (walletConfig.isMultiSig) {
+                // The neon.default.claimGas function expects the config.account property to be present and 
+                // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
+                // the multisig group); however it also uses config.account.address when looking up unclaimed
+                // GAS. So we manually lookup the unclaimed GAS information (using the multisig address) and then
+                // pass it in (thus avoiding the unclaimed lookup within claimGas).
+                config.claims = await api.getClaims(walletConfig.address);
+            }
             const result = await neon.default.claimGas(config);
             if (result.response && result.response.txid) {
                 this.viewState.showSuccess = true;
@@ -130,7 +140,7 @@ export class ClaimPanel {
         this.viewState.wallets = this.neoExpressConfig.wallets;
 
         this.viewState.claimable = 0;
-        const walletConfig = this.viewState.wallets.filter(_=>_.privateKey === this.viewState.walletKey)[0];
+        const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
         const walletAddress = walletConfig ? walletConfig.address : undefined;
         if (walletAddress) {
             try {
@@ -145,13 +155,13 @@ export class ClaimPanel {
         }
         
         if (!walletConfig) {
-            this.viewState.walletKey = undefined;
+            this.viewState.walletAddress = undefined;
             this.viewState.walletDescription = undefined;
             this.viewState.claimable = 0;
         }
 
         this.viewState.isValid =
-            !!this.viewState.walletKey &&
+            !!this.viewState.walletAddress &&
             ((this.viewState.claimable > 0) || this.viewState.getClaimableError);
 
         this.initialized = true;

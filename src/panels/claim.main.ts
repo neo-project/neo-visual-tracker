@@ -34,10 +34,10 @@ function populateWalletDropdown() {
     for (let i = 0; i < viewState.wallets.length; i++) {
         index++;
         const option = document.createElement('option') as HTMLOptionElement;
-        option.value = viewState.wallets[i].privateKey;
+        option.value = viewState.wallets[i].address;
         option.appendChild(htmlHelpers.text(viewState.wallets[i].description));
         dropdown.appendChild(option);
-        if (viewState.wallets[i].privateKey === viewState.walletKey) {
+        if (viewState.wallets[i].address === viewState.walletAddress) {
             dropdown.selectedIndex = index;
         }
     }
@@ -52,7 +52,7 @@ function render() {
     htmlHelpers.setPlaceholder(claimSelectors.ResultText, htmlHelpers.text(viewState.result));
     htmlHelpers.setPlaceholder(claimSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(claimSelectors.ErrorClaimableRetrievalFailure, viewState.getClaimableError);
-    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletKey && !viewState.showError && !(viewState.getClaimableError || (viewState.claimable > 0)));
+    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletAddress && !viewState.showError && !(viewState.getClaimableError || (viewState.claimable > 0)));
     htmlHelpers.showHide(claimSelectors.ClaimableInfo, viewState.claimable > 0);
     htmlHelpers.showHide(claimSelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(claimSelectors.ViewResults, viewState.showSuccess);
@@ -91,7 +91,7 @@ function initializePanel() {
         vscode.postMessage({ e: claimEvents.Refresh });
     });
     walletDropdown.addEventListener('change', _ => {
-        viewState.walletKey = walletDropdown.options[walletDropdown.selectedIndex].value;
+        viewState.walletAddress = walletDropdown.options[walletDropdown.selectedIndex].value;
         viewState.walletDescription = walletDropdown.options[walletDropdown.selectedIndex].textContent;
         enterLoadingState();
         vsCodePostMessage({ e: claimEvents.Update, c: viewState });
