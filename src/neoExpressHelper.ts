@@ -29,30 +29,6 @@ class JsonResult {
 
 export class NeoExpressHelper {
 
-    public static async claimGas(
-        neoExpressJsonFullPath: string,
-        walletName: string) : Promise<StringResult> {
-
-        let command = shellEscape.default(['neo-express', 'claim']);
-        command += ' -i ' + NeoExpressHelper.doubleQuoteEscape(neoExpressJsonFullPath);
-        command += ' GAS';
-        command += ' ' + NeoExpressHelper.doubleQuoteEscape(walletName);
-        return await new Promise((resolve) => {
-            childProcess.exec(command, (error, stdout, stderr) => {
-                if (error) {
-                    console.error('Claim GAS failed', command, error, stderr);
-                    resolve(StringResult.Error(error.message));
-                } else if (stderr) {
-                    console.error('Claim GAS failed', command, error, stderr);
-                    resolve(StringResult.Error(stderr));
-                } else {
-                    console.info('Claim GAS succeeded', command, stdout);
-                    resolve(StringResult.Success(command));
-                }
-            });
-        });
-    }
-
     public static async createInstance(
         neoExpressJsonFullPath: string,
         nodeCount: number,
@@ -136,29 +112,6 @@ export class NeoExpressHelper {
                     resolve(JsonResult.Error());
                 } else if (stderr) {
                     console.error('Error showing account', command, error, stderr);
-                    resolve(JsonResult.Error());
-                } else {
-                    resolve(JsonResult.Success(stdout));
-                }
-            });
-        });
-    }
-
-    public static async showClaimable(
-        neoExpressJsonFullPath: string,
-        wallet: string): Promise<JsonResult> {
-
-        let command = shellEscape.default(['neo-express', 'show', 'claimable']);
-        command += ' ' + NeoExpressHelper.doubleQuoteEscape(wallet);
-        command += ' -i ' + NeoExpressHelper.doubleQuoteEscape(neoExpressJsonFullPath);
-        command += ' -j';
-        return await new Promise((resolve) => {
-            childProcess.exec(command, (error, stdout, stderr) => {
-                if (error) {
-                    console.error('Error showing claimable', command, error, stderr);
-                    resolve(JsonResult.Error());
-                } else if (stderr) {
-                    console.error('Error showing claimable', command, error, stderr);
                     resolve(JsonResult.Error());
                 } else {
                     resolve(JsonResult.Success(stdout));
