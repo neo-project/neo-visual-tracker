@@ -158,6 +158,8 @@ class RpcServerTreeItemIdentifier {
 export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeItemIdentifier> {
 
     private readonly onDidChangeTreeDataEmitter: vscode.EventEmitter<any>;
+    private readonly fileSystemWatcher: vscode.FileSystemWatcher;
+    private readonly searchPattern: vscode.GlobPattern = '**/*.json';
     
     public readonly onDidChangeTreeData: vscode.Event<any>;
 
@@ -168,8 +170,16 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
         this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
         this.rootItems = [];
         this.refresh();
-        vscode.workspace.onDidSaveTextDocument(this.refresh, this);
-        vscode.workspace.onDidChangeWorkspaceFolders(this.refresh, this);
+        this.fileSystemWatcher = vscode.workspace.createFileSystemWatcher(this.searchPattern);
+        this.fileSystemWatcher.onDidChange(this.refresh, this);
+        this.fileSystemWatcher.onDidCreate(this.refresh, this);
+        this.fileSystemWatcher.onDidDelete(this.refresh, this);
+    }
+
+    public dispose() {
+        if (this.fileSystemWatcher) {
+            this.fileSystemWatcher.dispose();
+        }
     }
 
 	public async refresh() {
