@@ -176,6 +176,10 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
+	const createServerListCommand = vscode.commands.registerCommand('neo-visual-devtracker.createServerList', async () => {
+		await RpcServerExplorer.newServerList();
+	});
+
 	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
 	context.subscriptions.push(openTrackerCommand);
@@ -187,6 +191,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(claimCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
+	context.subscriptions.push(createServerListCommand);
 	context.subscriptions.push(serverExplorer);
 }
 

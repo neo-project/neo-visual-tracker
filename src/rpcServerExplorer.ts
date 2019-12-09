@@ -5,6 +5,24 @@ import * as vscode from 'vscode';
 
 const request = util.promisify(require('request'));
 
+const TemplateServerList = `[
+    {
+        "name": "Neo Main Net",
+        "url": "MAINNET_URL"
+    },
+    {
+        "name": "Neo Test Net",
+        "url": "TESTNET_URL"
+    }
+]`;
+
+const MainNetPlaceholder = 'MAINNET_URL';
+
+const TestNetPlaceholder = 'TESTNET_URL';
+
+const TemplateInstructions = 'To add a group of RPC servers, create a JSON file anywhere in your workspace ' +
+    '\n\nAn example file is being shown. Save this file to see the new servers appear in the list.';
+
 class RpcServerTreeItemIdentifier {
 
     public readonly jsonFile?: string;
@@ -181,22 +199,6 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
                 this.onDidChangeTreeDataEmitter.fire();
             }
         }
-        
-        // const testNetRpcServer = await RpcServerExplorer.getBestRpcServer(
-        //     'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes', 
-        //     'Neo Test Net');
-        // if (testNetRpcServer) {
-        //     this.rootItems.unshift(testNetRpcServer);
-        //     this.onDidChangeTreeDataEmitter.fire();
-        // }
-
-        // const mainNetRpcServer = await RpcServerExplorer.getBestRpcServer(
-        //     'https://api.neoscan.io/api/main_net/v1/get_all_nodes', 
-        //     'Neo Main Net');
-        // if (mainNetRpcServer) {
-        //     this.rootItems.unshift(mainNetRpcServer);
-        //     this.onDidChangeTreeDataEmitter.fire();
-        // }
 	}
 
 	public getTreeItem(element: RpcServerTreeItemIdentifier): vscode.TreeItem {
@@ -215,7 +217,20 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 		return element.parent;
     }
     
-    private static async getBestRpcServer(apiUrl: string, label: string): Promise<RpcServerTreeItemIdentifier | undefined> {
+    public static async newServerList() {
+        const testNetUrl = await RpcServerExplorer.getBestRpcServer(
+            'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes');
+        const mainNetUrl = await RpcServerExplorer.getBestRpcServer(
+            'https://api.neoscan.io/api/main_net/v1/get_all_nodes');
+        const textDocument = await vscode.workspace.openTextDocument({
+			language: 'json',
+			content: TemplateServerList.replace(MainNetPlaceholder, mainNetUrl).replace(TestNetPlaceholder, testNetUrl),
+		});
+        vscode.window.showTextDocument(textDocument);
+        vscode.window.showInformationMessage(TemplateInstructions, { modal: true });
+    }
+
+    private static async getBestRpcServer(apiUrl: string): Promise<string> {
         try {
             const apiResponse = JSON.parse((await request(apiUrl)).body);
             let maxHeight = -1;
@@ -235,13 +250,13 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
             }
 
             if (candidates.length > 0) {
-                return RpcServerTreeItemIdentifier.fromUri(candidates[Math.floor(Math.random() * candidates.length)], label);
+                return candidates[Math.floor(Math.random() * candidates.length)];
             } else {
-                throw new Error('API server result provide any RPC servers');
+                return '';
             }
         } catch(e) {
             console.error('Could not get an example RPC server from ', apiUrl, e);
-            return undefined;
+            return '';
         }
     }
 

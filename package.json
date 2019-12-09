@@ -30,6 +30,7 @@
     ],
     "activationEvents": [
         "onCommand:neo-visual-devtracker.createInstance",
+        "onCommand:neo-visual-devtracker.createServerList",
         "onCommand:neo-visual-devtracker.openTracker",
         "onView:neo-visual-devtracker.rpcServerExplorer"
     ],
@@ -111,6 +112,15 @@
                     "light": "resources/light/add.svg",
                     "dark": "resources/dark/add.svg"
                 }
+            },
+            {
+                "command": "neo-visual-devtracker.createServerList",
+                "title": "Create new RPC server list",
+                "category": "Neo Express",
+                "icon": {
+                    "light": "resources/light/folder.svg",
+                    "dark": "resources/dark/folder.svg"
+                }
             }
         ],
         "menus": {
@@ -122,6 +132,11 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createInstance",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.createServerList",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
                     "group": "navigation"
                 }
