@@ -241,9 +241,9 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
         const mainNetUrl = await RpcServerExplorer.getBestRpcServer(
             'https://api.neoscan.io/api/main_net/v1/get_all_nodes');
         const textDocument = await vscode.workspace.openTextDocument({
-			language: 'json',
-			content: TemplateServerList.replace(MainNetPlaceholder, mainNetUrl).replace(TestNetPlaceholder, testNetUrl),
-		});
+            language: 'json',
+            content: TemplateServerList.replace(MainNetPlaceholder, mainNetUrl).replace(TestNetPlaceholder, testNetUrl),
+        });
         vscode.window.showTextDocument(textDocument);
         vscode.window.showInformationMessage(TemplateInstructions, { modal: true });
     }
