@@ -81,6 +81,16 @@
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
             {
+                "command": "neo-visual-devtracker.editJson",
+                "title": "Edit JSON file",
+                "category": "Neo Express",
+                "icon": {
+                    "light": "resources/light/edit.svg",
+                    "dark": "resources/dark/edit.svg"
+                },
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == editable"
+            },
+            {
                 "command": "neo-visual-devtracker.createWallet",
                 "title": "Create wallet",
                 "category": "Neo Express",
@@ -153,12 +163,21 @@
                     "group": "inline"
                 },
                 {
+                    "command": "neo-visual-devtracker.editJson",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == editable",
+                    "group": "inline"
+                },
+                {
                     "command": "neo-visual-devtracker.startServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {
                     "command": "neo-visual-devtracker.stopServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "neo-visual-devtracker.editJson",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == editable"
                 },
                 {
                     "command": "neo-visual-devtracker.createWallet",

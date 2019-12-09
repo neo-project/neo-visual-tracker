@@ -149,6 +149,7 @@ class RpcServerTreeItemIdentifier {
             result.iconPath = vscode.ThemeIcon.Folder;
             result.description = this.description;
             result.tooltip = 'Configuration loaded from: ' + this.jsonFile;
+            result.contextValue = 'editable';
             return result;
         }
     }
@@ -217,6 +218,13 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 		return element.parent;
     }
     
+    public static async editJsonFile(item: RpcServerTreeItemIdentifier) {
+        if (item.jsonFile) {
+            const textDocument = await vscode.workspace.openTextDocument(vscode.Uri.parse(item.jsonFile));
+            vscode.window.showTextDocument(textDocument);
+        }
+    }
+
     public static async newServerList() {
         const testNetUrl = await RpcServerExplorer.getBestRpcServer(
             'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes');

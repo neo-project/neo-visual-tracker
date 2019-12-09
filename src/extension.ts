@@ -180,6 +180,10 @@ export function activate(context: vscode.ExtensionContext) {
 		await RpcServerExplorer.newServerList();
 	});
 
+	const editJsonCommand = vscode.commands.registerCommand('neo-visual-devtracker.editJson', async (item) => {
+		await RpcServerExplorer.editJsonFile(item);
+	});
+
 	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
 	context.subscriptions.push(openTrackerCommand);
@@ -192,6 +196,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
 	context.subscriptions.push(createServerListCommand);
+	context.subscriptions.push(editJsonCommand);
 	context.subscriptions.push(serverExplorer);
 }
 
