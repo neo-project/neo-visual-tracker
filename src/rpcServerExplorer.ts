@@ -11,6 +11,8 @@ class RpcServerTreeItemIdentifier {
 
     public readonly label?: string;
 
+    public readonly description?: string;
+
     public readonly rpcUri?: string;
 
     public readonly parent?: RpcServerTreeItemIdentifier;
@@ -30,7 +32,7 @@ class RpcServerTreeItemIdentifier {
                 label = label.substr(1);
             }
 
-            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, undefined);
+            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'Neo Express Instance', undefined);
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
             if (neoExpressConfig['consensus-nodes'] && neoExpressConfig['consensus-nodes'].length) {
@@ -51,6 +53,38 @@ class RpcServerTreeItemIdentifier {
         }
     }
 
+    public static fromNeoServersJsonFile(allRootPaths: string[], jsonFile: string) {
+        try {
+            let label = jsonFile;
+            for (let i = 0; i < allRootPaths.length; i++) {
+                label = label.replace(allRootPaths[i], '');
+            }
+
+            if (label.startsWith('/') || label.startsWith('\\')) {
+                label = label.substr(1);
+            }
+
+            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'JSON server list', undefined);
+            const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
+            const contents = JSON.parse(jsonFileContents);
+            if (contents && contents.length) {
+                for (let i = 0; i < contents.length; i++) {
+                    const server = contents[i];
+                    if (server && server.url) {
+                        const name = server.name || server.url;
+                        const child = RpcServerTreeItemIdentifier.fromUri(server.url, name, result, jsonFile);
+                        result.children.push(child);
+                    }
+                }
+                return result;
+            } else {
+                return undefined;
+            }
+        } catch(e) {
+            return undefined;
+        }
+    }
+
     public static fromUri(
         rpcUri: string, 
         label: string, 
@@ -58,7 +92,7 @@ class RpcServerTreeItemIdentifier {
         jsonFile?: string,
         index?: number) {
 
-        return new RpcServerTreeItemIdentifier(jsonFile, rpcUri, parent, label, index);
+        return new RpcServerTreeItemIdentifier(jsonFile, rpcUri, parent, label, undefined, index);
     }
 
     private constructor(
@@ -66,12 +100,14 @@ class RpcServerTreeItemIdentifier {
         rpcUri?: string, 
         parent?: RpcServerTreeItemIdentifier,
         label?: string,
+        description?: string,
         index?: number) {
 
         this.jsonFile = jsonFile;
         this.rpcUri = rpcUri;
         this.parent = parent;
         this.label = label;
+        this.description = description;
         this.index = index;
         this.children = [];
     }
@@ -93,8 +129,8 @@ class RpcServerTreeItemIdentifier {
         } else {
             const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
             result.iconPath = vscode.ThemeIcon.Folder;
-            result.description = 'Neo Express Instance';
-            result.tooltip = 'Neo Express configuration loaded from: ' + this.jsonFile;
+            result.description = this.description;
+            result.tooltip = 'Configuration loaded from: ' + this.jsonFile;
             return result;
         }
     }
@@ -129,30 +165,38 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
         const allJsonFiles = await vscode.workspace.findFiles('**/*.json');
         for (let i = 0; i < allJsonFiles.length; i++) {
-            const rpcServerFromJson = RpcServerTreeItemIdentifier.fromNeoExpressJsonFile(
+            const neoExpressServerFromJson = RpcServerTreeItemIdentifier.fromNeoExpressJsonFile(
                 allRootPaths,
                 allJsonFiles[i].fsPath);
-            if (rpcServerFromJson) {
-                this.rootItems.push(rpcServerFromJson);
+            if (neoExpressServerFromJson) {
+                this.rootItems.push(neoExpressServerFromJson);
+                this.onDidChangeTreeDataEmitter.fire();
+            }
+
+            const neoServersFromJson = RpcServerTreeItemIdentifier.fromNeoServersJsonFile(
+                allRootPaths,
+                allJsonFiles[i].fsPath);
+            if (neoServersFromJson) {
+                this.rootItems.push(neoServersFromJson);
                 this.onDidChangeTreeDataEmitter.fire();
             }
         }
         
-        const testNetRpcServer = await RpcServerExplorer.getBestRpcServer(
-            'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes', 
-            'Neo Test Net');
-        if (testNetRpcServer) {
-            this.rootItems.unshift(testNetRpcServer);
-            this.onDidChangeTreeDataEmitter.fire();
-        }
+        // const testNetRpcServer = await RpcServerExplorer.getBestRpcServer(
+        //     'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes', 
+        //     'Neo Test Net');
+        // if (testNetRpcServer) {
+        //     this.rootItems.unshift(testNetRpcServer);
+        //     this.onDidChangeTreeDataEmitter.fire();
+        // }
 
-        const mainNetRpcServer = await RpcServerExplorer.getBestRpcServer(
-            'https://api.neoscan.io/api/main_net/v1/get_all_nodes', 
-            'Neo Main Net');
-        if (mainNetRpcServer) {
-            this.rootItems.unshift(mainNetRpcServer);
-            this.onDidChangeTreeDataEmitter.fire();
-        }
+        // const mainNetRpcServer = await RpcServerExplorer.getBestRpcServer(
+        //     'https://api.neoscan.io/api/main_net/v1/get_all_nodes', 
+        //     'Neo Main Net');
+        // if (mainNetRpcServer) {
+        //     this.rootItems.unshift(mainNetRpcServer);
+        //     this.onDidChangeTreeDataEmitter.fire();
+        // }
 	}
 
 	public getTreeItem(element: RpcServerTreeItemIdentifier): vscode.TreeItem {
