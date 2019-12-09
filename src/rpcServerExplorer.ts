@@ -19,7 +19,7 @@ class RpcServerTreeItemIdentifier {
 
     public readonly children: RpcServerTreeItemIdentifier[];
 
-    public static fromJsonFile(allRootPaths: string[], jsonFile: string) {
+    public static fromNeoExpressJsonFile(allRootPaths: string[], jsonFile: string) {
         try {
             let label = jsonFile;
             for (let i = 0; i < allRootPaths.length; i++) {
@@ -129,7 +129,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
         const allJsonFiles = await vscode.workspace.findFiles('**/*.json');
         for (let i = 0; i < allJsonFiles.length; i++) {
-            const rpcServerFromJson = RpcServerTreeItemIdentifier.fromJsonFile(
+            const rpcServerFromJson = RpcServerTreeItemIdentifier.fromNeoExpressJsonFile(
                 allRootPaths,
                 allJsonFiles[i].fsPath);
             if (rpcServerFromJson) {
