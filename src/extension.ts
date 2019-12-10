@@ -122,7 +122,9 @@ export function activate(context: vscode.ExtensionContext) {
 		try {
 			const panel = new TransferPanel(
 				context.extensionPath, 
-				server.jsonFile,
+				new NeoExpressConfig(server.jsonFile),
+				server.rpcUri,
+				rpcConnectionPool.getConnection(server.rpcUri),
 				context.subscriptions);
 		} catch (e) {
 			console.error('Error opening transfer panel ', e);

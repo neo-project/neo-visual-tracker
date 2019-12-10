@@ -60,6 +60,10 @@ export class NeoExpressConfig {
 
     public constructor(public readonly neoExpressJsonFullPath: string) {
         this.basename = path.basename(neoExpressJsonFullPath);
+        this.refresh();
+    }
+
+    public refresh() {
         const jsonFileContents = fs.readFileSync(this.neoExpressJsonFullPath, { encoding: 'utf8' });
         const neoExpressConfig = JSON.parse(jsonFileContents);
         this.parseWallets(neoExpressConfig);

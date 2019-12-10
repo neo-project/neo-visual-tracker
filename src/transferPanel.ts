@@ -1,22 +1,26 @@
+import * as bignumber from 'bignumber.js';
 import * as fs from 'fs';
+import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { NeoExpressHelper } from './neoExpressHelper';
+import { INeoRpcConnection } from './neoRpcConnection';
+import { NeoExpressConfig } from './neoExpressConfig';
 import { transferEvents } from './panels/transferEvents';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ViewState {
-    neoExpressJsonFullPath: string = '';
-    wallets: string[] = [];
+    wallets: any[] = [];
     sourceWalletBalances: any[] = [];
     sourceWalletBalancesError: boolean = false;
-    sourceWallet?: string = undefined;
+    sourceWalletAddress?: string = undefined;
+    sourceWalletDescription?: string = undefined;
     assetName?: string = undefined;
     amount?: string = undefined;
-    destinationWallet?: string = undefined;
+    destinationWalletAddress?: string = undefined;
+    destinationWalletDescription?: string = undefined;
     showError: boolean = false;
     showSuccess: boolean = false;
     result: string = '';
@@ -25,21 +29,28 @@ class ViewState {
 
 export class TransferPanel {
 
+    private readonly neoExpressConfig: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
+    private readonly rpcUri: string;
+    private readonly rpcConnection: INeoRpcConnection;
 
     private viewState: ViewState;
 
     constructor(
         extensionPath: string,
-        neoExpressJsonFullPath: string,
+        neoExpressConfig: NeoExpressConfig,
+        rpcUri: string,
+        rpcConnection: INeoRpcConnection,
         disposables: vscode.Disposable[]) {
 
+        this.rpcUri = rpcUri;
+        this.rpcConnection = rpcConnection;
+        this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
-        this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
 
         this.panel = vscode.window.createWebviewPanel(
             'transferPanel',
-            path.basename(neoExpressJsonFullPath) + ' - Transfer assets',
+            this.neoExpressConfig.basename + ' - Transfer assets',
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
@@ -61,18 +72,44 @@ export class TransferPanel {
         this.panel.dispose();
     }
 
+    public updateStatus(status: string) {
+        console.info('TransferPanel status:', status);
+    }
+
     private async doTransfer() {
-        const result = await NeoExpressHelper.transfer(
-            this.viewState.neoExpressJsonFullPath,
-            this.viewState.assetName || 'unknown',
-            parseFloat(this.viewState.amount || '0') || 0,
-            this.viewState.sourceWallet || 'unknown',
-            this.viewState.destinationWallet || 'unknown');
-        this.viewState.showError = result.isError;
-        this.viewState.showSuccess = !result.isError;
-        this.viewState.result = result.output;
-        if (result.isError) {
-            this.viewState.result = 'The transfer failed. Please check that the values entered are valid and try again.';
+        this.viewState.showError = false;
+        this.viewState.showSuccess = false;
+        this.viewState.sourceWalletBalancesError = false;
+        try {
+            const sourceWalletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.sourceWalletAddress)[0];
+            const api = new neon.api.neoCli.instance(this.rpcUri);
+            const transfer: any = {};
+            transfer[this.viewState.assetName as string] = this.viewState.amount;
+            const config: any = {
+                api: api,
+                account: sourceWalletConfig.account,
+                signingFunction: sourceWalletConfig.signingFunction,
+                intents: neon.api.makeIntent(transfer, this.viewState.destinationWalletAddress as string),
+            };
+            if (sourceWalletConfig.isMultiSig) {
+                // The neon.default.sendAsset function expects the config.account property to be present and 
+                // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
+                // the multisig group); however it also uses config.account.address when looking up the available
+                // balance. So we manually lookup the available balance (using the multisig address) and then
+                // pass it in (thus avoiding the balance lookup within sendAsset).
+                config.balance = await api.getBalance(this.viewState.sourceWalletAddress as string);
+            }
+            const result = await neon.default.sendAsset(config);
+            if (result.response && result.response.txid) {
+                this.viewState.showSuccess = true;
+                this.viewState.result = result.response.txid;
+            } else {
+                this.viewState.showError = true;    
+                this.viewState.result = 'A transaction could not be created';
+            }
+        } catch (e) {
+            this.viewState.showError = true;
+            this.viewState.result = 'The transfer failed. ' + e;
         }
     }
 
@@ -95,6 +132,7 @@ export class TransferPanel {
             this.validate();
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Transfer) {
+            await this.refresh();
             await this.doTransfer();
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Close) {
@@ -103,58 +141,61 @@ export class TransferPanel {
     }
 
     private async refresh() {
-        this.viewState.wallets = [ 'genesis' ];
 
-        try {
-            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
-            const neoExpressConfig = JSON.parse(jsonFileContents);
-            const wallets = neoExpressConfig.wallets || [];
-            for (let i = 0; i < wallets.length; i++) {
-                if (wallets[i].name) {
-                    this.viewState.wallets.push(wallets[i].name);
-                }
-            }
-        } catch (e) {
-            console.error('TransferPanel encountered an error parsing ', this.viewState.neoExpressJsonFullPath, e);
-        }
+        this.neoExpressConfig.refresh();
+
+        this.viewState.wallets = this.neoExpressConfig.wallets;
 
         this.viewState.sourceWalletBalances = [];
-        if (this.viewState.sourceWallet) {
-            const accountResult = await NeoExpressHelper.showAccount(
-                this.viewState.neoExpressJsonFullPath,
-                this.viewState.sourceWallet);
-            if (accountResult.isError) {
-                this.viewState.sourceWalletBalancesError = true;
-            } else {    
-                this.viewState.sourceWalletBalancesError = false;
-                const account = accountResult.result;
-                if (account.balances && account.balances.length) {
-                    for (let i = 0; i < account.balances.length; i++) {
-                        let assetName = account.balances[i].asset;
-                        if (assetName === '0xc56f33fc6ecfcd0c225c4ab356fee59390af8560be0e930faebe74a6daff7c9b') {
-                            assetName = 'NEO';
-                        } else if (assetName === '0x602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7') {
-                            assetName = 'GAS';
+        if (this.viewState.sourceWalletAddress) {
+            try {
+                const getUnspentsResult = await this.rpcConnection.getUnspents(this.viewState.sourceWalletAddress, this);
+                if (getUnspentsResult.assets) {
+                    this.viewState.sourceWalletBalancesError = false;
+                    for (let assetName in getUnspentsResult.assets) {
+                        const unspents = getUnspentsResult.assets[assetName].unspent;
+                        if (unspents && unspents.length) {
+                            let total = new bignumber.BigNumber(0);
+                            for (let i = 0; i < unspents.length; i++) {
+                                total = total.plus(unspents[i].value as bignumber.BigNumber);
+                            }
+                            this.viewState.sourceWalletBalances.push({
+                                asset: assetName,
+                                value: total.toNumber(),
+                            });
                         }
-                        this.viewState.sourceWalletBalances.push({
-                            asset: assetName,
-                            value: account.balances[i].value,
-                        });
                     }
+                } else {
+                    this.viewState.sourceWalletBalancesError = true;    
                 }
-            }
+            } catch(e) {
+                this.viewState.sourceWalletBalancesError = true;
+            }            
+        }
+
+        if (this.viewState.sourceWalletBalancesError) {
+            // If unspents cannot be retrieved, populate the asset dropdown with 'GAS' and 'NEO' and
+            // rely on the user to know how much of each asset is available in the wallet.
+            this.viewState.sourceWalletBalances = [
+                { asset: 'NEO', amount: 0 },
+                { asset: 'GAS', amount: 0 },
+            ];
         }
         
         this.validate();
     }
 
     private validate() {
-        if (this.viewState.sourceWallet && this.viewState.wallets.indexOf(this.viewState.sourceWallet) === -1) {
-            this.viewState.sourceWallet = undefined;
+        const sourceWalletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.sourceWalletAddress)[0];
+        if (!sourceWalletConfig) {
+            this.viewState.sourceWalletAddress = undefined;
+            this.viewState.sourceWalletDescription = undefined;
         }
 
-        if (this.viewState.destinationWallet && this.viewState.wallets.indexOf(this.viewState.destinationWallet) === -1) {
-            this.viewState.destinationWallet = undefined;
+        const destinationWalletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.destinationWalletAddress)[0];
+        if (!destinationWalletConfig) {
+            this.viewState.destinationWalletAddress = undefined;
+            this.viewState.destinationWalletDescription = undefined;
         }
 
         if (this.viewState.assetName &&
@@ -164,10 +205,8 @@ export class TransferPanel {
         }
 
         this.viewState.isValid =
-            !!this.viewState.sourceWallet &&
-            !!this.viewState.destinationWallet &&
-            !this.viewState.sourceWalletBalancesError &&
-            !!this.viewState.sourceWalletBalances.length &&
+            !!this.viewState.sourceWalletAddress &&
+            !!this.viewState.destinationWalletAddress &&
             !!this.viewState.assetName;
     }
 }
