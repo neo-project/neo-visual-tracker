@@ -230,7 +230,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
     
     public static async editJsonFile(item: RpcServerTreeItemIdentifier) {
         if (item.jsonFile) {
-            const textDocument = await vscode.workspace.openTextDocument(vscode.Uri.parse('file:///' + item.jsonFile));
+            const textDocument = await vscode.workspace.openTextDocument(vscode.Uri.parse('file://' + item.jsonFile));
             vscode.window.showTextDocument(textDocument);
         }
     }
