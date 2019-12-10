@@ -119,16 +119,16 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
-		await requireNeoExpress(() => {
-			try {
-				const panel = new TransferPanel(
-					context.extensionPath, 
-					server.jsonFile,
-					context.subscriptions);
-			} catch (e) {
-				console.error('Error opening transfer panel ', e);
-			}
-		});
+		try {
+			const panel = new TransferPanel(
+				context.extensionPath, 
+				new NeoExpressConfig(server.jsonFile),
+				server.rpcUri,
+				rpcConnectionPool.getConnection(server.rpcUri),
+				context.subscriptions);
+		} catch (e) {
+			console.error('Error opening transfer panel ', e);
+		}
 	});
 
 	const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', async (server) => {

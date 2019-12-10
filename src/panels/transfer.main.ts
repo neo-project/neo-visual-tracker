@@ -44,10 +44,10 @@ function populateWalletDropdown(selector: string, currentSelection?: string) {
     for (let i = 0; i < viewState.wallets.length; i++) {
         index++;
         const option = document.createElement('option') as HTMLOptionElement;
-        option.value = viewState.wallets[i];
-        option.appendChild(htmlHelpers.text(viewState.wallets[i]));
+        option.value = viewState.wallets[i].address;
+        option.appendChild(htmlHelpers.text(viewState.wallets[i].description));
         dropdown.appendChild(option);
-        if (viewState.wallets[i] === currentSelection) {
+        if (viewState.wallets[i].address === currentSelection) {
             dropdown.selectedIndex = index;
         }
     }
@@ -74,15 +74,15 @@ function render() {
     const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
     const balancesTableBody = document.querySelector(transferSelectors.SourceBalancesTableBody) as HTMLTableSectionElement;
     const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
-    populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWallet);
-    populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWallet);
+    populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWalletAddress);
+    populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWalletAddress);
     populateAssetDropdown();
-    htmlHelpers.setPlaceholder(transferSelectors.DisplaySourceWallet, htmlHelpers.text(viewState.sourceWallet || '(unknown)'));
+    htmlHelpers.setPlaceholder(transferSelectors.DisplaySourceWallet, htmlHelpers.text(viewState.sourceWalletDescription || '(unknown)'));
     htmlHelpers.setPlaceholder(transferSelectors.ResultText, htmlHelpers.text(viewState.result));
     htmlHelpers.setPlaceholder(transferSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(transferSelectors.ErrorBalanceRetrievalFailure, viewState.sourceWalletBalancesError);
-    htmlHelpers.showHide(transferSelectors.ErrorSourceWalletEmpty, viewState.sourceWallet && !viewState.sourceWalletBalancesError && !viewState.sourceWalletBalances.length);
-    htmlHelpers.showHide(transferSelectors.SourceBalancesTable, viewState.sourceWalletBalances.length);
+    htmlHelpers.showHide(transferSelectors.ErrorSourceWalletEmpty, viewState.sourceWalletAddress && !viewState.sourceWalletBalancesError && !viewState.sourceWalletBalances.length);
+    htmlHelpers.showHide(transferSelectors.SourceBalancesTable, viewState.sourceWalletBalances.length && !viewState.sourceWalletBalancesError);
     htmlHelpers.showHide(transferSelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(transferSelectors.ViewResults, viewState.showSuccess);
     htmlHelpers.showHide(transferSelectors.ViewDataEntry, !viewState.showSuccess);
@@ -131,11 +131,13 @@ function initializePanel() {
         vscode.postMessage({ e: transferEvents.Refresh });
     });
     sourceWalletDropdown.addEventListener('change', _ => {
-        viewState.sourceWallet = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value;
+        viewState.sourceWalletAddress = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value;
+        viewState.sourceWalletDescription = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].textContent;
         postViewState(true);
     });
     destinationWalletDropdown.addEventListener('change', _ => {
-        viewState.destinationWallet = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].value;
+        viewState.destinationWalletAddress = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].value;
+        viewState.destinationWalletDescription = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].textContent;
         postViewState();
     });
     assetDropdown.addEventListener('change', _ => {
