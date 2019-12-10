@@ -138,6 +138,8 @@ export class ClaimPanel {
         this.viewState.showError = false;
         this.viewState.showSuccess = false;
 
+        this.neoExpressConfig.refresh();
+
         this.viewState.wallets = this.neoExpressConfig.wallets;
 
         this.viewState.claimable = 0;

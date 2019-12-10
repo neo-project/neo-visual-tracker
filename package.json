@@ -232,6 +232,7 @@
     "dependencies": {
         "@cityofzion/neon-js": "^4.7.0",
         "@neo-one/node-core": "^1.2.2",
+        "bignumber.js": "^9.0.0",
         "bitset": "^5.0.5",
         "bs58": "^4.0.1",
         "bs58check": "^2.1.2",
