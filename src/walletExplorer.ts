@@ -61,7 +61,7 @@ class WalletTreeItemIdentifier {
             const contents = JSON.parse(jsonFileContents);
             const parsedWallet = new wallet.Wallet(contents);
             const result = new WalletTreeItemIdentifier(jsonFile, label, parsedWallet.name);
-            if ((parsedWallet.name !== 'myWallet') || (parsedWallet.accounts && parsedWallet.accounts.length)) {
+            if (parsedWallet.accounts && parsedWallet.accounts.length) {
                 for (let i = 0; i < parsedWallet.accounts.length; i++) {
                     const accountRef = new WalletExplorerWallet(parsedWallet, parsedWallet.accounts[i], label, parsedWallet.name);
                     result.children.push(
