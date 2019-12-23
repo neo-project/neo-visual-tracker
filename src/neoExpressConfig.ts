@@ -83,8 +83,6 @@ export class NeoExpressConfig {
 
     private parseWallets(neoExpressConfig: any) {
 
-        const filename = path.basename(this.neoExpressJsonFullPath);
-
         this.wallets.length = 0;
 
         const genesisPrivateKeys: string[] = [];
@@ -103,7 +101,7 @@ export class NeoExpressConfig {
                 }
             }
         });
-        this.wallets.push(new MultiSigWallet(filename, 'genesis', genesisThreshold, genesisPrivateKeys));
+        this.wallets.push(new MultiSigWallet(this.basename, 'genesis', genesisThreshold, genesisPrivateKeys));
 
         const walletConfigs: any[] = neoExpressConfig.wallets || [];
         walletConfigs.forEach(walletConfig => {
@@ -116,7 +114,7 @@ export class NeoExpressConfig {
                     const privateKey: string | null = accountConfig['private-key'];
                     const address: string | null = accountConfig['script-hash'];
                     if (privateKey && address) {
-                        this.wallets.push(new Wallet(filename, walletName, accountLabel, isDefault, address, privateKey));
+                        this.wallets.push(new Wallet(this.basename, walletName, accountLabel, isDefault, address, privateKey));
                     }
                 });
             }
