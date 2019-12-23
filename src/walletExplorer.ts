@@ -63,9 +63,14 @@ class WalletTreeItemIdentifier {
             const result = new WalletTreeItemIdentifier(jsonFile, label, parsedWallet.name);
             if (parsedWallet.accounts && parsedWallet.accounts.length) {
                 for (let i = 0; i < parsedWallet.accounts.length; i++) {
-                    const accountRef = new WalletExplorerWallet(parsedWallet, parsedWallet.accounts[i], label, parsedWallet.name);
                     result.children.push(
-                        new WalletTreeItemIdentifier(jsonFile, label, parsedWallet.name, i, parsedWallet.accounts[i].label, accountRef));
+                        new WalletTreeItemIdentifier(
+                            jsonFile, 
+                            label, 
+                            parsedWallet.name, 
+                            i, 
+                            parsedWallet.accounts[i].label, 
+                            new WalletExplorerWallet(parsedWallet, parsedWallet.accounts[i], label, parsedWallet.name)));
                 }
                 return result;
             } else {
