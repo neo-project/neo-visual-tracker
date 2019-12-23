@@ -82,30 +82,32 @@ export class TransferPanel {
         this.viewState.sourceWalletBalancesError = false;
         try {
             const sourceWalletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.sourceWalletAddress)[0];
-            const api = new neon.api.neoCli.instance(this.rpcUri);
-            const transfer: any = {};
-            transfer[this.viewState.assetName as string] = this.viewState.amount;
-            const config: any = {
-                api: api,
-                account: sourceWalletConfig.account,
-                signingFunction: sourceWalletConfig.signingFunction,
-                intents: neon.api.makeIntent(transfer, this.viewState.destinationWalletAddress as string),
-            };
-            if (sourceWalletConfig.isMultiSig) {
-                // The neon.default.sendAsset function expects the config.account property to be present and 
-                // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
-                // the multisig group); however it also uses config.account.address when looking up the available
-                // balance. So we manually lookup the available balance (using the multisig address) and then
-                // pass it in (thus avoiding the balance lookup within sendAsset).
-                config.balance = await api.getBalance(this.viewState.sourceWalletAddress as string);
-            }
-            const result = await neon.default.sendAsset(config);
-            if (result.response && result.response.txid) {
-                this.viewState.showSuccess = true;
-                this.viewState.result = result.response.txid;
-            } else {
-                this.viewState.showError = true;    
-                this.viewState.result = 'A transaction could not be created';
+            if (await sourceWalletConfig.unlock()) {
+                const api = new neon.api.neoCli.instance(this.rpcUri);
+                const transfer: any = {};
+                transfer[this.viewState.assetName as string] = this.viewState.amount;
+                const config: any = {
+                    api: api,
+                    account: sourceWalletConfig.account,
+                    signingFunction: sourceWalletConfig.signingFunction,
+                    intents: neon.api.makeIntent(transfer, this.viewState.destinationWalletAddress as string),
+                };
+                if (sourceWalletConfig.isMultiSig) {
+                    // The neon.default.sendAsset function expects the config.account property to be present and 
+                    // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
+                    // the multisig group); however it also uses config.account.address when looking up the available
+                    // balance. So we manually lookup the available balance (using the multisig address) and then
+                    // pass it in (thus avoiding the balance lookup within sendAsset).
+                    config.balance = await api.getBalance(this.viewState.sourceWalletAddress as string);
+                }
+                const result = await neon.default.sendAsset(config);
+                if (result.response && result.response.txid) {
+                    this.viewState.showSuccess = true;
+                    this.viewState.result = result.response.txid;
+                } else {
+                    this.viewState.showError = true;    
+                    this.viewState.result = 'A transaction could not be created';
+                }
             }
         } catch (e) {
             this.viewState.showError = true;

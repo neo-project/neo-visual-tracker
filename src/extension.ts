@@ -129,7 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
 		try {
 			const panel = new TransferPanel(
 				context.extensionPath, 
-				new NeoExpressConfig(server.jsonFile),
+				new NeoExpressConfig(server.jsonFile, walletExplorer.allAccounts),
 				server.rpcUri,
 				rpcConnectionPool.getConnection(server.rpcUri),
 				context.subscriptions);
@@ -142,7 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
 		try {
 			const panel = new ClaimPanel(
 				context.extensionPath, 
-				new NeoExpressConfig(server.jsonFile),
+				new NeoExpressConfig(server.jsonFile, walletExplorer.allAccounts),
 				server.rpcUri,
 				rpcConnectionPool.getConnection(server.rpcUri),
 				context.subscriptions);

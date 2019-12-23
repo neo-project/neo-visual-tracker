@@ -2,10 +2,51 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { wallet } from '@cityofzion/neon-js';
+import { IWallet } from './iWallet';
+import { wallet } from '@cityofzion/neon-core';
 
 const NewWalletFileInstructions = 'Save this JSON file anywhere in your workspace then use the ' +
     'wallet explorer to add accounts to your new wallet.';
+
+class WalletExplorerWallet implements IWallet {
+
+    public readonly isMultiSig: boolean = false;
+    public readonly signingFunction: ((tx: string, pk: string) => string) | undefined = undefined;
+    public readonly description: string;
+    public readonly address: string;
+
+    public constructor(
+        private readonly parsedWallet: wallet.Wallet,
+        public readonly account: wallet.Account,
+        private readonly filename: string, 
+        walletName: string) {
+
+        this.description = '(wallet explorer) - ' + filename + ' - ' + walletName + ' - ' + account.label;
+        this.address = account.address;
+    }
+
+    public async unlock() : Promise<boolean> {
+        const passphrase = await vscode.window.showInputBox({
+            prompt: 'Enter the passphrase for ' + path.basename(this.filename),
+            password: true,
+        });
+        if (passphrase) {
+            let decrypted = false;
+            try {
+                decrypted = (await this.parsedWallet.decryptAll(passphrase)).reduce((a, b)=> a && b, true);
+            } catch (e) {
+                console.error('Wallet decryption error', this.filename, e);
+            }
+            if (decrypted) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+}
 
 class WalletTreeItemIdentifier {
 
@@ -25,10 +66,12 @@ class WalletTreeItemIdentifier {
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const contents = JSON.parse(jsonFileContents);
             const parsedWallet = new wallet.Wallet(contents);
-            const result = new WalletTreeItemIdentifier(jsonFile, parsedWallet.name, label);
+            const result = new WalletTreeItemIdentifier(jsonFile, label, parsedWallet.name);
             if ((parsedWallet.name !== 'myWallet') || (parsedWallet.accounts && parsedWallet.accounts.length)) {
                 for (let i = 0; i < parsedWallet.accounts.length; i++) {
-                    result.children.push(new WalletTreeItemIdentifier(jsonFile, parsedWallet.name, label, i, parsedWallet.accounts[i].label));
+                    const accountRef = new WalletExplorerWallet(parsedWallet, parsedWallet.accounts[i], label, parsedWallet.name);
+                    result.children.push(
+                        new WalletTreeItemIdentifier(jsonFile, label, parsedWallet.name, i, parsedWallet.accounts[i].label, accountRef));
                 }
                 return result;
             } else {
@@ -44,7 +87,8 @@ class WalletTreeItemIdentifier {
         public readonly jsonFileName: string,
         public readonly label?: string,
         public readonly index?: number,
-        public readonly accountLabel?: string) {
+        public readonly accountLabel?: string,
+        public readonly accountRef?: WalletExplorerWallet) {
     }
 
     public asTreeItem() : vscode.TreeItem {
@@ -110,6 +154,7 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
     private readonly fileSystemWatcher: vscode.FileSystemWatcher;
     private readonly searchPattern: vscode.GlobPattern = '**/*.json';
     
+    public readonly allAccounts: WalletExplorerWallet[] = [];
     public readonly onDidChangeTreeData: vscode.Event<any>;
 
     private rootItems: WalletTreeItemIdentifier[];
@@ -133,6 +178,7 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
 
 	public async refresh() {
         this.rootItems = [];
+        this.allAccounts.length = 0;
 
         this.onDidChangeTreeDataEmitter.fire();
 
@@ -148,6 +194,9 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
                 allJsonFiles[i].fsPath);
             if (walletFromJson) {
                 this.rootItems.push(walletFromJson);
+                for (let j = 0; j < walletFromJson.children.length; j++) {
+                    this.allAccounts.push(walletFromJson.children[j].accountRef as WalletExplorerWallet);
+                }
                 this.onDidChangeTreeDataEmitter.fire();
             }
         }

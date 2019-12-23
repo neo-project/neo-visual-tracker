@@ -79,27 +79,29 @@ export class ClaimPanel {
         this.viewState.getClaimableError = false;
         try {
             const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
-            const api = new neon.api.neoCli.instance(this.rpcUri);
-            const config: any = {
-                api: api,
-                account: walletConfig.account,
-                signingFunction: walletConfig.signingFunction,
-            };
-            if (walletConfig.isMultiSig) {
-                // The neon.default.claimGas function expects the config.account property to be present and 
-                // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
-                // the multisig group); however it also uses config.account.address when looking up unclaimed
-                // GAS. So we manually lookup the unclaimed GAS information (using the multisig address) and then
-                // pass it in (thus avoiding the unclaimed lookup within claimGas).
-                config.claims = await api.getClaims(walletConfig.address);
-            }
-            const result = await neon.default.claimGas(config);
-            if (result.response && result.response.txid) {
-                this.viewState.showSuccess = true;
-                this.viewState.result = result.response.txid;
-            } else {
-                this.viewState.showError = true;    
-                this.viewState.result = 'A claim transaction could not be created';
+            if (await walletConfig.unlock()) {
+                const api = new neon.api.neoCli.instance(this.rpcUri);
+                const config: any = {
+                    api: api,
+                    account: walletConfig.account,
+                    signingFunction: walletConfig.signingFunction,
+                };
+                if (walletConfig.isMultiSig) {
+                    // The neon.default.claimGas function expects the config.account property to be present and 
+                    // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
+                    // the multisig group); however it also uses config.account.address when looking up unclaimed
+                    // GAS. So we manually lookup the unclaimed GAS information (using the multisig address) and then
+                    // pass it in (thus avoiding the unclaimed lookup within claimGas).
+                    config.claims = await api.getClaims(walletConfig.address);
+                }
+                const result = await neon.default.claimGas(config);
+                if (result.response && result.response.txid) {
+                    this.viewState.showSuccess = true;
+                    this.viewState.result = result.response.txid;
+                } else {
+                    this.viewState.showError = true;    
+                    this.viewState.result = 'A claim transaction could not be created';
+                }
             }
         } catch (e) {
             this.viewState.showError = true;

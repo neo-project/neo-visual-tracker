@@ -2,7 +2,9 @@ import * as fs from 'fs';
 import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 
-class Wallet {
+import { IWallet } from './iWallet';
+
+class Wallet implements IWallet {
     public readonly description: string;
     public readonly isMultiSig: boolean = false;
     public readonly signingFunction: ((tx: string, pk: string) => string) | undefined = undefined;
@@ -18,9 +20,12 @@ class Wallet {
             walletName + 
             (accountLabel ? ' - ' + accountLabel + (isDefault ? ' (default)' : '') : '');
     }
+    public async unlock() : Promise<boolean> {
+        return true;
+    }
 }
 
-class MultiSigWallet {
+class MultiSigWallet implements IWallet {
     public readonly description: string;
     public readonly isMultiSig: boolean = true;
     public readonly signingFunction: ((tx: string, pk: string) => string) | undefined;
@@ -50,15 +55,18 @@ class MultiSigWallet {
             walletName + 
             ' (' + this.signingThreshold + ' of ' + this.publicKeys.length + ' multisig)';
     }
+    public async unlock() : Promise<boolean> {
+        return true;
+    }
 }
 
 export class NeoExpressConfig {
 
     public readonly basename: string;
 
-    public readonly wallets: (Wallet | MultiSigWallet)[] = [];
+    public readonly wallets: IWallet[] = [];
 
-    public constructor(public readonly neoExpressJsonFullPath: string) {
+    public constructor(public readonly neoExpressJsonFullPath: string, private readonly additionalAccounts: IWallet[]) {
         this.basename = path.basename(neoExpressJsonFullPath);
         this.refresh();
     }
@@ -107,6 +115,10 @@ export class NeoExpressConfig {
                 });
             }
         });
+
+        for (let i = 0; i < this.additionalAccounts.length; i++) {
+            this.wallets.push(this.additionalAccounts[i]);
+        }
     }
 
 }
