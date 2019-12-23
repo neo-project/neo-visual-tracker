@@ -66,7 +66,7 @@ export class NeoExpressConfig {
 
     public readonly wallets: IWallet[] = [];
 
-    public constructor(public readonly neoExpressJsonFullPath: string, private readonly additionalAccounts: IWallet[]) {
+    public constructor(public readonly neoExpressJsonFullPath: string) {
         this.basename = path.basename(neoExpressJsonFullPath);
         this.refresh();
     }
@@ -115,10 +115,6 @@ export class NeoExpressConfig {
                 });
             }
         });
-
-        for (let i = 0; i < this.additionalAccounts.length; i++) {
-            this.wallets.push(this.additionalAccounts[i]);
-        }
     }
 
 }

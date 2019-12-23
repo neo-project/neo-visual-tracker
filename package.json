@@ -122,13 +122,13 @@
                 "command": "neo-visual-devtracker.transferAssets",
                 "title": "Transfer assets",
                 "category": "Neo Express",
-                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
             },
             {
                 "command": "neo-visual-devtracker.claim",
                 "title": "Claim GAS",
                 "category": "Neo Express",
-                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
             },
             {
                 "command": "neo-visual-devtracker.invokeContract",
@@ -232,11 +232,11 @@
                 },
                 {
                     "command": "neo-visual-devtracker.transferAssets",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
                 },
                 {
                     "command": "neo-visual-devtracker.claim",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
                 },
                 {
                     "command": "neo-visual-devtracker.invokeContract",

@@ -7,6 +7,7 @@ import { claimEvents } from './panels/claimEvents';
 
 import { INeoRpcConnection } from './neoRpcConnection';
 import { NeoExpressConfig } from './neoExpressConfig';
+import { WalletExplorer } from './walletExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -25,29 +26,32 @@ class ViewState {
 
 export class ClaimPanel {
 
-    private readonly neoExpressConfig: NeoExpressConfig;
+    private readonly neoExpressConfig?: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
     private readonly rpcUri: string;
     private readonly rpcConnection: INeoRpcConnection;
+    private readonly walletExplorer: WalletExplorer;
 
     private viewState: ViewState;
     private initialized: boolean = false;
 
     constructor(
         extensionPath: string,
-        neoExpressConfig: NeoExpressConfig,
         rpcUri: string,
         rpcConnection: INeoRpcConnection,
-        disposables: vscode.Disposable[]) {
+        walletExplorer: WalletExplorer,
+        disposables: vscode.Disposable[],
+        neoExpressConfig?: NeoExpressConfig) {
 
         this.rpcUri = rpcUri;
         this.rpcConnection = rpcConnection;
+        this.walletExplorer = walletExplorer;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
 
         this.panel = vscode.window.createWebviewPanel(
             'claimPanel',
-            this.neoExpressConfig.basename + ' - Claim GAS',
+            (this.neoExpressConfig ? this.neoExpressConfig.basename : this.rpcUri) + ' - Claim GAS',
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
@@ -140,9 +144,15 @@ export class ClaimPanel {
         this.viewState.showError = false;
         this.viewState.showSuccess = false;
 
-        this.neoExpressConfig.refresh();
-
-        this.viewState.wallets = this.neoExpressConfig.wallets;
+        this.viewState.wallets = [];
+        if (this.neoExpressConfig) {
+            this.neoExpressConfig.refresh();
+            this.viewState.wallets = this.neoExpressConfig.wallets.slice();
+        }
+        
+        for (let i = 0; i < this.walletExplorer.allAccounts.length; i++) {
+            this.viewState.wallets.push(this.walletExplorer.allAccounts[i]);
+        }
 
         this.viewState.claimable = 0;
         const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];

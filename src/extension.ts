@@ -129,10 +129,11 @@ export function activate(context: vscode.ExtensionContext) {
 		try {
 			const panel = new TransferPanel(
 				context.extensionPath, 
-				new NeoExpressConfig(server.jsonFile, walletExplorer.allAccounts),
 				server.rpcUri,
 				rpcConnectionPool.getConnection(server.rpcUri),
-				context.subscriptions);
+				walletExplorer,
+				context.subscriptions,
+				server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
 		} catch (e) {
 			console.error('Error opening transfer panel ', e);
 		}
@@ -142,10 +143,11 @@ export function activate(context: vscode.ExtensionContext) {
 		try {
 			const panel = new ClaimPanel(
 				context.extensionPath, 
-				new NeoExpressConfig(server.jsonFile, walletExplorer.allAccounts),
 				server.rpcUri,
 				rpcConnectionPool.getConnection(server.rpcUri),
-				context.subscriptions);
+				walletExplorer,
+				context.subscriptions,
+				server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
 		} catch (e) {
 			console.error('Error opening claim panel ', e);
 		}

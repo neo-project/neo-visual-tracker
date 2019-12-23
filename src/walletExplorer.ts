@@ -21,7 +21,7 @@ class WalletExplorerWallet implements IWallet {
         private readonly filename: string, 
         walletName: string) {
 
-        this.description = '(wallet explorer) - ' + filename + ' - ' + walletName + ' - ' + account.label;
+        this.description = filename + ' - ' + walletName + ' - ' + account.label;
         this.address = account.address;
     }
 
