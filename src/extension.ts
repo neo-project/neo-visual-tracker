@@ -90,6 +90,10 @@ export function activate(context: vscode.ExtensionContext) {
 		rpcServerExplorer.refresh();
 	});
 
+	const refreshWalletsCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshWalletExplorer', () => {
+		walletExplorer.refresh();
+	});
+
 	const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', async (server) => {
 		await requireNeoExpress(() => {
 			console.log('User requested to start ', server);
@@ -194,6 +198,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(openTrackerCommand);
 	context.subscriptions.push(refreshServersCommand);
+	context.subscriptions.push(refreshWalletsCommand);
 	context.subscriptions.push(startServerCommand);
 	context.subscriptions.push(stopServerCommand);
 	context.subscriptions.push(createWalletCommand);

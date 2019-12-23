@@ -66,6 +66,15 @@
                 }
             },
             {
+                "command": "neo-visual-devtracker.refreshWalletExplorer",
+                "title": "Refresh Neo wallet list",
+                "category": "Neo Express",
+                "icon": {
+                    "light": "resources/light/refresh.svg",
+                    "dark": "resources/dark/refresh.svg"
+                }
+            },
+            {
                 "command": "neo-visual-devtracker.startServer",
                 "title": "Start Neo Express",
                 "category": "Neo Express",
@@ -143,6 +152,11 @@
                 {
                     "command": "neo-visual-devtracker.refreshObjectExplorerNode",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.refreshWalletExplorer",
+                    "when": "view == neo-visual-devtracker.walletExplorer",
                     "group": "navigation"
                 },
                 {
