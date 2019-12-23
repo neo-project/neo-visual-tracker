@@ -33,6 +33,7 @@
         "onCommand:neo-visual-devtracker.createServerList",
         "onCommand:neo-visual-devtracker.createWalletFile",
         "onCommand:neo-visual-devtracker.openTracker",
+        "onCommand:neo-visual-devtracker.openWallet",
         "onView:neo-visual-devtracker.rpcServerExplorer",
         "onView:neo-visual-devtracker.walletExplorer"
     ],
@@ -54,6 +55,12 @@
             {
                 "command": "neo-visual-devtracker.openTracker",
                 "title": "Open Neo Visual DevTracker",
+                "category": "Neo Express",
+                "when": "false"
+            },
+            {
+                "command": "neo-visual-devtracker.openWallet",
+                "title": "Open Neo wallet file",
                 "category": "Neo Express",
                 "when": "false"
             },

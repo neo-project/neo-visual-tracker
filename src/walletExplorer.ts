@@ -56,6 +56,13 @@ class WalletTreeItemIdentifier {
         result.iconPath = (this.index !== undefined) ? vscode.ThemeIcon.File : vscode.ThemeIcon.Folder;
         result.tooltip = (this.index !== undefined) ? '' : 'Wallet loaded from: ' + this.jsonFile;
         result.contextValue = (this.index !== undefined) ? '' : 'cancreate';
+        if (this.index !== undefined) {
+            result.command = {
+                title: 'Open wallet',
+                command: 'neo-visual-devtracker.openWallet',
+                arguments: [ this.jsonFile ],
+            };
+        }
         return result;
     }
 

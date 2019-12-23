@@ -204,6 +204,13 @@ export function activate(context: vscode.ExtensionContext) {
 		await RpcServerExplorer.editJsonFile(item);
 	});
 
+	const openWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.openWallet', async (jsonFile) => {
+		if (jsonFile) {
+            const textDocument = await vscode.workspace.openTextDocument(vscode.Uri.file(jsonFile));
+            vscode.window.showTextDocument(textDocument);
+        }
+	});
+
 	const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
 	const waletExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.walletExplorer', walletExplorer);
@@ -222,6 +229,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(createServerListCommand);
 	context.subscriptions.push(createWalletFileCommand);
 	context.subscriptions.push(editJsonCommand);
+	context.subscriptions.push(openWalletCommand);
 	context.subscriptions.push(serverExplorerProvider);
 	context.subscriptions.push(waletExplorerProvider);
 }
