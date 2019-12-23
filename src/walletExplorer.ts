@@ -3,6 +3,9 @@ import * as vscode from 'vscode';
 
 import { wallet } from '@cityofzion/neon-js';
 
+const NewWalletFileInstructions = 'Save this JSON file anywhere in your workspace then use the ' +
+    'wallet explorer to add accounts to your new wallet.';
+
 class WalletTreeItemIdentifier {
 
     public readonly jsonFile?: string;
@@ -113,5 +116,21 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
 
 	public getParent(element: WalletTreeItemIdentifier) {
 		return undefined;
+    }
+
+    public static async newWalletFile() {
+        const walletName = await vscode.window.showInputBox({
+            prompt: 'Enter a name for the new wallet',
+        });
+
+        if (walletName) {
+            const newWallet = new wallet.Wallet({ name: walletName });
+            const textDocument = await vscode.workspace.openTextDocument({
+                language: 'json',
+                content: JSON.stringify(newWallet.export()),
+            });
+            vscode.window.showTextDocument(textDocument);
+            vscode.window.showInformationMessage(NewWalletFileInstructions, { modal: true });
+        }
     }
 }
