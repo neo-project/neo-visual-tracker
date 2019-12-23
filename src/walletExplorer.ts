@@ -9,9 +9,7 @@ const NewWalletFileInstructions = 'Save this JSON file anywhere in your workspac
 
 class WalletTreeItemIdentifier {
 
-    public readonly jsonFile?: string;
-
-    public readonly label?: string;
+    public readonly children: WalletTreeItemIdentifier[] = [];
 
     public static fromJsonFile(allRootPaths: string[], jsonFile: string) {
         try {
@@ -24,11 +22,14 @@ class WalletTreeItemIdentifier {
                 label = label.substr(1);
             }
 
-            const result = new WalletTreeItemIdentifier(jsonFile, label);
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const contents = JSON.parse(jsonFileContents);
             const parsedWallet = new wallet.Wallet(contents);
+            const result = new WalletTreeItemIdentifier(jsonFile, parsedWallet.name, label);
             if ((parsedWallet.name !== 'myWallet') || (parsedWallet.accounts && parsedWallet.accounts.length)) {
+                for (let i = 0; i < parsedWallet.accounts.length; i++) {
+                    result.children.push(new WalletTreeItemIdentifier(jsonFile, parsedWallet.name, label, i, parsedWallet.accounts[i].label));
+                }
                 return result;
             } else {
                 return undefined;
@@ -39,17 +40,22 @@ class WalletTreeItemIdentifier {
     }
 
     private constructor(
-        jsonFile?: string, 
-        label?: string) {
-
-        this.jsonFile = jsonFile;
-        this.label = label;
+        public readonly jsonFile: string,
+        public readonly jsonFileName: string,
+        public readonly label?: string,
+        public readonly index?: number,
+        public readonly accountLabel?: string) {
     }
 
-    public asTreeItem(extensionPath: string) : vscode.TreeItem {
-        const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.None);
-        result.iconPath = vscode.ThemeIcon.File;
-        result.tooltip = 'Wallet loaded from: ' + this.jsonFile;
+    public asTreeItem() : vscode.TreeItem {
+        const treeItemLabel = (this.index !== undefined) ?
+            (this.accountLabel || 'Account #' + this.index) :
+            (this.label || path.basename(this.jsonFile));
+        const result = new vscode.TreeItem(treeItemLabel, (this.index !== undefined) ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded);
+        result.description = (this.index !== undefined) ? '' : this.jsonFileName;
+        result.iconPath = (this.index !== undefined) ? vscode.ThemeIcon.File : vscode.ThemeIcon.Folder;
+        result.tooltip = (this.index !== undefined) ? '' : 'Wallet loaded from: ' + this.jsonFile;
+        result.contextValue = (this.index !== undefined) ? '' : 'cancreate';
         return result;
     }
 
@@ -141,12 +147,12 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
 	}
 
 	public getTreeItem(element: WalletTreeItemIdentifier): vscode.TreeItem {
-        return element.asTreeItem(this.extensionPath);
+        return element.asTreeItem();
 	}
 
 	public getChildren(element?: WalletTreeItemIdentifier): WalletTreeItemIdentifier[] {
         if (element) {
-            return [];
+            return element.children;
         } else {
             return this.rootItems;
         }

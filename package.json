@@ -237,7 +237,7 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createAccount",
-                    "when": "view == neo-visual-devtracker.walletExplorer"
+                    "when": "view == neo-visual-devtracker.walletExplorer && viewItem == cancreate"
                 }
             ]
         }
