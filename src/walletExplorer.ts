@@ -160,7 +160,7 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
 
     private rootItems: WalletTreeItemIdentifier[];
 
-    constructor(private readonly extensionPath: string) {
+    constructor() {
         this.onDidChangeTreeDataEmitter = new vscode.EventEmitter<any>();
         this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
         this.rootItems = [];
