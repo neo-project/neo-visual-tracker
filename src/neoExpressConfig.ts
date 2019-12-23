@@ -10,6 +10,7 @@ class Wallet implements IWallet {
     public readonly signingFunction: ((tx: string, pk: string) => string) | undefined = undefined;
     public readonly account: any;
     public constructor(
+        filename: string,
         public readonly walletName: string,
         public readonly accountLabel: string | null,
         public readonly isDefault: boolean,
@@ -17,6 +18,7 @@ class Wallet implements IWallet {
         public readonly privateKey: string) {
         this.account = new neon.wallet.Account(this.privateKey);
         this.description = 
+            filename + ' - ' +
             walletName + 
             (accountLabel ? ' - ' + accountLabel + (isDefault ? ' (default)' : '') : '');
     }
@@ -35,6 +37,7 @@ class MultiSigWallet implements IWallet {
     public readonly account: any;
     public readonly publicKeys: string[];
     public constructor(
+        filename: string,
         public readonly walletName: string,
         public readonly signingThreshold: number,
         public readonly privateKeys: string[]) {
@@ -52,6 +55,7 @@ class MultiSigWallet implements IWallet {
             return neon.tx.Witness.buildMultiSig(tx, signatures, this.multiSigAccount).serialize();
         };
         this.description = 
+            filename + ' - ' +
             walletName + 
             ' (' + this.signingThreshold + ' of ' + this.publicKeys.length + ' multisig)';
     }
@@ -79,6 +83,8 @@ export class NeoExpressConfig {
 
     private parseWallets(neoExpressConfig: any) {
 
+        const filename = path.basename(this.neoExpressJsonFullPath);
+
         this.wallets.length = 0;
 
         const genesisPrivateKeys: string[] = [];
@@ -97,7 +103,7 @@ export class NeoExpressConfig {
                 }
             }
         });
-        this.wallets.push(new MultiSigWallet('genesis', genesisThreshold, genesisPrivateKeys));
+        this.wallets.push(new MultiSigWallet(filename, 'genesis', genesisThreshold, genesisPrivateKeys));
 
         const walletConfigs: any[] = neoExpressConfig.wallets || [];
         walletConfigs.forEach(walletConfig => {
@@ -110,7 +116,7 @@ export class NeoExpressConfig {
                     const privateKey: string | null = accountConfig['private-key'];
                     const address: string | null = accountConfig['script-hash'];
                     if (privateKey && address) {
-                        this.wallets.push(new Wallet(walletName, accountLabel, isDefault, address, privateKey));
+                        this.wallets.push(new Wallet(filename, walletName, accountLabel, isDefault, address, privateKey));
                     }
                 });
             }
