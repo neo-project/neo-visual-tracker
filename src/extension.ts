@@ -184,6 +184,14 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
+	const createAccountCommand = vscode.commands.registerCommand('neo-visual-devtracker.createAccount', async (wallet) => {
+		try {
+			await wallet.createAccount();
+		} catch (e) {
+			console.error('Error creating new account in wallet ', wallet, e);
+		}
+	});
+
 	const createServerListCommand = vscode.commands.registerCommand('neo-visual-devtracker.createServerList', async () => {
 		await RpcServerExplorer.newServerList();
 	});
@@ -210,6 +218,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(claimCommand);
 	context.subscriptions.push(invokeContractCommand);
 	context.subscriptions.push(createInstanceCommand);
+	context.subscriptions.push(createAccountCommand);
 	context.subscriptions.push(createServerListCommand);
 	context.subscriptions.push(createWalletFileCommand);
 	context.subscriptions.push(editJsonCommand);

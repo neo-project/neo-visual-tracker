@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { wallet } from '@cityofzion/neon-js';
@@ -27,7 +28,7 @@ class WalletTreeItemIdentifier {
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const contents = JSON.parse(jsonFileContents);
             const parsedWallet = new wallet.Wallet(contents);
-            if ((parsedWallet.name !== "myWallet") || (parsedWallet.accounts && parsedWallet.accounts.length)) {
+            if ((parsedWallet.name !== 'myWallet') || (parsedWallet.accounts && parsedWallet.accounts.length)) {
                 return result;
             } else {
                 return undefined;
@@ -50,6 +51,32 @@ class WalletTreeItemIdentifier {
         result.iconPath = vscode.ThemeIcon.File;
         result.tooltip = 'Wallet loaded from: ' + this.jsonFile;
         return result;
+    }
+
+    public async createAccount() {
+        if (this.jsonFile) {
+            const jsonFileContents = fs.readFileSync(this.jsonFile, { encoding: 'utf8' });
+            const contents = JSON.parse(jsonFileContents);
+            const parsedWallet = new wallet.Wallet(contents);
+            const accountName = await vscode.window.showInputBox({
+                prompt: 'Enter a name for the new account',
+            });
+
+            const passphrase = await vscode.window.showInputBox({
+                prompt: 'Enter the passphrase for ' + path.basename(this.jsonFile),
+            });
+    
+            if (accountName && passphrase) {
+                const account = new wallet.Account(wallet.generatePrivateKey());
+                account.label = accountName;
+                parsedWallet.addAccount(account);
+                if (await parsedWallet.encryptAll(passphrase)) {
+                    fs.writeFileSync(this.jsonFile, JSON.stringify(parsedWallet.export(), undefined, 4));
+                } else {
+                    vscode.window.showErrorMessage('The wallet file could not be encrypted using the supplied passphrase, the account was not added.');
+                }
+            }
+        }
     }
 }
 

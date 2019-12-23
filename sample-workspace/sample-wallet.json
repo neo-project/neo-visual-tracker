@@ -1,1 +1,31 @@
-{"name":"sample-wallet","version":"1.0","scrypt":{"n":16384,"r":8,"p":8,"size":64},"accounts":[],"extra":{}}
+{
+    "name": "sample-wallet",
+    "version": "1.0",
+    "scrypt": {
+        "n": 16384,
+        "r": 8,
+        "p": 8,
+        "size": 64
+    },
+    "accounts": [
+        {
+            "address": "AVwQ3RT7jdbbh3fzpvSY9665dHsEVWi2kN",
+            "label": "czfsfsd",
+            "isDefault": false,
+            "lock": false,
+            "key": "6PYN7v83v9V1WcDy5BZGu9Sf4DHJuygzRG2QXpzjgCpPavYVwfK1Rjvn8V",
+            "contract": {
+                "script": "2103786d62111a5e05bcec57711f06971a73098ab7445460c576efe1ba2df0c23818ac",
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "type": "Signature"
+                    }
+                ],
+                "deployed": false
+            },
+            "extra": {}
+        }
+    ],
+    "extra": {}
+}

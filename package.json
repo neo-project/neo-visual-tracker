@@ -155,6 +155,12 @@
                     "light": "resources/light/add.svg",
                     "dark": "resources/dark/add.svg"
                 }
+            },
+            {
+                "command": "neo-visual-devtracker.createAccount",
+                "title": "Create account",
+                "category": "Neo Express",
+                "when": "view == neo-visual-devtracker.walletExplorer"
             }
         ],
         "menus": {
@@ -228,6 +234,10 @@
                 {
                     "command": "neo-visual-devtracker.invokeContract",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "neo-visual-devtracker.createAccount",
+                    "when": "view == neo-visual-devtracker.walletExplorer"
                 }
             ]
         }
