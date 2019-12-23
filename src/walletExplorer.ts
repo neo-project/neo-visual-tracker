@@ -18,14 +18,14 @@ class WalletExplorerWallet implements IWallet {
     public constructor(
         private readonly parsedWallet: wallet.Wallet,
         public readonly account: wallet.Account,
-        private readonly filename: string, 
+        private readonly filename: string,
         walletName: string) {
 
         this.description = filename + ' - ' + walletName + ' - ' + account.label;
         this.address = account.address;
     }
 
-    public async unlock() : Promise<boolean> {
+    public async unlock(): Promise<boolean> {
         const passphrase = await vscode.window.showInputBox({
             prompt: 'Enter the passphrase for ' + path.basename(this.filename),
             password: true,
@@ -33,11 +33,11 @@ class WalletExplorerWallet implements IWallet {
         });
         if (passphrase) {
             try {
-                return (await this.parsedWallet.decryptAll(passphrase)).reduce((a, b)=> a && b, true);
+                return (await this.parsedWallet.decryptAll(passphrase)).reduce((a, b) => a && b, true);
             } catch (e) {
                 console.error('Wallet decryption error', this.filename, e);
             }
-        } 
+        }
         return false;
     }
 }
@@ -65,18 +65,18 @@ class WalletTreeItemIdentifier {
                 for (let i = 0; i < parsedWallet.accounts.length; i++) {
                     result.children.push(
                         new WalletTreeItemIdentifier(
-                            jsonFile, 
-                            label, 
-                            parsedWallet.name, 
-                            i, 
-                            parsedWallet.accounts[i].label, 
+                            jsonFile,
+                            label,
+                            parsedWallet.name,
+                            i,
+                            parsedWallet.accounts[i].label,
                             new WalletExplorerWallet(parsedWallet, parsedWallet.accounts[i], label, parsedWallet.name)));
                 }
                 return result;
             } else {
                 return undefined;
             }
-        } catch(e) {
+        } catch (e) {
             return undefined;
         }
     }
@@ -90,7 +90,7 @@ class WalletTreeItemIdentifier {
         public readonly accountRef?: WalletExplorerWallet) {
     }
 
-    public asTreeItem() : vscode.TreeItem {
+    public asTreeItem(): vscode.TreeItem {
         const treeItemLabel = (this.index !== undefined) ?
             (this.accountLabel || 'Account #' + this.index) :
             (this.label || path.basename(this.jsonFile));
@@ -103,7 +103,7 @@ class WalletTreeItemIdentifier {
             result.command = {
                 title: 'Open wallet',
                 command: 'neo-visual-devtracker.openWallet',
-                arguments: [ this.jsonFile ],
+                arguments: [this.jsonFile],
             };
         }
         return result;
@@ -122,7 +122,7 @@ class WalletTreeItemIdentifier {
             if (passphrase) {
                 let decrypted = false;
                 try {
-                    decrypted = (await parsedWallet.decryptAll(passphrase)).reduce((a, b)=> a && b, true);
+                    decrypted = (await parsedWallet.decryptAll(passphrase)).reduce((a, b) => a && b, true);
                 } catch (e) {
                     console.error('Wallet decryption error', this.jsonFile, e);
                 }
@@ -154,13 +154,13 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
     private readonly onDidChangeTreeDataEmitter: vscode.EventEmitter<any>;
     private readonly fileSystemWatcher: vscode.FileSystemWatcher;
     private readonly searchPattern: vscode.GlobPattern = '**/*.json';
-    
+
     public readonly allAccounts: WalletExplorerWallet[] = [];
     public readonly onDidChangeTreeData: vscode.Event<any>;
 
     private rootItems: WalletTreeItemIdentifier[];
 
-	constructor(private readonly extensionPath: string) { 
+    constructor(private readonly extensionPath: string) {
         this.onDidChangeTreeDataEmitter = new vscode.EventEmitter<any>();
         this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
         this.rootItems = [];
@@ -177,7 +177,7 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
         }
     }
 
-	public async refresh() {
+    public async refresh() {
         this.rootItems = [];
         this.allAccounts.length = 0;
 
@@ -201,22 +201,22 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
                 this.onDidChangeTreeDataEmitter.fire();
             }
         }
-	}
+    }
 
-	public getTreeItem(element: WalletTreeItemIdentifier): vscode.TreeItem {
+    public getTreeItem(element: WalletTreeItemIdentifier): vscode.TreeItem {
         return element.asTreeItem();
-	}
+    }
 
-	public getChildren(element?: WalletTreeItemIdentifier): WalletTreeItemIdentifier[] {
+    public getChildren(element?: WalletTreeItemIdentifier): WalletTreeItemIdentifier[] {
         if (element) {
             return element.children;
         } else {
             return this.rootItems;
         }
-	}
+    }
 
-	public getParent(element: WalletTreeItemIdentifier) {
-		return undefined;
+    public getParent(element: WalletTreeItemIdentifier) {
+        return undefined;
     }
 
     public static async newWalletFile() {
@@ -246,7 +246,7 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
                 } else {
                     vscode.window.showErrorMessage('A new wallet file could not be encrypted using the supplied passphrase.', { modal: true });
                 }
-            }       
+            }
         }
     }
 }
