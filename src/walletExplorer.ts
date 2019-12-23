@@ -5,8 +5,8 @@ import * as vscode from 'vscode';
 import { IWallet } from './iWallet';
 import { wallet } from '@cityofzion/neon-core';
 
-const NewWalletFileInstructions = 'Save this JSON file anywhere in your workspace then use the ' +
-    'wallet explorer to add accounts to your new wallet.';
+const NewWalletFileInstructions = 'Save this JSON file anywhere in your workspace. You will then see your new wallet appear ' +
+    'in the wallet explorer.';
 
 class WalletExplorerWallet implements IWallet {
 
