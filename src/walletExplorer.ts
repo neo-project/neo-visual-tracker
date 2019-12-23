@@ -29,6 +29,7 @@ class WalletExplorerWallet implements IWallet {
         const passphrase = await vscode.window.showInputBox({
             prompt: 'Enter the passphrase for ' + path.basename(this.filename),
             password: true,
+            ignoreFocusOut: true,
         });
         if (passphrase) {
             let decrypted = false;
@@ -118,6 +119,7 @@ class WalletTreeItemIdentifier {
             const passphrase = await vscode.window.showInputBox({
                 prompt: 'Enter the passphrase for ' + path.basename(this.jsonFile),
                 password: true,
+                ignoreFocusOut: true,
             });
             if (passphrase) {
                 let decrypted = false;
@@ -129,6 +131,7 @@ class WalletTreeItemIdentifier {
                 if (decrypted) {
                     const accountName = await vscode.window.showInputBox({
                         prompt: 'Enter a name for the new account',
+                        ignoreFocusOut: true,
                     });
                     if (accountName) {
                         const account = new wallet.Account(wallet.generatePrivateKey());
@@ -221,11 +224,13 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
     public static async newWalletFile() {
         const walletName = await vscode.window.showInputBox({
             prompt: 'Enter a name for the new wallet',
+            ignoreFocusOut: true,
         });
         if (walletName) {
             const passphrase = await vscode.window.showInputBox({
                 prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
                 password: true,
+                ignoreFocusOut: true,
             });
             if (passphrase) {
                 const newWallet = new wallet.Wallet({ name: walletName });
