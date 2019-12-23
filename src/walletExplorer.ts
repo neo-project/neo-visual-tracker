@@ -69,6 +69,7 @@ class WalletTreeItemIdentifier {
                             label,
                             parsedWallet.name,
                             i,
+                            result,
                             parsedWallet.accounts[i].label,
                             new WalletExplorerWallet(parsedWallet, parsedWallet.accounts[i], label, parsedWallet.name)));
                 }
@@ -86,6 +87,7 @@ class WalletTreeItemIdentifier {
         public readonly jsonFileName: string,
         public readonly label?: string,
         public readonly index?: number,
+        public readonly parent?: WalletTreeItemIdentifier,
         public readonly accountLabel?: string,
         public readonly accountRef?: WalletExplorerWallet) {
     }
@@ -216,7 +218,7 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
     }
 
     public getParent(element: WalletTreeItemIdentifier) {
-        return undefined;
+        return element.parent;
     }
 
     public static async newWalletFile() {
