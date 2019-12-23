@@ -127,7 +127,7 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
             const newWallet = new wallet.Wallet({ name: walletName });
             const textDocument = await vscode.workspace.openTextDocument({
                 language: 'json',
-                content: JSON.stringify(newWallet.export()),
+                content: JSON.stringify(newWallet.export(), undefined, 4),
             });
             vscode.window.showTextDocument(textDocument);
             vscode.window.showInformationMessage(NewWalletFileInstructions, { modal: true });
