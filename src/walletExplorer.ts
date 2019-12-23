@@ -32,20 +32,13 @@ class WalletExplorerWallet implements IWallet {
             ignoreFocusOut: true,
         });
         if (passphrase) {
-            let decrypted = false;
             try {
-                decrypted = (await this.parsedWallet.decryptAll(passphrase)).reduce((a, b)=> a && b, true);
+                return (await this.parsedWallet.decryptAll(passphrase)).reduce((a, b)=> a && b, true);
             } catch (e) {
                 console.error('Wallet decryption error', this.filename, e);
             }
-            if (decrypted) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        } 
+        return false;
     }
 }
 
