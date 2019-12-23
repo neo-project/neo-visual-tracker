@@ -58,22 +58,33 @@ class WalletTreeItemIdentifier {
             const jsonFileContents = fs.readFileSync(this.jsonFile, { encoding: 'utf8' });
             const contents = JSON.parse(jsonFileContents);
             const parsedWallet = new wallet.Wallet(contents);
-            const accountName = await vscode.window.showInputBox({
-                prompt: 'Enter a name for the new account',
-            });
-
             const passphrase = await vscode.window.showInputBox({
                 prompt: 'Enter the passphrase for ' + path.basename(this.jsonFile),
+                password: true,
             });
-    
-            if (accountName && passphrase) {
-                const account = new wallet.Account(wallet.generatePrivateKey());
-                account.label = accountName;
-                parsedWallet.addAccount(account);
-                if (await parsedWallet.encryptAll(passphrase)) {
-                    fs.writeFileSync(this.jsonFile, JSON.stringify(parsedWallet.export(), undefined, 4));
+            if (passphrase) {
+                let decrypted = false;
+                try {
+                    decrypted = (await parsedWallet.decryptAll(passphrase)).reduce((a, b)=> a && b, true);
+                } catch (e) {
+                    console.error('Wallet decryption error', this.jsonFile, e);
+                }
+                if (decrypted) {
+                    const accountName = await vscode.window.showInputBox({
+                        prompt: 'Enter a name for the new account',
+                    });
+                    if (accountName) {
+                        const account = new wallet.Account(wallet.generatePrivateKey());
+                        account.label = accountName;
+                        parsedWallet.addAccount(account);
+                        if (await parsedWallet.encryptAll(passphrase)) {
+                            fs.writeFileSync(this.jsonFile, JSON.stringify(parsedWallet.export(), undefined, 4));
+                        } else {
+                            vscode.window.showErrorMessage('The wallet file could not be encrypted using the supplied passphrase, the account was not added.', { modal: true });
+                        }
+                    }
                 } else {
-                    vscode.window.showErrorMessage('The wallet file could not be encrypted using the supplied passphrase, the account was not added.');
+                    vscode.window.showErrorMessage('The passphrase supplied was incorrect.', { modal: true });
                 }
             }
         }
@@ -149,15 +160,28 @@ export class WalletExplorer implements vscode.TreeDataProvider<WalletTreeItemIde
         const walletName = await vscode.window.showInputBox({
             prompt: 'Enter a name for the new wallet',
         });
-
         if (walletName) {
-            const newWallet = new wallet.Wallet({ name: walletName });
-            const textDocument = await vscode.workspace.openTextDocument({
-                language: 'json',
-                content: JSON.stringify(newWallet.export(), undefined, 4),
+            const passphrase = await vscode.window.showInputBox({
+                prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
+                password: true,
             });
-            vscode.window.showTextDocument(textDocument);
-            vscode.window.showInformationMessage(NewWalletFileInstructions, { modal: true });
+            if (passphrase) {
+                const newWallet = new wallet.Wallet({ name: walletName });
+                const account = new wallet.Account(wallet.generatePrivateKey());
+                account.label = 'Default account';
+                account.isDefault = true;
+                newWallet.addAccount(account);
+                if (await newWallet.encryptAll(passphrase)) {
+                    const textDocument = await vscode.workspace.openTextDocument({
+                        language: 'jsonc',
+                        content: JSON.stringify(newWallet.export(), undefined, 4),
+                    });
+                    vscode.window.showTextDocument(textDocument);
+                    vscode.window.showInformationMessage(NewWalletFileInstructions, { modal: true });
+                } else {
+                    vscode.window.showErrorMessage('A new wallet file could not be encrypted using the supplied passphrase.', { modal: true });
+                }
+            }       
         }
     }
 }
