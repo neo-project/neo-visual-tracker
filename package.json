@@ -32,7 +32,8 @@
         "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.createServerList",
         "onCommand:neo-visual-devtracker.openTracker",
-        "onView:neo-visual-devtracker.rpcServerExplorer"
+        "onView:neo-visual-devtracker.rpcServerExplorer",
+        "onView:neo-visual-devtracker.walletExplorer"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -41,6 +42,10 @@
                 {
                     "id": "neo-visual-devtracker.rpcServerExplorer",
                     "name": "Neo RPC Servers"
+                },
+                {
+                    "id": "neo-visual-devtracker.walletExplorer",
+                    "name": "Neo Wallets"
                 }
             ]
         },
