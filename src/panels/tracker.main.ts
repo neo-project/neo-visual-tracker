@@ -32,6 +32,10 @@ function handleMessage(message: any) {
         const checkbox: any = document.querySelector(trackerSelectors.HideEmptyBlocksCheckbox);
         checkbox.checked = message.viewState.hideEmptyBlocks;
         htmlHelpers.showHide(trackerSelectors.HideEmptyBlocksCheckboxArea, message.viewState.blockChainInfo && message.viewState.blockChainInfo.populatedBlocksKnown);
+        if (message.isSearch) {
+            const searchInput = document.querySelector(trackerSelectors.SearchInput) as HTMLInputElement;
+            searchInput.value = '';
+        }
     } else if (message.status) {
         const loadingIndicator: any = document.querySelector(trackerSelectors.LoadingIndicator);
         loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';

@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import { wallet } from '@cityofzion/neon-core';
+
 import { INeoRpcConnection, INeoSubscription, INeoStatusReceiver, BlockchainInfo, Blocks } from './neoRpcConnection';
 import { trackerEvents } from './panels/trackerEvents';
 
@@ -165,9 +167,32 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     ((this.viewState.currentBlock !== undefined) ? ActivePage.BlockDetail : ActivePage.Blocks );
             } else if (message.e === trackerEvents.Copy) {
                 await vscode.env.clipboard.writeText(message.c);
+            } else if (message.e === trackerEvents.Search) {
+                const block = await this.rpcConnection.getBlock(message.c, this);
+                if (block) {
+                    this.viewState.currentBlock = block;
+                    this.viewState.activePage = ActivePage.BlockDetail;
+                } else {
+                    const transaction = await this.rpcConnection.getTransaction(message.c, this);
+                    if (transaction) {
+                        this.viewState.currentTransaction = transaction;
+                        this.viewState.activePage = ActivePage.TransactionDetail;
+                    } else if (wallet.isAddress(message.c)) {
+                        this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(message.c, this);
+                        this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(message.c, this);
+                        this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(message.c, this);
+                        this.viewState.activePage = ActivePage.AddressDetail;
+                    } else {
+                        // Go to first page of block explorer when no results found:
+                        this.viewState.firstBlock = undefined;
+                        this.viewState.forwards = true;
+                        await this.updateBlockList(true);
+                        this.viewState.activePage = ActivePage.Blocks;
+                    }
+                }
             }
 
-            this.panel.webview.postMessage({ viewState: this.viewState });
+            this.panel.webview.postMessage({ viewState: this.viewState, isSearch: (message.e === trackerEvents.Search) });
         } finally {
             this.isPageLoading = false;
             this.updateStatus();
