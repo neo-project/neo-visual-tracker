@@ -95,11 +95,6 @@ table {
 }
 
 #searcharea {
-    .heading {
-        font-weight: bold;
-        font-style: italic;
-        font-size: 1.1em;
-    }
     .formarea {
         position: relative;
         padding-right: 16px;
@@ -115,5 +110,8 @@ table {
             top: 5px;
         }
     }
-    margin-top: 10px;
+    padding: 15px 20px 15px 20px;
+    margin: 0px -20px 10px -20px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+    background-color: var(--vscode-sideBar-background);
 }
