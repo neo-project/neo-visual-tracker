@@ -168,7 +168,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
             } else if (message.e === trackerEvents.Copy) {
                 await vscode.env.clipboard.writeText(message.c);
             } else if (message.e === trackerEvents.Search) {
-                const block = await this.rpcConnection.getBlock(message.c, this);
+                const asNumber = parseInt(message.c);
+                const block = await this.rpcConnection.getBlock((asNumber + '') === message.c ? asNumber : message.c, this);
                 if (block) {
                     this.viewState.currentBlock = block;
                     this.viewState.activePage = ActivePage.BlockDetail;
