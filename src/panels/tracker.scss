@@ -93,3 +93,27 @@ table {
 .unspentsNotSupported, .claimableNotSupported {
     margin-bottom: 1em;
 }
+
+#searcharea {
+    .heading {
+        font-weight: bold;
+        font-style: italic;
+        font-size: 1.1em;
+    }
+    .formarea {
+        position: relative;
+        padding-right: 16px;
+        #searchinput {
+            width: 100%;
+            font-size: 1.5em;
+            padding: 6px;
+        }
+        button {
+            position: absolute;
+            z-index: 1;
+            right: 5px;
+            top: 5px;
+        }
+    }
+    margin-top: 10px;
+}
