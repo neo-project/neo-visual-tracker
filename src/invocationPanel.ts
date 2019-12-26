@@ -137,7 +137,13 @@ export class InvocationPanel {
             await this.invoke(message.c, /*onChain=*/ true);
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === invokeEvents.InvokeScript) {
-            // TODO
+            const generatedScript = this.invokeScript(message.c);
+            if (generatedScript) {
+                vscode.window.showTextDocument(await vscode.workspace.openTextDocument({ language: 'javascript', content: generatedScript }));
+            } else {
+                this.viewState.invocationError = 'Could not generate sample invocation script; please ensure that all arguments are valid and that a wallet has been selected.';
+                this.panel.webview.postMessage({ viewState: this.viewState });
+            }
         } else if (message.e === invokeEvents.Dismiss) {
             this.viewState.invocationError = '';
             this.viewState.broadcastResult = '';
@@ -158,7 +164,7 @@ export class InvocationPanel {
                             const sb = neon.default.create.scriptBuilder();
                             let script = '';
                             if (method.name === 'Main') {
-                                const args = InvocationPanel.parseArrayArgument(method.parameters[1].value);
+                                const args = InvocationPanel.parseArrayArgument(method.parameters[1].value || '[]');
                                 script = sb.emitAppCall(
                                     contractHash, 
                                     method.parameters[0].value, 
@@ -220,6 +226,75 @@ export class InvocationPanel {
             this.viewState.showResult = false;
             this.viewState.broadcastResult = undefined;
             this.viewState.invocationError = 'Could not invoke ' + methodName + ': ' + e;
+        }
+    }
+
+    private invokeScript(methodName: string): string | undefined {
+        for (let i = 0; i < this.viewState.contracts.length; i++) {
+            if (this.viewState.contracts[i].hash === this.viewState.selectedContract) {
+                const contract = this.viewState.contracts[i];
+                for (let j = 0; j < contract.functions.length; j++) {
+                    const method = contract.functions[j];
+                    const selectedWallet = method.selectedWallet;
+                    if (selectedWallet && (method.name === methodName)) {
+                        let intentsScript = undefined;
+                        const symbol = method.intentSymbol;
+                        const value = method.intentValue;
+                        if (symbol && value) {
+                            const numericValue = parseFloat(value);
+                            if (!isNaN(numericValue) && (numericValue > 0)) {
+                                const intentAssets: any = {};
+                                intentAssets[symbol] = value;
+                                intentsScript = 'neon.api.makeIntent(' + JSON.stringify(intentAssets) + ', contractHash)';
+                            }
+                        }
+
+                        let generatedFile = '';
+                        generatedFile += '//  \r\n';
+                        generatedFile += '//  Instructions:\r\n';
+                        generatedFile += '//  \r\n';
+                        generatedFile += '//  - Save this file as a JavaScript file (e.g. invoke.js), \r\n';
+                        generatedFile += '//  - Ensure that the @cityofzion/neon-js package is installed (e.g. `npm install @cityofzion/neon-js`, \r\n';
+                        generatedFile += '//  - Press F5\r\n';
+                        generatedFile += '//  \r\n';
+                        generatedFile += '\r\n';
+                        generatedFile += 'const neon = require("@cityofzion/neon-js");\r\n';
+                        generatedFile += '\r\n';
+                        generatedFile += 'const rpcUrl = "' + this.viewState.rpcUrl + '";\r\n';
+                        generatedFile += 'const contractHash = "' + contract.hash.replace(/^0x/, '') + '";\r\n';
+                        generatedFile += 'const privateKey = "' + selectedWallet + '";\r\n';
+                        if (method.name === 'Main') {
+                            generatedFile += 'const methodName = "' + method.parameters[0].value + '";\r\n';
+                            generatedFile += 'const args = ' + JSON.stringify(InvocationPanel.parseArrayArgument(method.parameters[1].value || '[]'), undefined, 4) + ';\r\n';
+                        } else {
+                            generatedFile += 'const methodName = "' + method.name + '";\r\n';
+                            generatedFile += 'const args = ' + JSON.stringify(InvocationPanel.extractArguments(method.parameters), undefined, 4) + ';\r\n';
+                        }
+                        generatedFile += '\r\n';
+                        generatedFile += '/*\r\nArguments: \r\n' + JSON.stringify(method.parameters, undefined, 4) + '\r\n*/\r\n';
+                        generatedFile += '\r\n';
+                        generatedFile += 'const sb = neon.default.create.scriptBuilder();\r\n';
+                        generatedFile += 'const script = sb.emitAppCall(contractHash, methodName, args).str;\r\n';
+                        generatedFile += 'const api = new neon.api.neoCli.instance(rpcUrl);\r\n';
+                        generatedFile += 'const account = new neon.wallet.Account(privateKey);\r\n';
+                        if (intentsScript) {
+                            generatedFile += 'const intents = ' + intentsScript + ';\r\n';
+                            generatedFile += 'const config = { api: api, script: script, account: account, intents: intents };\r\n';
+                        } else {
+                            generatedFile += 'const config = { api: api, script: script, account: account };\r\n';
+                        }
+                        generatedFile += '(async function() {\r\n';
+                        generatedFile += '    try {\r\n';
+                        generatedFile += '        const result = await neon.default.doInvoke(config);\r\n';
+                        generatedFile += '        console.log("Success:", result);\r\n';
+                        generatedFile += '    } catch (e) {\r\n';
+                        generatedFile += '        console.error("Error:", e);\r\n';
+                        generatedFile += '    }\r\n';
+                        generatedFile += '})();\r\n';
+                        return generatedFile;
+                    }
+                }
+            }
         }
     }
 
