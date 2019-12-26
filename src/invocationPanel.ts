@@ -136,6 +136,8 @@ export class InvocationPanel {
         } else if (message.e === invokeEvents.InvokeOnChain) {
             await this.invoke(message.c, /*onChain=*/ true);
             this.panel.webview.postMessage({ viewState: this.viewState });
+        } else if (message.e === invokeEvents.InvokeScript) {
+            // TODO
         } else if (message.e === invokeEvents.Dismiss) {
             this.viewState.invocationError = '';
             this.viewState.broadcastResult = '';
