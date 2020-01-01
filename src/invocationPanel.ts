@@ -141,6 +141,11 @@ export class InvocationPanel {
             this.viewState.broadcastResult = '';
             this.viewState.showResult = false;
             this.panel.webview.postMessage({ viewState: this.viewState });
+        } else if (message.e === invokeEvents.Debug) {
+            if (!(await this.startDebugging())) {
+                this.viewState.invocationError = 'There was an error launching the debugger.';
+                this.panel.webview.postMessage({ viewState: this.viewState });
+            }
         }
     }
 
@@ -219,6 +224,10 @@ export class InvocationPanel {
             this.viewState.broadcastResult = undefined;
             this.viewState.invocationError = 'Could not invoke ' + methodName + ': ' + e;
         }
+    }
+
+    private async startDebugging() {
+        return false;
     }
 
     private static extractArguments(parameters: any[]) {
