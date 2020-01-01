@@ -289,7 +289,6 @@ export class InvocationPanel {
                                         }
                                     }
                                 };
-                                console.log(debugConfiguration);
                                 return await vscode.debug.startDebugging(undefined, debugConfiguration);
                             } else {
                                 this.viewState.invocationError = 'Could not find an AVM file for this contract in the current workspace.';
