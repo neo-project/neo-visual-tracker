@@ -62,6 +62,7 @@ class ViewState {
 export class InvocationPanel {
 
     private readonly panel: vscode.WebviewPanel;
+    private readonly avmFiles: Map<string, string>;
 
     private viewState: ViewState;
     private jsonParsed: boolean;
@@ -71,6 +72,8 @@ export class InvocationPanel {
         neoExpressJsonFullPath: string,
         rpcUrl: string,
         disposables: vscode.Disposable[]) {
+
+        this.avmFiles = new Map<string, string>();
 
         this.jsonParsed = false;
 
@@ -142,8 +145,9 @@ export class InvocationPanel {
             this.viewState.showResult = false;
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === invokeEvents.Debug) {
-            if (!(await this.startDebugging())) {
-                this.viewState.invocationError = 'There was an error launching the debugger.';
+            this.viewState.invocationError = undefined;
+            if (!(await this.startDebugging(message.c))) {
+                this.viewState.invocationError = this.viewState.invocationError || 'There was an error launching the debugger.';
                 this.panel.webview.postMessage({ viewState: this.viewState });
             }
         }
@@ -226,7 +230,81 @@ export class InvocationPanel {
         }
     }
 
-    private async startDebugging() {
+    private async startDebugging(methodName: string) {
+        try {
+            for (let i = 0; i < this.viewState.contracts.length; i++) {
+                const contractHash = this.viewState.contracts[i].hash;
+                if (contractHash === this.viewState.selectedContract) {
+                    const contract = this.viewState.contracts[i];
+                    const contractName = contract.name;
+                    for (let j = 0; j < contract.functions.length; j++) {
+                        const method = contract.functions[j];
+                        if (method.name === methodName) {
+
+                            let avmFileName = this.avmFiles.get(contractHash);
+                            if (!avmFileName) {
+                                const allAbiJsons = await vscode.workspace.findFiles('**/*.abi.json');
+                                for (let k = 0; k < allAbiJsons.length; k++) {
+                                    const abiJsonFile = allAbiJsons[k];
+                                    try {
+                                        const abiJson = fs.readFileSync(abiJsonFile.fsPath, { encoding: 'utf8' });
+                                        const abi = JSON.parse(abiJson);
+                                        if (abi.hash === contractHash) {
+                                            const correspondingAvm = abiJsonFile.fsPath.replace(/.abi.json$/, '.avm');
+                                            if (fs.existsSync(correspondingAvm)) {
+                                                avmFileName = correspondingAvm;
+                                                break;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        console.info('Could not parse potential ABI file', abiJsonFile, e);
+                                    }
+                                }
+                            }
+
+                            if (avmFileName) {
+                                this.avmFiles.set(contractHash, avmFileName);
+                                let args = [];
+                                if (methodName === 'Main') {
+                                    args = [
+                                        method.parameters[0].value,
+                                        InvocationPanel.parseArrayArgument(method.parameters[1].value || '[]'),
+                                    ];
+                                } else {
+                                    args = [
+                                        methodName,
+                                        InvocationPanel.extractArguments(method.parameters),
+                                    ];
+                                }
+                                const debugConfiguration: vscode.DebugConfiguration = {
+                                    'name': contractName + '-' + methodName,
+                                    'type': 'neo-contract',
+                                    'request': 'launch',
+                                    'program': avmFileName,
+                                    'args': args,
+                                    'storage': [],
+                                    'runtime': {
+                                        'witnesses': {
+                                            'check-result': true,
+                                        }
+                                    }
+                                };
+                                console.log(debugConfiguration);
+                                return await vscode.debug.startDebugging(undefined, debugConfiguration);
+                            } else {
+                                this.viewState.invocationError = 'Could not find an AVM file for this contract in the current workspace.';
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            this.viewState.invocationError = 'Could not debug ' + methodName + ': ' + e;
+            return false;
+        }
+
+        this.viewState.invocationError = 'Could not find NEO Express configuration for this contract.';
         return false;
     }
 
