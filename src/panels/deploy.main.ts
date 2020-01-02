@@ -67,6 +67,7 @@ function render() {
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractName, htmlHelpers.text(viewState.contractName));
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractPath, htmlHelpers.text(viewState.contractPath));
     htmlHelpers.setPlaceholder(deploySelectors.ErrorMessage, htmlHelpers.text(viewState.result));
+    htmlHelpers.setPlaceholder(deploySelectors.Result, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(deploySelectors.ErrorNoContracts, viewState.contracts.length === 0);
     htmlHelpers.showHide(deploySelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(deploySelectors.ViewResults, viewState.showSuccess);

@@ -69,7 +69,7 @@
                 <div class="select"><select id="walletDropdown"></select></div>
             </div>
 
-            <div id="error-message" class="result-text error m-t">
+            <div id="error-message" class="error m-t">
             </div>
 
             <div class="text-center">
@@ -85,11 +85,23 @@
             <h1>Contract deployed</h1>
 
             <div>
-                The following contract was deployed:
+                The following contract was deployed in transaction <span class="result-text emphasis"></span>:
             </div>
 
             <div>
-                <pre class="result-text display-contract-path"></pre>
+                <table>
+                    <tr>
+                        <td colspan="2" class="stronger display-contract-name"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Hash</td>
+                        <td class="small display-contract-hash"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Path</td>
+                        <td class="small display-contract-path"></td>
+                    </tr>
+                </table>
             </div>
 
             <div class="text-center">

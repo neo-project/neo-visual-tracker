@@ -154,7 +154,6 @@ export function activate(context: vscode.ExtensionContext) {
                 context.extensionPath, 
                 new NeoExpressConfig(server.jsonFile),
                 server.rpcUri,
-                rpcConnectionPool.getConnection(server.rpcUri),
                 contractDetector,
                 context.subscriptions);
         } catch (e) {

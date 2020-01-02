@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -15,6 +16,7 @@ class ViewState {
     contractPath?: string = undefined;
     contractName?: string = undefined;
     contractHash?: string = undefined;
+    contractAvmHex?: string = undefined;
     isValid: boolean = false;
     result: string = '';
     showError: boolean = false;
@@ -29,7 +31,6 @@ export class DeployPanel {
     private readonly neoExpressConfig: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
     private readonly rpcUri: string;
-    private readonly rpcConnection: INeoRpcConnection;
 
     private viewState: ViewState;
     private initialized: boolean = false;
@@ -38,13 +39,11 @@ export class DeployPanel {
         extensionPath: string,
         neoExpressConfig: NeoExpressConfig,
         rpcUri: string,
-        rpcConnection: INeoRpcConnection,
         contractDetector: ContractDetector,
         disposables: vscode.Disposable[]) {
 
         this.contractDetector = contractDetector;
         this.rpcUri = rpcUri;
-        this.rpcConnection = rpcConnection;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
 
@@ -72,11 +71,53 @@ export class DeployPanel {
     }
 
     private async doDeploy() {
-        // TODO
-        //   See: https://github.com/Moonlight-io/moonlight-ico-template/blob/master/lib/nep5-interface.js#L191
-        this.viewState.result = 'Code not written yet';
-        this.viewState.showError = true;
-        this.viewState.showSuccess = false;
+        try {
+            //
+            // Construct a script that calls Neo.Contract.Create
+            //   -- see: https://docs.neo.org/docs/en-us/reference/scapi/fw/dotnet/neo/Contract/Create.html
+            //
+            // TODO: Find the contracts .abi.json and correctly determine parameters and return types. For now
+            //       we assume that all contracts take two parameters (a string and an array) and return void.
+            // TODO: Allow storage usage to be specified in the UI. For now we assume storage is used.
+            // TODO: Allow specification of description, email, etc. in the UI. For now we use blank values.
+            //
+            const sb = neon.default.create.scriptBuilder();
+            const script = sb
+                .emitPush(neon.default.u.str2hexstring('')) // description
+                .emitPush(neon.default.u.str2hexstring('')) // email
+                .emitPush(neon.default.u.str2hexstring('')) // author
+                .emitPush(neon.default.u.str2hexstring('')) // code_version
+                .emitPush(neon.default.u.str2hexstring('')) // name
+                .emitPush(0x01) // storage: {none: 0x00, storage: 0x01, dynamic: 0x02, storage+dynamic:0x03}
+                .emitPush('ff') // return type - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
+                .emitPush('0710') // parameter list - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
+                .emitPush(this.viewState.contractAvmHex)
+                .emitSysCall('Neo.Contract.Create')
+                .str;
+
+            const api = new neon.api.neoCli.instance(this.rpcUri);
+            const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
+            const config = {
+                api: api,
+                script: script,
+                account: walletConfig.account,
+                signingFunction: walletConfig.signingFunction,
+            };
+            const result = await neon.default.doInvoke(config);
+            if (result.response && result.response.txid) {
+                this.viewState.result = result.response.txid;
+                this.viewState.showError = false;
+                this.viewState.showSuccess = true;
+            } else {
+                this.viewState.result = 'No response from RPC server; contract may not have deployed';
+                this.viewState.showError = true;
+                this.viewState.showSuccess = false;
+            }
+        } catch (e) {
+            this.viewState.result = 'Error deploying contract: ' + e;
+            this.viewState.showError = true;
+            this.viewState.showSuccess = false;
+        }
     }
 
     private async onMessage(message: any) {
@@ -91,7 +132,10 @@ export class DeployPanel {
             await this.refresh(true);
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === deployEvents.Deploy) {
-            await this.doDeploy();
+            await this.refresh(true);
+            if (this.viewState.isValid) {
+                await this.doDeploy();
+            }
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === deployEvents.Close) {
             this.dispose();
@@ -121,9 +165,11 @@ export class DeployPanel {
             this.viewState.contractPath = undefined;
             this.viewState.contractName = undefined;
             this.viewState.contractHash = undefined;
+            this.viewState.contractAvmHex = undefined;
         } else {
             this.viewState.contractName = contractConfig.name;
             this.viewState.contractHash = contractConfig.hash;
+            this.viewState.contractAvmHex = contractConfig.avmHex;
         }
 
         this.viewState.isValid =
