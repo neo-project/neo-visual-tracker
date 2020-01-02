@@ -46,6 +46,21 @@
             <div class="error m-b" id="errorNoContracts">
                 No compiled contracts (*.avm files) were found in the current workspace.
             </div>
+            <div class="m-b" id="contractDetail">
+                <table>
+                    <tr>
+                        <td colspan="2" class="stronger display-contract-name"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Hash</td>
+                        <td class="small display-contract-hash"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Path</td>
+                        <td class="small display-contract-path"></td>
+                    </tr>
+                </table>
+            </div>
 
             <div>
                 Select the wallet that you wish to use for the deployment transaction:
@@ -74,7 +89,7 @@
             </div>
 
             <div>
-                <pre class="result-text display-contract"></pre>
+                <pre class="result-text display-contract-path"></pre>
             </div>
 
             <div class="text-center">

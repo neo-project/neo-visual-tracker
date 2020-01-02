@@ -54,7 +54,7 @@ function populateDropdown(
 function render() {
     populateDropdown(
         contractDropdown, 
-        viewState.contracts.map((_: any) => _.path), 
+        viewState.contracts.map((_: any) => _.name + ' - ' + _.path), 
         viewState.contracts.map((_: any) => _.path), 
         viewState.contractPath);
     populateDropdown(
@@ -62,7 +62,10 @@ function render() {
         viewState.wallets.map((_: any) => _.description), 
         viewState.wallets.map((_: any) => _.address), 
         viewState.walletAddress);
-    htmlHelpers.setPlaceholder(deploySelectors.DisplayContract, htmlHelpers.text(viewState.contractPath));
+    htmlHelpers.showHide(deploySelectors.ContractDetail, !!viewState.contractPath);
+    htmlHelpers.setPlaceholder(deploySelectors.DisplayContractHash, htmlHelpers.text(viewState.contractHash));
+    htmlHelpers.setPlaceholder(deploySelectors.DisplayContractName, htmlHelpers.text(viewState.contractName));
+    htmlHelpers.setPlaceholder(deploySelectors.DisplayContractPath, htmlHelpers.text(viewState.contractPath));
     htmlHelpers.setPlaceholder(deploySelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(deploySelectors.ErrorNoContracts, viewState.contracts.length === 0);
     htmlHelpers.showHide(deploySelectors.ErrorMessage, viewState.showError);

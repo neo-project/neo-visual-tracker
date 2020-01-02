@@ -2,9 +2,12 @@
 
 const deploySelectors = {
     CloseButton: '#close',
+    ContractDetail: '#contractDetail',
     ContractDropdown: '#contractDropdown',
     DeployButton: '#deploy',
-    DisplayContract: '.display-contract',
+    DisplayContractHash: '.display-contract-hash',
+    DisplayContractName: '.display-contract-name',
+    DisplayContractPath: '.display-contract-path',
     ErrorMessage: '#error-message',
     ErrorNoContracts: '#errorNoContracts',
     LoadingIndicator: '.loading',

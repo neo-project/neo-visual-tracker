@@ -13,6 +13,8 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 class ViewState {
     contracts: any[] = [];
     contractPath?: string = undefined;
+    contractName?: string = undefined;
+    contractHash?: string = undefined;
     isValid: boolean = false;
     result: string = '';
     showError: boolean = false;
@@ -117,6 +119,11 @@ export class DeployPanel {
         const contractConfig = this.viewState.contracts.filter(_ => _.path === this.viewState.contractPath)[0];
         if (!contractConfig) {
             this.viewState.contractPath = undefined;
+            this.viewState.contractName = undefined;
+            this.viewState.contractHash = undefined;
+        } else {
+            this.viewState.contractName = contractConfig.name;
+            this.viewState.contractHash = contractConfig.hash;
         }
 
         this.viewState.isValid =
