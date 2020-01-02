@@ -77,7 +77,8 @@ export class DeployPanel {
             //   -- see: https://docs.neo.org/docs/en-us/reference/scapi/fw/dotnet/neo/Contract/Create.html
             //
             // TODO: Find the contracts .abi.json and correctly determine parameters and return types. For now
-            //       we assume that all contracts take two parameters (a string and an array) and return void.
+            //       we assume that all contracts take two parameters (a string and an array) and return a byte
+            //       array.
             // TODO: Allow storage usage to be specified in the UI. For now we assume storage is used.
             // TODO: Allow specification of description, email, etc. in the UI. For now we use blank values.
             //
@@ -89,11 +90,16 @@ export class DeployPanel {
                 .emitPush(neon.default.u.str2hexstring('')) // code_version
                 .emitPush(neon.default.u.str2hexstring('')) // name
                 .emitPush(0x01) // storage: {none: 0x00, storage: 0x01, dynamic: 0x02, storage+dynamic:0x03}
-                .emitPush('ff') // return type - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
+                .emitPush('05') // return type - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
                 .emitPush('0710') // parameter list - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
                 .emitPush(this.viewState.contractAvmHex)
                 .emitSysCall('Neo.Contract.Create')
                 .str;
+
+            // Determine required GAS:
+            const rpcClient = new neon.rpc.RPCClient(this.rpcUri);
+            const invokeResult = await rpcClient.invokeScript(script);
+            const gas = parseFloat(invokeResult.gas_consumed);
 
             const api = new neon.api.neoCli.instance(this.rpcUri);
             const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
@@ -102,6 +108,7 @@ export class DeployPanel {
                 script: script,
                 account: walletConfig.account,
                 signingFunction: walletConfig.signingFunction,
+                gas: gas,
             };
             const result = await neon.default.doInvoke(config);
             if (result.response && result.response.txid) {
