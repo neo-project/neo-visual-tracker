@@ -30,7 +30,6 @@ export class ContractDetector {
     public async refresh() {
         this.contracts = (await vscode.workspace.findFiles(this.searchPattern)).map(
             uri => new Contract(uri.path));
-        console.info('Available contracts refreshed', this.contracts);
     }
 
 }
