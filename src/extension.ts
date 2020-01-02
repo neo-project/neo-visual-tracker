@@ -16,207 +16,209 @@ import { TransferPanel } from './transferPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	const rpcConnectionPool = new RpcConnectionPool();
+    const rpcConnectionPool = new RpcConnectionPool();
 
-	const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
+    const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
 
-	const neoExpressInstanceManager = new NeoExpressInstanceManager();
+    const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
-	const contractDetector = new ContractDetector();
+    const contractDetector = new ContractDetector();
 
-	let createInstancePanel: CreateInstancePanel | null = null;
+    let createInstancePanel: CreateInstancePanel | null = null;
 
-	const installationTaskName = 'Install Neo Express';
-	let postInstallAction: Function | null = null;
-	vscode.tasks.onDidEndTask(async e => {
-		if (postInstallAction && (e.execution.task.name === installationTaskName)) {
-			const action = postInstallAction;
-			postInstallAction = null;
-			if (await NeoExpressHelper.isNeoExpressInstalled()) {
-				action();
-			} else {
-				await vscode.window.showErrorMessage(
-					'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.\n',
-					{ modal: true });
-			}
-		}
-	});
+    const installationTaskName = 'Install Neo Express';
+    let postInstallAction: Function | null = null;
+    vscode.tasks.onDidEndTask(async e => {
+        if (postInstallAction && (e.execution.task.name === installationTaskName)) {
+            const action = postInstallAction;
+            postInstallAction = null;
+            if (await NeoExpressHelper.isNeoExpressInstalled()) {
+                action();
+            } else {
+                await vscode.window.showErrorMessage(
+                    'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.\n',
+                    { modal: true });
+            }
+        }
+    });
 
-	const requireNeoExpress = async (then: Function) => {
-		if (await NeoExpressHelper.isNeoExpressInstalled()) {
-			then();
-		} else if(postInstallAction) {
-			await vscode.window.showErrorMessage(
-				'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.\n',
-				{ modal: true });
-		} else {
-			const moreInfo = 'More Information';
-			const install = 'Install';
-			const dialogResponse = await vscode.window.showInformationMessage(
-				'Neo Express Required\n\nNeo Express was not detected on your machine. Neo Express must be installed in order to use this functionality.\n',
-				{ modal: true },
-				install,
-				moreInfo);
-			if (dialogResponse === moreInfo) {
-				vscode.env.openExternal(vscode.Uri.parse('https://github.com/neo-project/neo-express#Installation'));
-			} else if (dialogResponse === install) {
-				postInstallAction = then;
-				await vscode.tasks.executeTask(
-					new vscode.Task(
-						{ type: 'install-neo-express' },
-						vscode.TaskScope.Global,
-						installationTaskName,
-						'dotnet',
-						new vscode.ShellExecution('dotnet tool install Neo.Express -g')));
-			}
-		}
-	};
+    const requireNeoExpress = async (then: Function) => {
+        if (await NeoExpressHelper.isNeoExpressInstalled()) {
+            then();
+        } else if(postInstallAction) {
+            await vscode.window.showErrorMessage(
+                'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.\n',
+                { modal: true });
+        } else {
+            const moreInfo = 'More Information';
+            const install = 'Install';
+            const dialogResponse = await vscode.window.showInformationMessage(
+                'Neo Express Required\n\nNeo Express was not detected on your machine. Neo Express must be installed in order to use this functionality.\n',
+                { modal: true },
+                install,
+                moreInfo);
+            if (dialogResponse === moreInfo) {
+                vscode.env.openExternal(vscode.Uri.parse('https://github.com/neo-project/neo-express#Installation'));
+            } else if (dialogResponse === install) {
+                postInstallAction = then;
+                await vscode.tasks.executeTask(
+                    new vscode.Task(
+                        { type: 'install-neo-express' },
+                        vscode.TaskScope.Global,
+                        installationTaskName,
+                        'dotnet',
+                        new vscode.ShellExecution('dotnet tool install Neo.Express -g')));
+            }
+        }
+    };
 
-	const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', (url?: string) => {
-		if (url) {	
-			try {
-				const panel = new NeoTrackerPanel(
-					context.extensionPath, 
-					rpcConnectionPool.getConnection(url), 
-					context.subscriptions);
-			} catch (e) {
-				console.error('Error opening Neo tracker panel ', e);
-			}
-		} else {
-			console.warn('Attempted to open Neo tracker without providing RPC URL');
-		}
-	});
+    const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', (url?: string) => {
+        if (url) {	
+            try {
+                const panel = new NeoTrackerPanel(
+                    context.extensionPath, 
+                    rpcConnectionPool.getConnection(url), 
+                    context.subscriptions);
+            } catch (e) {
+                console.error('Error opening Neo tracker panel ', e);
+            }
+        } else {
+            console.warn('Attempted to open Neo tracker without providing RPC URL');
+        }
+    });
 
-	const refreshServersCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshObjectExplorerNode', () => {
-		rpcServerExplorer.refresh();
-	});
+    const refreshServersCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshObjectExplorerNode', () => {
+        rpcServerExplorer.refresh();
+    });
 
-	const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', async (server) => {
-		await requireNeoExpress(() => {
-			console.log('User requested to start ', server);
-			let label = undefined;
-			if (server.parent) {
-				label = server.parent.label;
-			}
-			neoExpressInstanceManager.start(server.jsonFile, server.index, label);
-		});
-	});
+    const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', async (server) => {
+        await requireNeoExpress(() => {
+            console.log('User requested to start ', server);
+            let label = undefined;
+            if (server.parent) {
+                label = server.parent.label;
+            }
+            neoExpressInstanceManager.start(server.jsonFile, server.index, label);
+        });
+    });
 
-	const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', async (server) => {
-		await requireNeoExpress(() => {
-			console.log('User requested to stop ', server);
-			neoExpressInstanceManager.stop(server.jsonFile, server.index);
-		});
-	});
+    const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', async (server) => {
+        await requireNeoExpress(() => {
+            console.log('User requested to stop ', server);
+            neoExpressInstanceManager.stop(server.jsonFile, server.index);
+        });
+    });
 
-	const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', async (server) => {
-		await requireNeoExpress(() => {
-			try {
-				const panel = new NewWalletPanel(
-					context.extensionPath, 
-					server.jsonFile,
-					context.subscriptions);
-			} catch (e) {
-				console.error('Error opening new wallet panel ', e);
-			}
-		});
-	});
+    const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', async (server) => {
+        await requireNeoExpress(() => {
+            try {
+                const panel = new NewWalletPanel(
+                    context.extensionPath, 
+                    server.jsonFile,
+                    context.subscriptions);
+            } catch (e) {
+                console.error('Error opening new wallet panel ', e);
+            }
+        });
+    });
 
-	const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
-		try {
-			const panel = new TransferPanel(
-				context.extensionPath, 
-				new NeoExpressConfig(server.jsonFile),
-				server.rpcUri,
-				rpcConnectionPool.getConnection(server.rpcUri),
-				context.subscriptions);
-		} catch (e) {
-			console.error('Error opening transfer panel ', e);
-		}
-	});
+    const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
+        try {
+            const panel = new TransferPanel(
+                context.extensionPath, 
+                new NeoExpressConfig(server.jsonFile),
+                server.rpcUri,
+                rpcConnectionPool.getConnection(server.rpcUri),
+                context.subscriptions);
+        } catch (e) {
+            console.error('Error opening transfer panel ', e);
+        }
+    });
 
-	const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', async (server) => {
-		try {
-			const panel = new ClaimPanel(
-				context.extensionPath, 
-				new NeoExpressConfig(server.jsonFile),
-				server.rpcUri,
-				rpcConnectionPool.getConnection(server.rpcUri),
-				context.subscriptions);
-		} catch (e) {
-			console.error('Error opening claim panel ', e);
-		}
-	});
+    const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', async (server) => {
+        try {
+            const panel = new ClaimPanel(
+                context.extensionPath, 
+                new NeoExpressConfig(server.jsonFile),
+                server.rpcUri,
+                rpcConnectionPool.getConnection(server.rpcUri),
+                context.subscriptions);
+        } catch (e) {
+            console.error('Error opening claim panel ', e);
+        }
+    });
 
-	const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', (server) => {
-		try {
-			const panel = new DeployPanel(
-				context.extensionPath, 
-				server.jsonFile,
-				contractDetector,
-				context.subscriptions);
-		} catch (e) {
-			console.error('Error opening contract deployment panel ', e);
-		}
-	});
+    const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', (server) => {
+        try {
+            const panel = new DeployPanel(
+                context.extensionPath, 
+                new NeoExpressConfig(server.jsonFile),
+                server.rpcUri,
+                rpcConnectionPool.getConnection(server.rpcUri),
+                contractDetector,
+                context.subscriptions);
+        } catch (e) {
+            console.error('Error opening contract deployment panel ', e);
+        }
+    });
 
-	const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
-		try {
-			const panel = new InvocationPanel(
-				context.extensionPath, 
-				server.jsonFile,
-				server.rpcUri,
-				context.subscriptions);
-		} catch (e) {
-			console.error('Error opening invocation panel ', e);
-		}
-	});
+    const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
+        try {
+            const panel = new InvocationPanel(
+                context.extensionPath, 
+                server.jsonFile,
+                server.rpcUri,
+                context.subscriptions);
+        } catch (e) {
+            console.error('Error opening invocation panel ', e);
+        }
+    });
 
-	const createInstanceCommand = vscode.commands.registerCommand('neo-visual-devtracker.createInstance', async () => {
-		await requireNeoExpress(() => {
-			if (createInstancePanel !== null) {
-				createInstancePanel.disposeIfCreated(); // clear previous successful creation
-			}
+    const createInstanceCommand = vscode.commands.registerCommand('neo-visual-devtracker.createInstance', async () => {
+        await requireNeoExpress(() => {
+            if (createInstancePanel !== null) {
+                createInstancePanel.disposeIfCreated(); // clear previous successful creation
+            }
 
-			if ((createInstancePanel === null) || createInstancePanel.isDisposed()) {
-				const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
-					vscode.workspace.workspaceFolders[0].uri.fsPath : 
-					process.cwd();
-				createInstancePanel = new CreateInstancePanel(
-					context.extensionPath,
-					defaultPath,
-					rpcServerExplorer,
-					context.subscriptions);
-			}
+            if ((createInstancePanel === null) || createInstancePanel.isDisposed()) {
+                const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
+                    vscode.workspace.workspaceFolders[0].uri.fsPath : 
+                    process.cwd();
+                createInstancePanel = new CreateInstancePanel(
+                    context.extensionPath,
+                    defaultPath,
+                    rpcServerExplorer,
+                    context.subscriptions);
+            }
 
-			createInstancePanel.reveal();
-		});
-	});
+            createInstancePanel.reveal();
+        });
+    });
 
-	const createServerListCommand = vscode.commands.registerCommand('neo-visual-devtracker.createServerList', async () => {
-		await RpcServerExplorer.newServerList();
-	});
+    const createServerListCommand = vscode.commands.registerCommand('neo-visual-devtracker.createServerList', async () => {
+        await RpcServerExplorer.newServerList();
+    });
 
-	const editJsonCommand = vscode.commands.registerCommand('neo-visual-devtracker.editJson', async (item) => {
-		await RpcServerExplorer.editJsonFile(item);
-	});
+    const editJsonCommand = vscode.commands.registerCommand('neo-visual-devtracker.editJson', async (item) => {
+        await RpcServerExplorer.editJsonFile(item);
+    });
 
-	const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
+    const serverExplorer = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
-	context.subscriptions.push(openTrackerCommand);
-	context.subscriptions.push(refreshServersCommand);
-	context.subscriptions.push(startServerCommand);
-	context.subscriptions.push(stopServerCommand);
-	context.subscriptions.push(createWalletCommand);
-	context.subscriptions.push(transferCommand);
-	context.subscriptions.push(claimCommand);
-	context.subscriptions.push(deployContractCommand);
-	context.subscriptions.push(invokeContractCommand);
-	context.subscriptions.push(createInstanceCommand);
-	context.subscriptions.push(createServerListCommand);
-	context.subscriptions.push(editJsonCommand);
-	context.subscriptions.push(serverExplorer);
-	context.subscriptions.push(contractDetector);
+    context.subscriptions.push(openTrackerCommand);
+    context.subscriptions.push(refreshServersCommand);
+    context.subscriptions.push(startServerCommand);
+    context.subscriptions.push(stopServerCommand);
+    context.subscriptions.push(createWalletCommand);
+    context.subscriptions.push(transferCommand);
+    context.subscriptions.push(claimCommand);
+    context.subscriptions.push(deployContractCommand);
+    context.subscriptions.push(invokeContractCommand);
+    context.subscriptions.push(createInstanceCommand);
+    context.subscriptions.push(createServerListCommand);
+    context.subscriptions.push(editJsonCommand);
+    context.subscriptions.push(serverExplorer);
+    context.subscriptions.push(contractDetector);
 }
 
 export function deactivate() {

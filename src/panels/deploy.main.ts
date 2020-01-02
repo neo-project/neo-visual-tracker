@@ -30,25 +30,38 @@ function exitLoadingState() {
     htmlHelpers.showHide(deploySelectors.LoadingIndicator, false);
 }
 
-function populateDropdown(dropdown: HTMLSelectElement, items: string[], selected?: string) {
+function populateDropdown(
+    dropdown: HTMLSelectElement, 
+    items: string[], 
+    values: string[], 
+    selectedValue?: string) {
+
     htmlHelpers.clearChildren(dropdown);
     let index = 0;
     dropdown.appendChild(document.createElement('option'));
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < Math.min(items.length, values.length); i++) {
         index++;
         const option = document.createElement('option') as HTMLOptionElement;
-        option.value = items[i];
+        option.value = values[i];
         option.appendChild(htmlHelpers.text(items[i]));
         dropdown.appendChild(option);
-        if (items[i] === selected) {
+        if (values[i] === selectedValue) {
             dropdown.selectedIndex = index;
         }
     }
 }
 
 function render() {
-    populateDropdown(contractDropdown, viewState.contracts, viewState.contractPath);
-    populateDropdown(walletDropdown, viewState.wallets, viewState.wallet);
+    populateDropdown(
+        contractDropdown, 
+        viewState.contracts.map((_: any) => _.path), 
+        viewState.contracts.map((_: any) => _.path), 
+        viewState.contractPath);
+    populateDropdown(
+        walletDropdown, 
+        viewState.wallets.map((_: any) => _.description), 
+        viewState.wallets.map((_: any) => _.address), 
+        viewState.walletAddress);
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContract, htmlHelpers.text(viewState.contractPath));
     htmlHelpers.setPlaceholder(deploySelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(deploySelectors.ErrorNoContracts, viewState.contracts.length === 0);
@@ -95,7 +108,7 @@ function initializePanel() {
     });
 
     walletDropdown.addEventListener('change', _ => {
-        viewState.wallet = walletDropdown.options[walletDropdown.selectedIndex].value;
+        viewState.walletAddress = walletDropdown.options[walletDropdown.selectedIndex].value;
         vsCodePostMessage({ e: deployEvents.Update, c: viewState });
         console.log('->', viewState);
     });

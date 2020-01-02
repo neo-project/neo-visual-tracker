@@ -4,44 +4,51 @@ import * as vscode from 'vscode';
 
 import { ContractDetector } from './contractDetector';
 import { deployEvents } from './panels/deployEvents';
+import { INeoRpcConnection } from './neoRpcConnection';
+import { NeoExpressConfig } from './neoExpressConfig';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ViewState {
-    contracts: string[] = [];
+    contracts: any[] = [];
     contractPath?: string = undefined;
     isValid: boolean = false;
-    neoExpressJsonFullPath: string = '';
     result: string = '';
     showError: boolean = false;
     showSuccess: boolean = false;
-    wallet?: string = undefined;
-    wallets: string[] = [];
+    walletAddress?: string = undefined;
+    wallets: any[] = [];
 }
 
 export class DeployPanel {
 
-    private readonly panel: vscode.WebviewPanel;
     private readonly contractDetector: ContractDetector;
+    private readonly neoExpressConfig: NeoExpressConfig;
+    private readonly panel: vscode.WebviewPanel;
+    private readonly rpcUri: string;
+    private readonly rpcConnection: INeoRpcConnection;
 
     private viewState: ViewState;
     private initialized: boolean = false;
 
     constructor(
         extensionPath: string,
-        neoExpressJsonFullPath: string,
+        neoExpressConfig: NeoExpressConfig,
+        rpcUri: string,
+        rpcConnection: INeoRpcConnection,
         contractDetector: ContractDetector,
         disposables: vscode.Disposable[]) {
 
         this.contractDetector = contractDetector;
-
+        this.rpcUri = rpcUri;
+        this.rpcConnection = rpcConnection;
+        this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
-        this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
 
         this.panel = vscode.window.createWebviewPanel(
             'deployPanel',
-            path.basename(neoExpressJsonFullPath) + ' - Deploy contract',
+            this.neoExpressConfig.basename + ' - Deploy contract',
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
@@ -97,33 +104,23 @@ export class DeployPanel {
         this.viewState.showError = false;
         this.viewState.showSuccess = false;
 
-        this.viewState.wallets = [ 'genesis' ];
-        try {
-            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
-            const neoExpressConfig = JSON.parse(jsonFileContents);
-            const wallets = neoExpressConfig.wallets || [];
-            for (let i = 0; i < wallets.length; i++) {
-                if (wallets[i].name) {
-                    this.viewState.wallets.push(wallets[i].name);
-                }
-            }
-        } catch (e) {
-            console.error('DeployPanel encountered an error parsing ', this.viewState.neoExpressJsonFullPath, e);
-        }
+        this.viewState.wallets = this.neoExpressConfig.wallets;
 
-        if (this.viewState.wallet && this.viewState.wallets.indexOf(this.viewState.wallet) === -1) {
-            this.viewState.wallet = undefined;
+        const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
+        if (!walletConfig) {
+            this.viewState.walletAddress = undefined;
         }
 
         await this.contractDetector.refresh();
-        this.viewState.contracts = this.contractDetector.contracts.map(c => c.path);
+        this.viewState.contracts = this.contractDetector.contracts;
 
-        if (this.viewState.contractPath && this.viewState.contracts.indexOf(this.viewState.contractPath) === -1) {
+        const contractConfig = this.viewState.contracts.filter(_ => _.path === this.viewState.contractPath)[0];
+        if (!contractConfig) {
             this.viewState.contractPath = undefined;
         }
 
         this.viewState.isValid =
-            !!this.viewState.wallet &&
+            !!this.viewState.walletAddress &&
             !!this.viewState.contractPath;
 
         this.initialized = true;
