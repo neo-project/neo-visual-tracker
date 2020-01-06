@@ -59,6 +59,8 @@ const trackerSelectors = {
     LoadingIndicator: '#loading-indicator',
     LoadingMessage: '#loading-indicator .message',
     OpeningIndicator: '#opening-indicator',
+    SearchInput: '#searchinput',
+    SearchButton: '#searchbutton',
 };
 
 export { trackerSelectors };

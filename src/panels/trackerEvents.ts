@@ -14,6 +14,7 @@ const trackerEvents = {
     CloseAddress: 'closeAddress',
     ChangeHideEmpty: 'changeHideEmpty',
     Copy: 'copy',
+    Search: 'search',
 };
 
 export { trackerEvents };

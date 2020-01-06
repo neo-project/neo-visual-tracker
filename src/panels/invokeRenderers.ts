@@ -189,6 +189,10 @@ const invokeRenderers = {
                     }
                     this.renderParameters(thisMethodDetail, methodData.parameters, updateViewState);
                     this.renderIntents(thisMethodDetail, methodData, updateViewState);
+                    const launchDebuggerButton = thisMethodDetail.querySelector(invokeSelectors.LaunchDebuggerButton);
+                    if (launchDebuggerButton) {
+                        htmlHelpers.setOnClickEvent(launchDebuggerButton, invokeEvents.Debug, methodData.name, postMessage);
+                    }
                     const invokeOffChainButton = thisMethodDetail.querySelector(invokeSelectors.InvokeOffChainButton);
                     if (invokeOffChainButton) {
                         htmlHelpers.setOnClickEvent(invokeOffChainButton, invokeEvents.InvokeOffChain, methodData.name, postMessage);
