@@ -133,6 +133,9 @@ export class ClaimPanel {
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === claimEvents.Close) {
             this.dispose();
+        } else if (message.e === claimEvents.NewWallet) {
+            this.initialized = false; // cause wallet list to be refreshed when this panel is next initialized
+            vscode.commands.executeCommand('neo-visual-devtracker.createWalletFile');
         }
     }
 

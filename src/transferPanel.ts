@@ -143,6 +143,8 @@ export class TransferPanel {
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === transferEvents.Close) {
             this.dispose();
+        } else if (message.e === transferEvents.NewWallet) {
+            vscode.commands.executeCommand('neo-visual-devtracker.createWalletFile');
         }
     }
 

@@ -88,9 +88,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     const refreshServersCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshObjectExplorerNode', () => {
         rpcServerExplorer.refresh();
-    });
-
-    const refreshWalletsCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshWalletExplorer', () => {
         walletExplorer.refresh();
     });
 
@@ -206,20 +203,12 @@ export function activate(context: vscode.ExtensionContext) {
         await RpcServerExplorer.editJsonFile(item);
     });
 
-    const openWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.openWallet', async (jsonFile) => {
-        if (jsonFile) {
-            const textDocument = await vscode.workspace.openTextDocument(vscode.Uri.file(jsonFile));
-            vscode.window.showTextDocument(textDocument);
-        }
-    });
-
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
-    const waletExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.walletExplorer', walletExplorer);
+    const waletExplorerProvider = vscode.languages.registerCodeLensProvider({ language: 'json' }, walletExplorer);
 
     context.subscriptions.push(openTrackerCommand);
     context.subscriptions.push(refreshServersCommand);
-    context.subscriptions.push(refreshWalletsCommand);
     context.subscriptions.push(startServerCommand);
     context.subscriptions.push(stopServerCommand);
     context.subscriptions.push(createWalletCommand);
@@ -231,7 +220,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createServerListCommand);
     context.subscriptions.push(createWalletFileCommand);
     context.subscriptions.push(editJsonCommand);
-    context.subscriptions.push(openWalletCommand);
     context.subscriptions.push(serverExplorerProvider);
     context.subscriptions.push(waletExplorerProvider);
 }

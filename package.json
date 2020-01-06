@@ -33,9 +33,7 @@
         "onCommand:neo-visual-devtracker.createServerList",
         "onCommand:neo-visual-devtracker.createWalletFile",
         "onCommand:neo-visual-devtracker.openTracker",
-        "onCommand:neo-visual-devtracker.openWallet",
-        "onView:neo-visual-devtracker.rpcServerExplorer",
-        "onView:neo-visual-devtracker.walletExplorer"
+        "onView:neo-visual-devtracker.rpcServerExplorer"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -44,10 +42,6 @@
                 {
                     "id": "neo-visual-devtracker.rpcServerExplorer",
                     "name": "Neo RPC Servers"
-                },
-                {
-                    "id": "neo-visual-devtracker.walletExplorer",
-                    "name": "Neo Wallets"
                 }
             ]
         },
@@ -59,23 +53,8 @@
                 "when": "false"
             },
             {
-                "command": "neo-visual-devtracker.openWallet",
-                "title": "Open Neo wallet file",
-                "category": "Neo Express",
-                "when": "false"
-            },
-            {
                 "command": "neo-visual-devtracker.refreshObjectExplorerNode",
                 "title": "Refresh Neo RPC Server list",
-                "category": "Neo Express",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
-            },
-            {
-                "command": "neo-visual-devtracker.refreshWalletExplorer",
-                "title": "Refresh Neo wallet list",
                 "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/refresh.svg",
@@ -114,7 +93,7 @@
             },
             {
                 "command": "neo-visual-devtracker.createWallet",
-                "title": "Create wallet",
+                "title": "Create Neo Express wallet",
                 "category": "Neo Express",
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
@@ -157,17 +136,12 @@
             {
                 "command": "neo-visual-devtracker.createWalletFile",
                 "title": "Create new NEP-6 wallet file",
-                "category": "Neo Express",
-                "icon": {
-                    "light": "resources/light/add.svg",
-                    "dark": "resources/dark/add.svg"
-                }
+                "category": "Neo Express"
             },
             {
                 "command": "neo-visual-devtracker.createAccount",
-                "title": "Create account",
-                "category": "Neo Express",
-                "when": "view == neo-visual-devtracker.walletExplorer"
+                "title": "Add account to NEP-6 wallet",
+                "category": "Neo Express"
             }
         ],
         "menus": {
@@ -178,11 +152,6 @@
                     "group": "navigation"
                 },
                 {
-                    "command": "neo-visual-devtracker.refreshWalletExplorer",
-                    "when": "view == neo-visual-devtracker.walletExplorer",
-                    "group": "navigation"
-                },
-                {
                     "command": "neo-visual-devtracker.createInstance",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
                     "group": "navigation"
@@ -190,11 +159,6 @@
                 {
                     "command": "neo-visual-devtracker.createServerList",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
-                    "group": "navigation"
-                },
-                {
-                    "command": "neo-visual-devtracker.createWalletFile",
-                    "when": "view == neo-visual-devtracker.walletExplorer",
                     "group": "navigation"
                 }
             ],
@@ -241,10 +205,6 @@
                 {
                     "command": "neo-visual-devtracker.invokeContract",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
-                },
-                {
-                    "command": "neo-visual-devtracker.createAccount",
-                    "when": "view == neo-visual-devtracker.walletExplorer && viewItem == cancreate"
                 }
             ]
         }
