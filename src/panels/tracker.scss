@@ -93,3 +93,28 @@ table {
 .unspentsNotSupported, .claimableNotSupported {
     margin-bottom: 1em;
 }
+
+#searcharea {
+    .formarea {
+        position: relative;
+        padding-right: 16px;
+        #searchinput {
+            width: 100%;
+            font-size: 1.5em;
+            padding: 8px;
+            background-color: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-foreground);
+        }
+        button {
+            position: absolute;
+            z-index: 1;
+            right: 5px;
+            top: 6px;
+        }
+    }
+    padding: 15px 20px 15px 20px;
+    margin: 0px -20px 10px -20px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+    background-color: var(--vscode-sideBar-background);
+}
