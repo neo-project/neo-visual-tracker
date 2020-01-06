@@ -117,14 +117,14 @@ export class NeoRpcConnection implements INeoRpcConnection {
         return new BlockchainInfo(height, this.rpcUrl, this.online, populatedBlocks);
     }
 
-    public async getBlock(index: number, statusReceiver: INeoStatusReceiver) {
+    public async getBlock(indexOrHash: string | number, statusReceiver: INeoStatusReceiver) {
         try {
-            statusReceiver.updateStatus('Retrieving block #' + index + '...');
-            const result = await this.rpcClient.getBlock(index) as any;
-            statusReceiver.updateStatus('Retrieved block #' + index);
+            statusReceiver.updateStatus('Retrieving block ' + indexOrHash + '...');
+            const result = await this.rpcClient.getBlock(indexOrHash) as any;
+            statusReceiver.updateStatus('Retrieved block ' + indexOrHash);
             return result;
         } catch(e) {
-            console.error('NeoRpcConnection could not retrieve individual block #' + index + ': ' + e);
+            console.error('NeoRpcConnection could not retrieve individual block ' + indexOrHash + ': ' + e);
             return undefined;
         }
     }
