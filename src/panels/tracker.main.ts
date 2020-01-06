@@ -31,7 +31,11 @@ function handleMessage(message: any) {
         openingIndicator.style.display = (!message.viewState.blockChainInfo || !message.viewState.blockChainInfo.online) ? 'block' : 'none';
         const checkbox: any = document.querySelector(trackerSelectors.HideEmptyBlocksCheckbox);
         checkbox.checked = message.viewState.hideEmptyBlocks;
-        htmlHelpers.showHide(trackerSelectors.HideEmptyBlocksCheckboxArea, message.viewState.blockChainInfo.populatedBlocksKnown);
+        htmlHelpers.showHide(trackerSelectors.HideEmptyBlocksCheckboxArea, message.viewState.blockChainInfo && message.viewState.blockChainInfo.populatedBlocksKnown);
+        if (message.isSearch) {
+            const searchInput = document.querySelector(trackerSelectors.SearchInput) as HTMLInputElement;
+            searchInput.value = '';
+        }
     } else if (message.status) {
         const loadingIndicator: any = document.querySelector(trackerSelectors.LoadingIndicator);
         loadingIndicator.style.display = message.status.isLoading ? 'block' : 'none';
@@ -79,6 +83,17 @@ function initializePanel() {
             'change', 
             () => vsCodePostMessage({ e: trackerEvents.ChangeHideEmpty, c: (checkbox as any).checked }));
     }
+
+    const searchButton = document.querySelector(trackerSelectors.SearchButton) as HTMLButtonElement;
+    const searchInput = document.querySelector(trackerSelectors.SearchInput) as HTMLInputElement;
+    searchButton.addEventListener('click', _ => {
+        vsCodePostMessage({ e: trackerEvents.Search, c: searchInput.value });
+    });
+    searchInput.addEventListener('keyup', e => {
+        if (e.keyCode === 13) { // enter
+            vsCodePostMessage({ e: trackerEvents.Search, c: searchInput.value });
+        }
+    });
 }
 
 window.onload = initializePanel;
