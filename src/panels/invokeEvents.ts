@@ -6,6 +6,7 @@ const invokeEvents = {
     InvokeOffChain: 'invokeOffChain',
     Update: 'update',
     Dismiss: 'dismiss',
+    Debug: 'debug',
 };
 
 export { invokeEvents };
