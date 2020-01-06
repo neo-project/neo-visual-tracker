@@ -168,31 +168,45 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
             } else if (message.e === trackerEvents.Copy) {
                 await vscode.env.clipboard.writeText(message.c);
             } else if (message.e === trackerEvents.Search) {
-                const asNumber = parseInt(message.c);
-                const block = await this.rpcConnection.getBlock((asNumber + '') === message.c ? asNumber : message.c, this);
-                if (block) {
-                    this.viewState.currentBlock = block;
-                    this.viewState.activePage = ActivePage.BlockDetail;
-                } else {
-                    const transaction = await this.rpcConnection.getTransaction(message.c, this);
+                let resultFound = false;
+                const input = message.c.trim();
+                const inputIsAddress = wallet.isAddress(input);
+                const inputIsHash = !!input.match(/^(0x)?[0-9a-f]{64}$/i);
+                const inputIsNumber = parseInt(input) + '' === input;
+                // If the input is obviously (based on its format) an address, just get the data for that address:
+                if (inputIsAddress) {
+                    this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(input, this);
+                    this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(input, this);
+                    this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(input, this);
+                    this.viewState.activePage = ActivePage.AddressDetail;
+                    resultFound = true;
+                }
+                // Next, see if the input is a block number or a block hash (only do the RPC call if the input is a valid integer or hash):
+                if (!resultFound && (inputIsNumber || inputIsHash)) {
+                    const block = await this.rpcConnection.getBlock(inputIsNumber ? parseInt(input) : input, this);
+                    if (block) {
+                        this.viewState.currentBlock = block;
+                        this.viewState.activePage = ActivePage.BlockDetail;
+                        resultFound = true;
+                    }
+                }
+                // Next, see if the input corresponds to a transaction hash (only do the RPC call if the input looks like a valid hash):
+                if (!resultFound && inputIsHash) {
+                    const transaction = await this.rpcConnection.getTransaction(input, this);
                     if (transaction) {
                         this.viewState.currentTransaction = transaction;
                         this.viewState.activePage = ActivePage.TransactionDetail;
-                    } else if (wallet.isAddress(message.c)) {
-                        this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(message.c, this);
-                        this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(message.c, this);
-                        this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(message.c, this);
-                        this.viewState.activePage = ActivePage.AddressDetail;
-                    } else {
-                        // Go to first page of block explorer when no results found:
-                        this.viewState.firstBlock = undefined;
-                        this.viewState.forwards = true;
-                        await this.updateBlockList(true);
-                        this.viewState.activePage = ActivePage.Blocks;
+                        resultFound = true;
                     }
                 }
+                // Go to first page of block explorer when no results found:
+                if (!resultFound) {
+                    this.viewState.firstBlock = undefined;
+                    this.viewState.forwards = true;
+                    await this.updateBlockList(true);
+                    this.viewState.activePage = ActivePage.Blocks;
+                }
             }
-
             this.panel.webview.postMessage({ viewState: this.viewState, isSearch: (message.e === trackerEvents.Search) });
         } finally {
             this.isPageLoading = false;
