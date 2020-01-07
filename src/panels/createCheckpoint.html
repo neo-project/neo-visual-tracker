@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="dialog">
+
+        <div id="data-entry-view">
+
+            <h1>Create a Neo Express checkpoint</h1>
+
+            <div>
+                Select the path that the Neo Express checkpoint file should be saved in:
+            </div>
+            <table id="path-selection">
+                <tr>
+                    <td>
+                        <input type="file" id="custom-path-picker" webkitdirectory />
+                        <span id="current-path"></span>
+                    </td>
+                    <td class="text-right">
+                        <button id="change-path">Browse</button>
+                    </td>
+                </tr>
+            </table>
+            <div>
+                Choose a name for the Neo Express checkpoint:
+            </div>
+            <div>
+                <input type="text" id="checkpointname" />
+            </div>
+            <div id="file-exists-warning" class="error">
+                <div>
+                    The selected checkpoint file <span class="combined-path emphasis"></span> already exists.
+                </div>
+                <div>
+                    <label>
+                        <input type="checkbox" id="allow-overwrite" />
+                        Allow overwrite of existing checkpoint file
+                    </label>
+                </div>
+            </div>
+            <div id="file-does-not-exist-notice">
+                <div>
+                    The checkpoint file <span class="combined-path emphasis"></span> will be created.
+                </div>
+            </div>
+
+            <div id="error-message" class="result-text error">
+            </div>
+
+            <div class="text-center">
+                <button id="create" class="action-btn">Create checkpoint</button>
+            </div>
+
+        </div>
+
+        <div id="results-view" class="results">
+
+            <h1>New checkpoint created</h1>
+
+            <div>
+                The checkpoint file <span class="combined-path emphasis"></span> has been created.
+            </div>
+
+            <div class="text-center">
+                <button id="close" class="action-btn">OK</button>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>

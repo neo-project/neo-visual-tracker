@@ -96,3 +96,18 @@ a:focus {
     width: 49%;
     display: inline-block;
 }
+
+/* Show a path, and allow the user to change it: */
+#path-selection {
+    width: 100%;
+    margin: 10px 0 10px 0;
+    border: 1px solid var(--vscode-input-foreground);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    td {
+        padding: 0 0 0 5px;
+    }
+    #custom-path-picker {
+        display: none;
+    }
+}
