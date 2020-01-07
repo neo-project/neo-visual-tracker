@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { CheckpointDetector } from './checkpointDetector';
 import { ClaimPanel } from './claimPanel';
 import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
@@ -19,6 +20,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
 
 	const neoExpressInstanceManager = new NeoExpressInstanceManager();
+
+	const checkpointDetector = new CheckpointDetector();
 
 	let createInstancePanel: CreateInstancePanel | null = null;
 
@@ -199,6 +202,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(createServerListCommand);
 	context.subscriptions.push(editJsonCommand);
 	context.subscriptions.push(serverExplorer);
+	context.subscriptions.push(checkpointDetector);
 }
 
 export function deactivate() {
