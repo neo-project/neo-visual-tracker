@@ -42,8 +42,6 @@ export class CheckpointDetector {
             this.checkpoints.push(
                 new Checkpoint(allCheckpoints[i].substring(commonPrefix.length), allCheckpoints[i]));
         }
-
-        console.log('Checkpoints', this.checkpoints);
     }
 
     private static commonPrefix(paths: string[]){

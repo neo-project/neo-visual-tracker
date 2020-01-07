@@ -38,14 +38,14 @@ const invokeRenderers = {
             placeholder.appendChild(dropdown);
             const noneItem = document.createElement('option');
             noneItem.value = '';
-            noneItem.innerText = '';
+            noneItem.innerText = '(none)';
             dropdown.appendChild(noneItem);    
             for (let i = 0; i < checkpoints.length; i++) {
                 const checkpoint = checkpoints[i];
                 const item = document.createElement('option');
-                item.value = checkpoint;
-                item.innerText = checkpoint;
-                if (selectedCheckpoint === checkpoint) {
+                item.value = checkpoint.fullpath;
+                item.innerText = checkpoint.name;
+                if (selectedCheckpoint === checkpoint.fullpath) {
                     item.selected = true;
                 }
                 dropdown.appendChild(item);

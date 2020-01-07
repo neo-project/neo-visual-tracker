@@ -153,6 +153,7 @@ export function activate(context: vscode.ExtensionContext) {
 				context.extensionPath, 
 				server.jsonFile,
 				server.rpcUri,
+				checkpointDetector,
 				context.subscriptions);
 		} catch (e) {
 			console.error('Error opening invocation panel ', e);
