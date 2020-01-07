@@ -23,25 +23,14 @@ export class CheckpointDetector {
     }
 
     public dispose() {
-        if (this.fileSystemWatcher) {
-            this.fileSystemWatcher.dispose();
-        }
+        this.fileSystemWatcher.dispose();
     }
 
     public async refresh() {
-        const allDirs = [];
-        const allCheckpointsUris = await vscode.workspace.findFiles(this.searchPattern);
-        const allCheckpoints =  allCheckpointsUris.map(uri => uri.path);
-        for (let i = 0; i < allCheckpoints.length; i++) {
-            allDirs.push((path.parse(allCheckpoints[i])).dir + path.sep);
-        }
-        const commonPrefix = CheckpointDetector.commonPrefix(allDirs);
-
-        this.checkpoints = [];
-        for (let i = 0; i < allCheckpoints.length; i++) {
-            this.checkpoints.push(
-                new Checkpoint(allCheckpoints[i].substring(commonPrefix.length), allCheckpoints[i]));
-        }
+        const checkpointFiles = (await vscode.workspace.findFiles(this.searchPattern)).map(uri => uri.path);
+        const checkpointDirs = checkpointFiles.map(c => path.parse(c).dir + path.sep);
+        const commonPrefixLength = CheckpointDetector.commonPrefix(checkpointDirs).length;
+        this.checkpoints = checkpointFiles.map(c => new Checkpoint(c.substring(commonPrefixLength), c));
     }
 
     private static commonPrefix(paths: string[]){
