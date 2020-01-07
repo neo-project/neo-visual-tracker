@@ -48,6 +48,7 @@ class ViewState {
     neoExpressJsonFullPath: string = '';
     neoExpressJsonFileName: string = '';
     wallets: any[] = [];
+    checkpoints: any[] = [];
     contracts: any[] = [];
     selectedContract: string = '';
     selectedMethod: string = '';

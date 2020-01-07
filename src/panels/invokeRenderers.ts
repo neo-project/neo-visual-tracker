@@ -13,6 +13,7 @@ const invokeRenderers = {
             viewState.selectedContract, 
             viewState.selectedMethod, 
             viewState.wallets,
+            viewState.checkpoints,
             updateViewState, 
             postMessage);
         this.renderBroadcastResult(viewState.broadcastResult);
@@ -29,11 +30,39 @@ const invokeRenderers = {
         }
     },
 
+    renderCheckpoints: function(parent: ParentNode, checkpoints: any[], selectedCheckpoint: string, setSelected: Function) {
+        const placeholder = parent.querySelector(invokeSelectors.CheckpointDropdown) as HTMLElement;
+        if (placeholder) {
+            htmlHelpers.clearChildren(placeholder);
+            const dropdown = document.createElement('select') as HTMLSelectElement;
+            placeholder.appendChild(dropdown);
+            const noneItem = document.createElement('option');
+            noneItem.value = '';
+            noneItem.innerText = '';
+            dropdown.appendChild(noneItem);    
+            for (let i = 0; i < checkpoints.length; i++) {
+                const checkpoint = checkpoints[i];
+                const item = document.createElement('option');
+                item.value = checkpoint;
+                item.innerText = checkpoint;
+                if (selectedCheckpoint === checkpoint) {
+                    item.selected = true;
+                }
+                dropdown.appendChild(item);
+            }
+            dropdown.addEventListener('change', _ => {
+                setSelected(dropdown.options[dropdown.selectedIndex].value);
+                dropdown.blur();
+            });
+        }
+    },
+
     renderContracts: function(
         contracts: any[], 
         selectedContract: string, 
         selectedMethod: string, 
         wallets: any[],
+        checkpoints: any[],
         updateViewState: Function,
         postMessage: Function) {
 
@@ -74,6 +103,7 @@ const invokeRenderers = {
                         contractData.functions || [],
                         selectedMethod,
                         wallets,
+                        checkpoints,
                         updateViewState,
                         postMessage);
                     placeholder.appendChild(thisContract);
@@ -151,6 +181,7 @@ const invokeRenderers = {
         methods: any[], 
         selectedMethod: string, 
         wallets: any[],
+        checkpoints: any[],
         updateViewState: Function,
         postMessage: Function) {
 
@@ -206,6 +237,11 @@ const invokeRenderers = {
                         wallets, 
                         methodData.selectedWallet, 
                         (w: string) => { methods[i].selectedWallet = w; updateViewState(); });
+                    this.renderCheckpoints(
+                        thisMethod, 
+                        checkpoints, 
+                        methodData.selectedCheckpoint, 
+                        (c: string) => { methods[i].selectedCheckpoint = c; updateViewState(); });
                     instructionsPlaceholder.innerHTML = instructionsTemplate.innerHTML;
                     placeholder.appendChild(thisMethod);
                 }
