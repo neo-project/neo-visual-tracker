@@ -3,6 +3,7 @@
 const transferEvents = {
     Close: 'close',
     Init: 'init',
+    NewWallet: 'newwallet',
     Refresh: 'refresh',
     Transfer: 'transfer',
     Update: 'update',

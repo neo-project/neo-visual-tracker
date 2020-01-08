@@ -1,0 +1,40 @@
+{
+
+    "NOTE_0": "                                                ",
+    "NOTE_1": "    The password for this wallet file is:       ",
+    "NOTE_2": "        neo                                     ",
+    "NOTE_3": "    (without any whitespace or punctuation)     ",
+    "NOTE_4": "                                                ",
+    "NOTE_5": "    DO NOT USE IN PRODUCTION!                   ",
+    "NOTE_6": "                                                ",
+
+    "name": "sample-wallet",
+    "version": "1.0",
+    "scrypt": {
+        "n": 16384,
+        "r": 8,
+        "p": 8,
+        "size": 64
+    },
+    "accounts": [
+        {
+            "address": "AKNLWdYPeBKcLQwLVZrKJrUr6anwzFiJ7V",
+            "label": "Default account",
+            "isDefault": true,
+            "lock": false,
+            "key": "6PYNK3nmjNFWjyuSBV7n4BaxTsmd37CzdggdhQ7f8QeXHYo5H6LGE73FJ5",
+            "contract": {
+                "script": "2103f3b4d7bb1a5e24bd4076b35aca85ca97a88bb625cf7271065af08e99cabdab02ac",
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "type": "Signature"
+                    }
+                ],
+                "deployed": false
+            },
+            "extra": {}
+        }
+    ],
+    "extra": {}
+}
