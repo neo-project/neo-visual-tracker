@@ -20,11 +20,11 @@ body {
     padding-bottom: 20px;
     margin: 0;
     table {
-        width: 90%;
+        width: 98%;
+        margin-bottom: 5px;
     }
     button {
-        margin-top: 10px;
-        width: 90%;
+        width: 98%;
     }
 }
 
@@ -119,7 +119,7 @@ select:focus {
     border: none;
 }
 
-.walletDropdownOuter {
+.dropdownOuter {
     background-color: var(--vscode-input-background);
     border: 1px solid var(--vscode-input-foreground);
     width: 100%;
@@ -147,7 +147,6 @@ h4, h5, h6 {
 
 table {
     width: 100%;
-    margin-top: 10px;
     td,
     th {
         padding: 0px 10px 0px 10px;
@@ -164,6 +163,13 @@ table {
             text-align: center;
         }
     }
+}
+
+.group {
+    background-color: var(--vscode-sideBar-background);
+    border: 1px solid var(--vscode-sideBarSectionHeader-background);
+    margin: 10px;
+    padding: 10px;
 }
 
 ul {

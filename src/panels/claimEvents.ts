@@ -6,6 +6,7 @@ const claimEvents = {
     Refresh: 'refresh',
     Claim: 'claim',
     Update: 'update',
+    NewWallet: 'newwallet',
 };
 
 export { claimEvents };

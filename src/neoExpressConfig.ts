@@ -2,12 +2,15 @@ import * as fs from 'fs';
 import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 
-class Wallet {
+import { IWallet } from './iWallet';
+
+class Wallet implements IWallet {
     public readonly description: string;
     public readonly isMultiSig: boolean = false;
     public readonly signingFunction: ((tx: string, pk: string) => string) | undefined = undefined;
     public readonly account: any;
     public constructor(
+        filename: string,
         public readonly walletName: string,
         public readonly accountLabel: string | null,
         public readonly isDefault: boolean,
@@ -15,12 +18,16 @@ class Wallet {
         public readonly privateKey: string) {
         this.account = new neon.wallet.Account(this.privateKey);
         this.description = 
+            filename + ' - ' +
             walletName + 
             (accountLabel ? ' - ' + accountLabel + (isDefault ? ' (default)' : '') : '');
     }
+    public async unlock() : Promise<boolean> {
+        return true;
+    }
 }
 
-class MultiSigWallet {
+class MultiSigWallet implements IWallet {
     public readonly description: string;
     public readonly isMultiSig: boolean = true;
     public readonly signingFunction: ((tx: string, pk: string) => string) | undefined;
@@ -30,6 +37,7 @@ class MultiSigWallet {
     public readonly account: any;
     public readonly publicKeys: string[];
     public constructor(
+        filename: string,
         public readonly walletName: string,
         public readonly signingThreshold: number,
         public readonly privateKeys: string[]) {
@@ -47,8 +55,12 @@ class MultiSigWallet {
             return neon.tx.Witness.buildMultiSig(tx, signatures, this.multiSigAccount).serialize();
         };
         this.description = 
+            filename + ' - ' +
             walletName + 
             ' (' + this.signingThreshold + ' of ' + this.publicKeys.length + ' multisig)';
+    }
+    public async unlock() : Promise<boolean> {
+        return true;
     }
 }
 
@@ -56,7 +68,7 @@ export class NeoExpressConfig {
 
     public readonly basename: string;
 
-    public readonly wallets: (Wallet | MultiSigWallet)[] = [];
+    public readonly wallets: IWallet[] = [];
 
     public constructor(public readonly neoExpressJsonFullPath: string) {
         this.basename = path.basename(neoExpressJsonFullPath);
@@ -89,7 +101,7 @@ export class NeoExpressConfig {
                 }
             }
         });
-        this.wallets.push(new MultiSigWallet('genesis', genesisThreshold, genesisPrivateKeys));
+        this.wallets.push(new MultiSigWallet(this.basename, 'genesis', genesisThreshold, genesisPrivateKeys));
 
         const walletConfigs: any[] = neoExpressConfig.wallets || [];
         walletConfigs.forEach(walletConfig => {
@@ -102,7 +114,7 @@ export class NeoExpressConfig {
                     const privateKey: string | null = accountConfig['private-key'];
                     const address: string | null = accountConfig['script-hash'];
                     if (privateKey && address) {
-                        this.wallets.push(new Wallet(walletName, accountLabel, isDefault, address, privateKey));
+                        this.wallets.push(new Wallet(this.basename, walletName, accountLabel, isDefault, address, privateKey));
                     }
                 });
             }

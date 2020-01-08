@@ -31,6 +31,7 @@
     "activationEvents": [
         "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.createServerList",
+        "onCommand:neo-visual-devtracker.createWalletFile",
         "onCommand:neo-visual-devtracker.openTracker",
         "onView:neo-visual-devtracker.rpcServerExplorer"
     ],
@@ -91,8 +92,14 @@
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == editable"
             },
             {
+                "command": "neo-visual-devtracker.createCheckpoint",
+                "title": "Create checkpoint",
+                "category": "Neo Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
                 "command": "neo-visual-devtracker.createWallet",
-                "title": "Create wallet",
+                "title": "Create Neo Express wallet",
                 "category": "Neo Express",
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
@@ -100,13 +107,13 @@
                 "command": "neo-visual-devtracker.transferAssets",
                 "title": "Transfer assets",
                 "category": "Neo Express",
-                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
             },
             {
                 "command": "neo-visual-devtracker.claim",
                 "title": "Claim GAS",
                 "category": "Neo Express",
-                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
             },
             {
                 "command": "neo-visual-devtracker.invokeContract",
@@ -137,6 +144,16 @@
                     "light": "resources/light/folder.svg",
                     "dark": "resources/dark/folder.svg"
                 }
+            },
+            {
+                "command": "neo-visual-devtracker.createWalletFile",
+                "title": "Create new NEP-6 wallet file",
+                "category": "Neo Express"
+            },
+            {
+                "command": "neo-visual-devtracker.createAccount",
+                "title": "Add account to NEP-6 wallet",
+                "category": "Neo Express"
             }
         ],
         "menus": {
@@ -190,12 +207,16 @@
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {
-                    "command": "neo-visual-devtracker.transferAssets",
+                    "command": "neo-visual-devtracker.createCheckpoint",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {
+                    "command": "neo-visual-devtracker.transferAssets",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
+                },
+                {
                     "command": "neo-visual-devtracker.claim",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
                 },
                 {
                     "command": "neo-visual-devtracker.deployContract",
