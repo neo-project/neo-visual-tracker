@@ -92,6 +92,12 @@
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == editable"
             },
             {
+                "command": "neo-visual-devtracker.createCheckpoint",
+                "title": "Create checkpoint",
+                "category": "Neo Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+            },
+            {
                 "command": "neo-visual-devtracker.createWallet",
                 "title": "Create Neo Express wallet",
                 "category": "Neo Express",
@@ -192,6 +198,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createWallet",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
+                },
+                {
+                    "command": "neo-visual-devtracker.createCheckpoint",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
                 },
                 {

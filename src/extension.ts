@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 
+import { CheckpointDetector } from './checkpointDetector';
 import { ClaimPanel } from './claimPanel';
+import { CreateCheckpointPanel } from './createCheckpointPanel';
 import { CreateInstancePanel } from './createInstancePanel';
 import { InvocationPanel } from './invocationPanel';
 import { NeoExpressConfig } from './neoExpressConfig';
@@ -21,7 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     const walletExplorer = new WalletExplorer();
 
-    const neoExpressInstanceManager = new NeoExpressInstanceManager();
+	const neoExpressInstanceManager = new NeoExpressInstanceManager();
+	
+	const checkpointDetector = new CheckpointDetector();
 
     let createInstancePanel: CreateInstancePanel | null = null;
 
@@ -120,7 +124,24 @@ export function activate(context: vscode.ExtensionContext) {
                 console.error('Error opening new wallet panel ', e);
             }
         });
-    });
+	});
+	
+	const createCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.createCheckpoint', async (server) => {
+		await requireNeoExpress(() => {
+			try {
+				const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
+					vscode.workspace.workspaceFolders[0].uri.fsPath : 
+					process.cwd();
+				const panel = new CreateCheckpointPanel(
+					context.extensionPath,
+					server.jsonFile,
+					defaultPath,
+					context.subscriptions);
+			} catch (e) {
+				console.error('Error opening new checkpoint panel ', e);
+			}
+		});
+	});
 
     const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
         try {
@@ -155,7 +176,8 @@ export function activate(context: vscode.ExtensionContext) {
             const panel = new InvocationPanel(
                 context.extensionPath,
                 server.jsonFile,
-                server.rpcUri,
+				server.rpcUri,
+				checkpointDetector,
                 context.subscriptions);
         } catch (e) {
             console.error('Error opening invocation panel ', e);
@@ -211,7 +233,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(refreshServersCommand);
     context.subscriptions.push(startServerCommand);
     context.subscriptions.push(stopServerCommand);
-    context.subscriptions.push(createWalletCommand);
+	context.subscriptions.push(createWalletCommand);
+	context.subscriptions.push(createCheckpointCommand);
     context.subscriptions.push(transferCommand);
     context.subscriptions.push(claimCommand);
     context.subscriptions.push(invokeContractCommand);
