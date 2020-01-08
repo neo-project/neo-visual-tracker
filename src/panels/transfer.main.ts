@@ -14,6 +14,8 @@ let viewState: any = {};
 
 let vsCodePostMessage: Function;
 
+const CreateNewWallet = 'CREATE_NEW_WALLET';
+
 function toggleLoadingState(isLoading: boolean) {
     htmlHelpers.showHide(transferSelectors.LoadingIndicator, isLoading, 'inline');
     const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
@@ -51,6 +53,11 @@ function populateWalletDropdown(selector: string, currentSelection?: string) {
             dropdown.selectedIndex = index;
         }
     }
+    dropdown.appendChild(document.createElement('option'));
+    const newWalletOption = document.createElement('option') as HTMLOptionElement;
+    newWalletOption.value = CreateNewWallet;
+    newWalletOption.appendChild(htmlHelpers.text('Create a new NEP-6 wallet file...'));
+    dropdown.appendChild(newWalletOption);
 }
 
 function populateAssetDropdown() {
@@ -131,14 +138,24 @@ function initializePanel() {
         vscode.postMessage({ e: transferEvents.Refresh });
     });
     sourceWalletDropdown.addEventListener('change', _ => {
-        viewState.sourceWalletAddress = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value;
-        viewState.sourceWalletDescription = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].textContent;
-        postViewState(true);
+        if (sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value === CreateNewWallet) {
+            vsCodePostMessage({ e: transferEvents.NewWallet });
+            sourceWalletDropdown.selectedIndex = 0;
+        } else {
+            viewState.sourceWalletAddress = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].value;
+            viewState.sourceWalletDescription = sourceWalletDropdown.options[sourceWalletDropdown.selectedIndex].textContent;
+            postViewState(true);
+        }
     });
     destinationWalletDropdown.addEventListener('change', _ => {
-        viewState.destinationWalletAddress = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].value;
-        viewState.destinationWalletDescription = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].textContent;
-        postViewState();
+        if (destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].value === CreateNewWallet) {
+            vsCodePostMessage({ e: transferEvents.NewWallet });
+            destinationWalletDropdown.selectedIndex = 0;
+        } else {
+            viewState.destinationWalletAddress = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].value;
+            viewState.destinationWalletDescription = destinationWalletDropdown.options[destinationWalletDropdown.selectedIndex].textContent;
+            postViewState();
+        }
     });
     assetDropdown.addEventListener('change', _ => {
         viewState.assetName = assetDropdown.options[assetDropdown.selectedIndex].value;
