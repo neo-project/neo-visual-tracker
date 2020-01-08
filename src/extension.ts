@@ -25,11 +25,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
-	const contractDetector = new ContractDetector();
-	
+    const contractDetector = new ContractDetector();
+    
     const walletExplorer = new WalletExplorer();
-	
-	const checkpointDetector = new CheckpointDetector();
+    
+    const checkpointDetector = new CheckpointDetector();
 
     let createInstancePanel: CreateInstancePanel | null = null;
 
@@ -128,29 +128,29 @@ export function activate(context: vscode.ExtensionContext) {
                 console.error('Error opening new wallet panel ', e);
             }
         });
-	});
-	
-	const createCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.createCheckpoint', async (server) => {
-		await requireNeoExpress(() => {
-			try {
-				const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
-					vscode.workspace.workspaceFolders[0].uri.fsPath : 
-					process.cwd();
-				const panel = new CreateCheckpointPanel(
-					context.extensionPath,
-					server.jsonFile,
-					defaultPath,
-					context.subscriptions);
-			} catch (e) {
-				console.error('Error opening new checkpoint panel ', e);
-			}
-		});
-	});
+    });
+    
+    const createCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.createCheckpoint', async (server) => {
+        await requireNeoExpress(() => {
+            try {
+                const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
+                    vscode.workspace.workspaceFolders[0].uri.fsPath : 
+                    process.cwd();
+                const panel = new CreateCheckpointPanel(
+                    context.extensionPath,
+                    server.jsonFile,
+                    defaultPath,
+                    context.subscriptions);
+            } catch (e) {
+                console.error('Error opening new checkpoint panel ', e);
+            }
+        });
+    });
 
     const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
         try {
             const panel = new TransferPanel(
-				context.extensionPath,
+                context.extensionPath,
                 server.rpcUri,
                 rpcConnectionPool.getConnection(server.rpcUri),
                 walletExplorer,
@@ -194,7 +194,7 @@ export function activate(context: vscode.ExtensionContext) {
                 context.extensionPath, 
                 server.jsonFile,
                 server.rpcUri,
-				checkpointDetector,
+                checkpointDetector,
                 context.subscriptions);
         } catch (e) {
             console.error('Error opening invocation panel ', e);
@@ -250,11 +250,11 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(refreshServersCommand);
     context.subscriptions.push(startServerCommand);
     context.subscriptions.push(stopServerCommand);
-	context.subscriptions.push(createWalletCommand);
-	context.subscriptions.push(createCheckpointCommand);
+    context.subscriptions.push(createWalletCommand);
+    context.subscriptions.push(createCheckpointCommand);
     context.subscriptions.push(transferCommand);
-	context.subscriptions.push(claimCommand);
-	context.subscriptions.push(deployContractCommand);
+    context.subscriptions.push(claimCommand);
+    context.subscriptions.push(deployContractCommand);
     context.subscriptions.push(invokeContractCommand);
     context.subscriptions.push(createInstanceCommand);
     context.subscriptions.push(createAccountCommand);
