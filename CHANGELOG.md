@@ -13,6 +13,28 @@ will not have contiguous patch numbers. Initial major and minor releases will be
 in this file without a patch number. Patch version will be included for bug fix releases, but
 may not exactly match a publicly released version.
 
+## [Unreleased]
+
+### Added
+
+- Search for a specific block/transaction/address from within the block explorer
+- Support for smart contract invocation on Neo Express instances
+- Support for smart contract invocation in the debugger
+- Support for creation of new Neo Express instances
+- Support for creation of new Neo Express wallets
+- Support for creation of new NEP-6 wallets
+- Support for transfer of assets between accounts
+- Support for claiming GAS
+- Support for Neo Express checkpoint creation
+- Neo Express can be installed from within VS Code when needed but not detected
+- Custom RPC servers can be added to the RPC Servers tree-view
+
+### Changed
+
+- Block explorer now shows getapplicationlog output for transactions
+- Block explorer now shows unclaimed GAS for an address
+- Hiding empty blocks in the block exploer is now much more efficient
+
 ## [0.5.18] - 2019-11-01
 
 ### Changed
