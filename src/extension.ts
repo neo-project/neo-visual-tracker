@@ -177,7 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', (server) => {
         try {
-            const  panel = new DeployPanel(
+            const panel = new DeployPanel(
                 context.extensionPath,
                 server.rpcUri,
                 walletExplorer,
