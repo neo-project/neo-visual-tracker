@@ -207,7 +207,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     const createAccountCommand = vscode.commands.registerCommand('neo-visual-devtracker.createAccount', async (wallet) => {
         try {
-            await wallet.createAccount();
+            if (!wallet && vscode.window.activeTextEditor) {
+                wallet = walletExplorer.getWalletForFile(vscode.window.activeTextEditor.document.uri);
+            }
+            if (wallet) {
+                await wallet.createAccount();
+            } else {
+                vscode.window.showErrorMessage('Please open a NEP-6 wallet file before attempting to create a new account');
+            }
         } catch (e) {
             console.error('Error creating new account in wallet ', wallet, e);
         }
