@@ -235,10 +235,10 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
         const onUpdate = () => this.onDidChangeTreeDataEmitter.fire();
         this.rootItems = [
-            RpcServerTreeItemIdentifier.fromChildren('Neo Express instances', 'neoexpresslist', neoExpressInstances),
-            RpcServerTreeItemIdentifier.fromChildren('Custom server lists', 'customserverlists', jsonServerLists),
-            RpcServerTreeItemIdentifier.fromUriFetcher('Neo MainNet', RpcServerExplorer.getAllRpcServers(MainNetServerListUrl), onUpdate),
-            RpcServerTreeItemIdentifier.fromUriFetcher('Neo TestNet', RpcServerExplorer.getAllRpcServers(TestNetServerListUrl), onUpdate),
+            RpcServerTreeItemIdentifier.fromChildren('Neo Express', 'neoexpresslist', neoExpressInstances),
+            RpcServerTreeItemIdentifier.fromChildren('Server lists', 'customserverlists', jsonServerLists),
+            RpcServerTreeItemIdentifier.fromUriFetcher('Public Main Net endpoints', RpcServerExplorer.getAllRpcServers(MainNetServerListUrl), onUpdate),
+            RpcServerTreeItemIdentifier.fromUriFetcher('Public Test Net endpoints', RpcServerExplorer.getAllRpcServers(TestNetServerListUrl), onUpdate),
         ];
         onUpdate();
 	}
