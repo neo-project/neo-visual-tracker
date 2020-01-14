@@ -23,6 +23,10 @@ const TestNetPlaceholder = 'TESTNET_URL';
 const TemplateInstructions = 'To add a group of RPC servers, create a JSON file anywhere in your workspace ' +
     '\n\nAn example file is being shown. Save this file to see the new servers appear in the list.';
 
+const MainNetServerListUrl = 'https://api.neoscan.io/api/main_net/v1/get_all_nodes';
+
+const TestNetServerListUrl = 'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes';
+
 class RpcServerTreeItemIdentifier {
 
     public readonly children: RpcServerTreeItemIdentifier[];
@@ -107,6 +111,26 @@ class RpcServerTreeItemIdentifier {
         index?: number) {
 
         return new RpcServerTreeItemIdentifier(jsonFile, rpcUri, parent, label, undefined, index);
+    }
+
+    public static fromUriFetcher(label: string, uriFetch: Promise<string[]>, onUpdate: Function) {
+        const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label);
+        uriFetch.then(uris => {
+            for (let i = 0; i < uris.length; i++) {
+                try { 
+                    result.children.push(RpcServerTreeItemIdentifier.fromUri(
+                        uris[i], 
+                        vscode.Uri.parse(uris[i]).authority, 
+                        result));
+                } catch (e) {
+                    console.error('Error adding', uris[i], 'to', label, e);
+                }
+            }
+            onUpdate();
+        }).catch(e => {
+            console.error('Error populating', label, e);
+        });
+        return result;
     }
 
     private constructor(
@@ -209,12 +233,14 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
             }
         }
 
+        const onUpdate = () => this.onDidChangeTreeDataEmitter.fire();
         this.rootItems = [
             RpcServerTreeItemIdentifier.fromChildren('Neo Express instances', 'neoexpresslist', neoExpressInstances),
             RpcServerTreeItemIdentifier.fromChildren('Custom server lists', 'customserverlists', jsonServerLists),
+            RpcServerTreeItemIdentifier.fromUriFetcher('Neo MainNet', RpcServerExplorer.getAllRpcServers(MainNetServerListUrl), onUpdate),
+            RpcServerTreeItemIdentifier.fromUriFetcher('Neo TestNet', RpcServerExplorer.getAllRpcServers(TestNetServerListUrl), onUpdate),
         ];
-
-        this.onDidChangeTreeDataEmitter.fire();
+        onUpdate();
 	}
 
 	public getTreeItem(element: RpcServerTreeItemIdentifier): vscode.TreeItem {
@@ -241,16 +267,28 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
     }
 
     public static async newServerList() {
-        const testNetUrl = await RpcServerExplorer.getBestRpcServer(
-            'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes');
-        const mainNetUrl = await RpcServerExplorer.getBestRpcServer(
-            'https://api.neoscan.io/api/main_net/v1/get_all_nodes');
+        const testNetUrl = await RpcServerExplorer.getBestRpcServer(TestNetServerListUrl);
+        const mainNetUrl = await RpcServerExplorer.getBestRpcServer(MainNetServerListUrl);
         const textDocument = await vscode.workspace.openTextDocument({
             language: 'json',
             content: TemplateServerList.replace(MainNetPlaceholder, mainNetUrl).replace(TestNetPlaceholder, testNetUrl),
         });
         vscode.window.showTextDocument(textDocument);
         vscode.window.showInformationMessage(TemplateInstructions, { modal: true });
+    }
+
+    private static async getAllRpcServers(apiUrl: string): Promise<string[]> {
+        try {
+            const apiResponse = JSON.parse((await request(apiUrl)).body);
+            if (apiResponse && apiResponse.length) {
+                return apiResponse.map((_: any) => _.url);
+            } else {
+                console.error('Unexpected API response when querying RPC servers ', apiUrl, apiResponse);
+            }
+        } catch(e) {
+            console.error('Could not get an example RPC server from ', apiUrl, e);
+        }
+        return [];
     }
 
     private static async getBestRpcServer(apiUrl: string): Promise<string> {
