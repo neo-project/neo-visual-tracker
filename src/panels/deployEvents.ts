@@ -4,6 +4,7 @@ const deployEvents = {
     Close: 'close',
     Deploy: 'deploy',
     Init: 'init',
+    NewWallet: 'newwallet',
     Refresh: 'refresh',
     Update: 'update',
 };

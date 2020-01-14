@@ -178,11 +178,12 @@ export function activate(context: vscode.ExtensionContext) {
     const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', (server) => {
         try {
             const panel = new DeployPanel(
-                context.extensionPath, 
-                new NeoExpressConfig(server.jsonFile),
+                context.extensionPath,
                 server.rpcUri,
+                walletExplorer,
                 contractDetector,
-                context.subscriptions);
+                context.subscriptions,
+                server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
         } catch (e) {
             console.error('Error opening contract deployment panel ', e);
         }

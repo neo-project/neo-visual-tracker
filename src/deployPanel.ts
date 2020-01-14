@@ -3,10 +3,11 @@ import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { ContractDetector } from './contractDetector';
 import { deployEvents } from './panels/deployEvents';
-import { INeoRpcConnection } from './neoRpcConnection';
+
+import { ContractDetector } from './contractDetector';
 import { NeoExpressConfig } from './neoExpressConfig';
+import { WalletExplorer } from './walletExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -28,28 +29,31 @@ class ViewState {
 export class DeployPanel {
 
     private readonly contractDetector: ContractDetector;
-    private readonly neoExpressConfig: NeoExpressConfig;
+    private readonly neoExpressConfig?: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
     private readonly rpcUri: string;
+    private readonly walletExplorer: WalletExplorer;
 
     private viewState: ViewState;
     private initialized: boolean = false;
 
     constructor(
         extensionPath: string,
-        neoExpressConfig: NeoExpressConfig,
         rpcUri: string,
+        walletExplorer: WalletExplorer,
         contractDetector: ContractDetector,
-        disposables: vscode.Disposable[]) {
+        disposables: vscode.Disposable[],
+        neoExpressConfig?: NeoExpressConfig) {
 
         this.contractDetector = contractDetector;
         this.rpcUri = rpcUri;
+        this.walletExplorer = walletExplorer;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
 
         this.panel = vscode.window.createWebviewPanel(
             'deployPanel',
-            this.neoExpressConfig.basename + ' - Deploy contract',
+            (this.neoExpressConfig ? this.neoExpressConfig.basename : this.rpcUri) + ' - Deploy contract',
             vscode.ViewColumn.Active,
             { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
@@ -101,24 +105,26 @@ export class DeployPanel {
             const invokeResult = await rpcClient.invokeScript(script);
             const gas = parseFloat(invokeResult.gas_consumed);
 
-            const api = new neon.api.neoCli.instance(this.rpcUri);
             const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
-            const config = {
-                api: api,
-                script: script,
-                account: walletConfig.account,
-                signingFunction: walletConfig.signingFunction,
-                gas: gas,
-            };
-            const result = await neon.default.doInvoke(config);
-            if (result.response && result.response.txid) {
-                this.viewState.result = result.response.txid;
-                this.viewState.showError = false;
-                this.viewState.showSuccess = true;
-            } else {
-                this.viewState.result = 'No response from RPC server; contract may not have deployed';
-                this.viewState.showError = true;
-                this.viewState.showSuccess = false;
+            if (await walletConfig.unlock()) {
+                const api = new neon.api.neoCli.instance(this.rpcUri);
+                const config = {
+                    api: api,
+                    script: script,
+                    account: walletConfig.account,
+                    signingFunction: walletConfig.signingFunction,
+                    gas: gas,
+                };
+                const result = await neon.default.doInvoke(config);
+                if (result.response && result.response.txid) {
+                    this.viewState.result = result.response.txid;
+                    this.viewState.showError = false;
+                    this.viewState.showSuccess = true;
+                } else {
+                    this.viewState.result = 'No response from RPC server; contract may not have deployed';
+                    this.viewState.showError = true;
+                    this.viewState.showSuccess = false;
+                }
             }
         } catch (e) {
             this.viewState.result = 'Error deploying contract: ' + e;
@@ -146,6 +152,9 @@ export class DeployPanel {
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === deployEvents.Close) {
             this.dispose();
+        } else if (message.e === deployEvents.NewWallet) {
+            this.initialized = false; // cause wallet list to be refreshed when this panel is next initialized
+            vscode.commands.executeCommand('neo-visual-devtracker.createWalletFile');
         }
     }
 
@@ -157,7 +166,15 @@ export class DeployPanel {
         this.viewState.showError = false;
         this.viewState.showSuccess = false;
 
-        this.viewState.wallets = this.neoExpressConfig.wallets;
+        this.viewState.wallets = [];
+        if (this.neoExpressConfig) {
+            this.neoExpressConfig.refresh();
+            this.viewState.wallets = this.neoExpressConfig.wallets.slice();
+        }
+        
+        for (let i = 0; i < this.walletExplorer.allAccounts.length; i++) {
+            this.viewState.wallets.push(this.walletExplorer.allAccounts[i]);
+        }
 
         const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
         if (!walletConfig) {

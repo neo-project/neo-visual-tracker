@@ -14,6 +14,8 @@ let viewState: any = {};
 
 let vsCodePostMessage: Function;
 
+const CreateNewWallet = 'CREATE_NEW_WALLET';
+
 let deployButton: HTMLButtonElement;
 let closeButton: HTMLButtonElement;
 let walletDropdown: HTMLSelectElement;
@@ -34,7 +36,8 @@ function populateDropdown(
     dropdown: HTMLSelectElement, 
     items: string[], 
     values: string[], 
-    selectedValue?: string) {
+    selectedValue?: string,
+    addNewCallToAction?: string) {
 
     htmlHelpers.clearChildren(dropdown);
     let index = 0;
@@ -49,6 +52,13 @@ function populateDropdown(
             dropdown.selectedIndex = index;
         }
     }
+    if (addNewCallToAction) {
+        dropdown.appendChild(document.createElement('option'));
+        const addNewCallToActionOption = document.createElement('option') as HTMLOptionElement;
+        addNewCallToActionOption.value = CreateNewWallet;
+        addNewCallToActionOption.appendChild(htmlHelpers.text(addNewCallToAction));
+        dropdown.appendChild(addNewCallToActionOption);
+    }
 }
 
 function render() {
@@ -61,7 +71,8 @@ function render() {
         walletDropdown, 
         viewState.wallets.map((_: any) => _.description), 
         viewState.wallets.map((_: any) => _.address), 
-        viewState.walletAddress);
+        viewState.walletAddress,
+        'Create a new NEP-6 wallet file...');
     htmlHelpers.showHide(deploySelectors.ContractDetail, !!viewState.contractPath);
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractHash, htmlHelpers.text(viewState.contractHash));
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractName, htmlHelpers.text(viewState.contractName));
@@ -112,8 +123,13 @@ function initializePanel() {
     });
 
     walletDropdown.addEventListener('change', _ => {
-        viewState.walletAddress = walletDropdown.options[walletDropdown.selectedIndex].value;
-        vsCodePostMessage({ e: deployEvents.Update, c: viewState });
+        if (walletDropdown.options[walletDropdown.selectedIndex].value === CreateNewWallet) {
+            vsCodePostMessage({ e: deployEvents.NewWallet, c: viewState });
+            walletDropdown.selectedIndex = 0;
+        } else {
+            viewState.walletAddress = walletDropdown.options[walletDropdown.selectedIndex].value;
+            vsCodePostMessage({ e: deployEvents.Update, c: viewState });
+        }
         console.log('->', viewState);
     });
 
