@@ -46,10 +46,10 @@ export class ContractDetector {
     }
 
     public async refresh() {
-        this.contracts = 
-            (await vscode.workspace.findFiles(this.searchPattern))
-                .map(uri => new Contract(uri.path))
-                .filter(contract => !!contract.hash);
+        const files = await vscode.workspace.findFiles(this.searchPattern);
+        this.contracts = files
+            .map(uri => new Contract(uri.fsPath))
+            .filter(contract => !!contract.hash);
     }
 
 }
