@@ -141,8 +141,8 @@
                 "title": "Create new RPC server list",
                 "category": "Neo Express",
                 "icon": {
-                    "light": "resources/light/folder.svg",
-                    "dark": "resources/dark/folder.svg"
+                    "light": "resources/light/add.svg",
+                    "dark": "resources/dark/add.svg"
                 }
             },
             {
@@ -204,41 +204,49 @@
                     "command": "neo-visual-devtracker.refreshObjectExplorerNode",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
                     "group": "navigation"
-                },
-                {
-                    "command": "neo-visual-devtracker.createInstance",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
-                    "group": "navigation"
-                },
-                {
-                    "command": "neo-visual-devtracker.createServerList",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
-                    "group": "navigation"
                 }
             ],
             "view/item/context": [
+                {
+                    "command": "neo-visual-devtracker.createInstance",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == neoexpresslist",
+                    "group": "inline"
+                },
+                {
+                    "command": "neo-visual-devtracker.createInstance",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == neoexpresslist"
+                },
+                {
+                    "command": "neo-visual-devtracker.createServerList",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == customserverlists",
+                    "group": "inline"
+                },
+                {
+                    "command": "neo-visual-devtracker.createServerList",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == customserverlists"
+                },
                 {
                     "command": "neo-visual-devtracker.startServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl",
                     "group": "inline"
                 },
                 {
+                    "command": "neo-visual-devtracker.startServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                },
+                {
                     "command": "neo-visual-devtracker.stopServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl",
                     "group": "inline"
+                },
+                {
+                    "command": "neo-visual-devtracker.stopServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
                 },
                 {
                     "command": "neo-visual-devtracker.editJson",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == editable",
                     "group": "inline"
-                },
-                {
-                    "command": "neo-visual-devtracker.startServer",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
-                },
-                {
-                    "command": "neo-visual-devtracker.stopServer",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
                 },
                 {
                     "command": "neo-visual-devtracker.editJson",

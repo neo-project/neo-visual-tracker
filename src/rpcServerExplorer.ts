@@ -25,19 +25,15 @@ const TemplateInstructions = 'To add a group of RPC servers, create a JSON file 
 
 class RpcServerTreeItemIdentifier {
 
-    public readonly jsonFile?: string;
-
-    public readonly label?: string;
-
-    public readonly description?: string;
-
-    public readonly rpcUri?: string;
-
-    public readonly parent?: RpcServerTreeItemIdentifier;
-
-    public readonly index?: number;
-
     public readonly children: RpcServerTreeItemIdentifier[];
+
+    public static fromChildren(label: string, contextValue: string, children: RpcServerTreeItemIdentifier[]) {
+        const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label, undefined, undefined, contextValue);
+        for (let i = 0; i < children.length; i++) {
+            result.children.push(children[i]);
+        }
+        return result;
+    }
 
     public static fromNeoExpressJsonFile(allRootPaths: string[], jsonFile: string) {
         try {
@@ -114,24 +110,20 @@ class RpcServerTreeItemIdentifier {
     }
 
     private constructor(
-        jsonFile?: string, 
-        rpcUri?: string, 
-        parent?: RpcServerTreeItemIdentifier,
-        label?: string,
-        description?: string,
-        index?: number) {
+        public readonly jsonFile?: string, 
+        public readonly rpcUri?: string, 
+        public readonly parent?: RpcServerTreeItemIdentifier,
+        public readonly label?: string,
+        public readonly description?: string,
+        public readonly index?: number,
+        public readonly contextValue?: string) {
 
-        this.jsonFile = jsonFile;
-        this.rpcUri = rpcUri;
-        this.parent = parent;
-        this.label = label;
-        this.description = description;
-        this.index = index;
         this.children = [];
     }
 
     public asTreeItem(extensionPath: string) : vscode.TreeItem {
-        if (this.rpcUri) {
+        if (this.rpcUri) { 
+            // Individual node from a Neo Express configuration, or individual item from a JSON server list:
             const result = new vscode.TreeItem(this.label || this.rpcUri);
             result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
             result.description = this.rpcUri;
@@ -141,15 +133,24 @@ class RpcServerTreeItemIdentifier {
                 arguments: [ this.rpcUri ],
             };
             if (this.rpcUri.startsWith('http://127.0.0.1:')) {
-                result.contextValue = 'startable';
+                result.contextValue = 'startableUrl';
+            } else {
+                result.contextValue = 'url';
             }
             return result;
-        } else {
+        } else if (this.jsonFile) {
+            // Neo Express configuration or JSON server list:
             const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
-            result.iconPath = vscode.ThemeIcon.Folder;
+            result.iconPath = vscode.ThemeIcon.File;
             result.description = this.description;
             result.tooltip = 'Configuration loaded from: ' + this.jsonFile;
             result.contextValue = 'editable';
+            return result;
+        } else {
+            // Top-level group:
+            const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
+            result.iconPath = vscode.ThemeIcon.Folder;
+            result.contextValue = this.contextValue;
             return result;
         }
     }
@@ -183,9 +184,8 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
     }
 
 	public async refresh() {
-        this.rootItems = [];
-
-        this.onDidChangeTreeDataEmitter.fire();
+        const neoExpressInstances = [];
+        const jsonServerLists = [];
 
         let allRootPaths: string[] = [];
         if (vscode.workspace.workspaceFolders) {
@@ -198,18 +198,23 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
                 allRootPaths,
                 allJsonFiles[i].fsPath);
             if (neoExpressServerFromJson) {
-                this.rootItems.push(neoExpressServerFromJson);
-                this.onDidChangeTreeDataEmitter.fire();
+                neoExpressInstances.push(neoExpressServerFromJson);
             }
 
             const neoServersFromJson = RpcServerTreeItemIdentifier.fromNeoServersJsonFile(
                 allRootPaths,
                 allJsonFiles[i].fsPath);
             if (neoServersFromJson) {
-                this.rootItems.push(neoServersFromJson);
-                this.onDidChangeTreeDataEmitter.fire();
+                jsonServerLists.push(neoServersFromJson);
             }
         }
+
+        this.rootItems = [
+            RpcServerTreeItemIdentifier.fromChildren('Neo Express instances', 'neoexpresslist', neoExpressInstances),
+            RpcServerTreeItemIdentifier.fromChildren('Custom server lists', 'customserverlists', jsonServerLists),
+        ];
+
+        this.onDidChangeTreeDataEmitter.fire();
 	}
 
 	public getTreeItem(element: RpcServerTreeItemIdentifier): vscode.TreeItem {
