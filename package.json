@@ -33,15 +33,25 @@
         "onCommand:neo-visual-devtracker.createServerList",
         "onCommand:neo-visual-devtracker.createWalletFile",
         "onCommand:neo-visual-devtracker.openTracker",
-        "onView:neo-visual-devtracker.rpcServerExplorer"
+        "onView:neo-visual-devtracker.rpcServerExplorer",
+        "workspaceContains:**/*.avm"
     ],
     "main": "./out/extension.js",
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "neo-visual-devtracker-mainView",
+                    "title": "Neo",
+                    "icon": "resources/neo.svg"
+                }
+            ]
+        },
         "views": {
-            "explorer": [
+            "neo-visual-devtracker-mainView": [
                 {
                     "id": "neo-visual-devtracker.rpcServerExplorer",
-                    "name": "Neo RPC Servers"
+                    "name": "RPC Servers"
                 }
             ]
         },
