@@ -149,7 +149,7 @@ export class WalletExplorer implements vscode.CodeLensProvider {
     }
 
     public getWalletForFile(uri: vscode.Uri): WalletExplorerWallet | undefined {
-        return this.rootItems.filter(_=>_.jsonFile === uri.fsPath)[0];
+        return this.rootItems.filter(_ => _.jsonFile === uri.fsPath)[0];
     }
 
     public async refresh() {
