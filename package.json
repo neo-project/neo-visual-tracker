@@ -59,12 +59,12 @@
             {
                 "command": "neo-visual-devtracker.openTracker",
                 "title": "Open Neo Visual DevTracker",
-                "category": "Neo Express"
+                "category": "Neo Visual DevTracker"
             },
             {
                 "command": "neo-visual-devtracker.refreshObjectExplorerNode",
                 "title": "Refresh Neo RPC Server list",
-                "category": "Neo Express",
+                "category": "Neo Visual DevTracker",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -91,7 +91,7 @@
             {
                 "command": "neo-visual-devtracker.editJson",
                 "title": "Edit JSON file",
-                "category": "Neo Express",
+                "category": "Neo Visual DevTracker",
                 "icon": {
                     "light": "resources/light/edit.svg",
                     "dark": "resources/dark/edit.svg"
@@ -110,22 +110,22 @@
             {
                 "command": "neo-visual-devtracker.transferAssets",
                 "title": "Transfer assets",
-                "category": "Neo Express"
+                "category": "Neo Visual DevTracker"
             },
             {
                 "command": "neo-visual-devtracker.claim",
                 "title": "Claim GAS",
-                "category": "Neo Express"
+                "category": "Neo Visual DevTracker"
             },
             {
                 "command": "neo-visual-devtracker.invokeContract",
                 "title": "Invoke contract",
-                "category": "Neo Express"
+                "category": "Neo Visual DevTracker"
             },
             {
                 "command": "neo-visual-devtracker.deployContract",
                 "title": "Deploy contract",
-                "category": "Neo Express"
+                "category": "Neo Visual DevTracker"
             },
             {
                 "command": "neo-visual-devtracker.createInstance",
@@ -139,7 +139,7 @@
             {
                 "command": "neo-visual-devtracker.createServerList",
                 "title": "Create new RPC server list",
-                "category": "Neo Express",
+                "category": "Neo Visual DevTracker",
                 "icon": {
                     "light": "resources/light/add.svg",
                     "dark": "resources/dark/add.svg"
@@ -148,12 +148,12 @@
             {
                 "command": "neo-visual-devtracker.createWalletFile",
                 "title": "Create new NEP-6 wallet file",
-                "category": "Neo Express"
+                "category": "Neo Visual DevTracker"
             },
             {
                 "command": "neo-visual-devtracker.createAccount",
                 "title": "Add account to NEP-6 wallet",
-                "category": "Neo Express"
+                "category": "Neo Visual DevTracker"
             }
         ],
         "menus": {
