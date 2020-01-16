@@ -175,7 +175,7 @@ export class DeployPanel {
                     this.viewState.contractMetadata.entrypointReturnTypeHex = 
                         await ContractParameterType.promptForTypeHex('What is the contract return type? (Press \'Escape\' to abort the deployment)');
                     if (!this.viewState.contractMetadata.entrypointReturnTypeHex) {
-                        return false;
+                        return false; // user canceled
                     }
                 }
                 if (missingParmeterTypes) {
@@ -184,15 +184,15 @@ export class DeployPanel {
                             'What is the type of parameter ##? (Press \'Escape\' to abort the deployment)', 
                             '(no more parameters)');
                     if (this.viewState.contractMetadata.entrypointParameterTypesHex === undefined) {
-                        return false;
+                        return false; // user canceled
                     }
                 }
-                return true;
+                return true; // user has now provided all missing metadata
             } else {
-                return false;
+                return false; // user opted out of providing data manually
             }
         } else {
-            return true;
+            return true; // all metadata present from ABI
         }
     }
 
