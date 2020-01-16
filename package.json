@@ -122,6 +122,12 @@
                 "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startable"
             },
             {
+                "command": "neo-visual-devtracker.deployContract",
+                "title": "Deploy contract",
+                "category": "Neo Express",
+                "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
+            },
+            {
                 "command": "neo-visual-devtracker.createInstance",
                 "title": "Create new Neo Express instance",
                 "category": "Neo Express",
@@ -210,6 +216,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.claim",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
+                },
+                {
+                    "command": "neo-visual-devtracker.deployContract",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem != editable"
                 },
                 {

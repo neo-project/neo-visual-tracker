@@ -64,6 +64,11 @@ a:focus {
     margin-top: 10px;
 }
 
+/* Helper class to add a bottom margin to any element: */
+.m-b {
+    margin-bottom: 10px;
+}
+
 /* More prominent main action buttons: */
 .action-btn {
     margin-top: 15px;

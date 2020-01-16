@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="dialog">
+
+        <div id="data-entry-view">
+
+            <h1>Deploy contract</h1>
+
+            <a href="#" 
+                id="refreshLink" 
+                class="right"
+                title="Click to refresh the available wallets and contracts">Refresh</a>
+
+            <!-- 'Loading' animation courtesy of loading.io; see: https://loading.io/license/#free-license -->
+            <svg class="loading right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34px" height="34px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <rect x="17.5" y="0" width="15" height="40" fill="#85a2b6">
+                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="0;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="64;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                </rect>
+                <rect x="42.5" y="0" width="15" height="40" fill="#bbcedd">
+                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                </rect>
+                <rect x="67.5" y="0" width="15" height="40" fill="#dce4eb">
+                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                </rect>
+            </svg>
+
+            <div>
+                Select the contract that you wish to deploy:
+            </div>
+            <div>
+                <div class="select"><select id="contractDropdown"></select></div>
+            </div>
+            <div class="error m-b" id="errorNoContracts">
+                No compiled contracts (*.avm files) were found in the current workspace.
+            </div>
+            <div class="m-b" id="contractDetail">
+                <table>
+                    <tr>
+                        <td colspan="2" class="stronger display-contract-name"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Hash</td>
+                        <td class="small display-contract-hash"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Path</td>
+                        <td class="small display-contract-path"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div>
+                Select the wallet that you wish to use for the deployment transaction:
+            </div>
+            <div>
+                <div class="select"><select id="walletDropdown"></select></div>
+            </div>
+
+            <div id="error-message" class="error m-t">
+            </div>
+
+            <div class="text-center">
+                <button id="deploy" class="action-btn">
+                    Deploy 
+                </button>
+            </div>
+
+        </div>
+
+        <div id="results-view" class="results">
+
+            <h1>Contract deployed</h1>
+
+            <div>
+                The following contract was deployed in transaction <span class="result-text emphasis"></span>:
+            </div>
+
+            <div>
+                <table>
+                    <tr>
+                        <td colspan="2" class="stronger display-contract-name"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Hash</td>
+                        <td class="small display-contract-hash"></td>
+                    </tr>
+                    <tr>
+                        <td class="strong">Path</td>
+                        <td class="small display-contract-path"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="text-center">
+                <button id="close" class="action-btn">OK</button>
+            </div>
+
+        </div>
+        
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>
