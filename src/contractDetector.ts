@@ -3,14 +3,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import { ContractParameterType } from './contractParameterType';
+
 class Contract {
     public readonly hash?: string;
     public readonly name?: string;
     public readonly path: string;
     public readonly avmHex?: string;
     public readonly metadata: any;
+
     constructor(fullpath: string) {
         this.path = fullpath;
+
         try {
             this.name = path.basename(fullpath).replace(/\.avm$/, '');
             const avmContents = fs.readFileSync(fullpath);
@@ -21,6 +25,7 @@ class Contract {
         } catch (e) {
             console.error('Error parsing', path, e);
         }
+
         try {
             this.metadata = {};
             const abiPath = fullpath.replace(/\.avm$/, '.abi.json');
@@ -32,7 +37,22 @@ class Contract {
                 if (abi.metadata) {
                     this.metadata = abi.metadata;
                 } else {
-                    console.warn('ABI does not contain metadata', abiPath);
+                    console.warn('ABI does not contain metadata', abiPath, abi);
+                }
+                const functions = abi.functions || [];
+                const entrypoint = abi.entrypoint || '';
+                const entrypointFunction = functions.filter((_: any) => _.name === entrypoint)[0];
+                if (entrypointFunction) {
+                    const entrypointFunctionParameters = entrypointFunction.parameters;
+                    if (entrypointFunctionParameters) {
+                        this.metadata.entrypointParameterTypes = entrypointFunctionParameters.map((_: any) => _.type || '');
+                        const entrypointParameterTypesHex = this.metadata.entrypointParameterTypes.map(ContractParameterType.typeNameToHexString);
+                        if (entrypointParameterTypesHex.filter((_: any) => _ === undefined).length === 0) {
+                            this.metadata.entrypointParameterTypesHex = entrypointParameterTypesHex.join('');
+                        }
+                    }
+                    this.metadata.entrypointReturnType = entrypointFunction.returntype;
+                    this.metadata.entrypointReturnTypeHex = ContractParameterType.typeNameToHexString(this.metadata.entrypointReturnType);
                 }
             }
         } catch (e) {

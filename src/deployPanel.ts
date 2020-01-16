@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { deployEvents } from './panels/deployEvents';
 
 import { ContractDetector } from './contractDetector';
+import { ContractParameterType } from './contractParameterType';
 import { NeoExpressConfig } from './neoExpressConfig';
 import { WalletExplorer } from './walletExplorer';
 
@@ -90,13 +91,8 @@ export class DeployPanel {
                     flags = 0x02;
                 }
 
-                //
                 // Construct a script that calls Neo.Contract.Create
                 //   -- see: https://docs.neo.org/docs/en-us/reference/scapi/fw/dotnet/neo/Contract/Create.html
-                //
-                // TODO: Correctly determine parameters and return types. For now we assume that all contracts take two 
-                //       parameters (a string and an array) and return a byte array.
-                //
                 const sb = neon.default.create.scriptBuilder();
                 const script = sb
                     .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.description))
@@ -105,8 +101,8 @@ export class DeployPanel {
                     .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.version))
                     .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.title))
                     .emitPush(flags)
-                    .emitPush('05') // return type - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
-                    .emitPush('0710') // parameter list - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
+                    .emitPush(this.viewState.contractMetadata.entrypointReturnTypeHex)
+                    .emitPush(this.viewState.contractMetadata.entrypointParameterTypesHex)
                     .emitPush(this.viewState.contractAvmHex)
                     .emitSysCall('Neo.Contract.Create')
                     .str;
@@ -153,7 +149,9 @@ export class DeployPanel {
         ];
         const missingStringFields = stringFields.filter(_ => this.viewState.contractMetadata[_] === undefined);
         const missingFlagFields = flagFields.filter(_ => this.viewState.contractMetadata[_[0]] === undefined);
-        if (missingStringFields.length || missingFlagFields.length) {
+        const missingReturnType = !this.viewState.contractMetadata.entrypointReturnTypeHex;
+        const missingParmeterTypes = this.viewState.contractMetadata.entrypointParameterTypesHex === undefined;
+        if (missingStringFields.length || missingFlagFields.length || missingReturnType || missingParmeterTypes) {
             if (await this.promptForBooleanOrCancel('Some contract metadata is missing. Would you like to provide the missing metadata manually?', false)) {
                 for (let i = 0; i < missingStringFields.length; i++) {
                     this.viewState.contractMetadata[missingStringFields[i]] = 
@@ -171,6 +169,22 @@ export class DeployPanel {
                         await this.promptForBooleanOrCancel('Yes or no, does this contract use ' + missingFlagFields[i][1] + '?', true);
                     if (this.viewState.contractMetadata[missingFlagFields[i][0]] === undefined) {
                         return false; // user canceled
+                    }
+                }
+                if (missingReturnType) {
+                    this.viewState.contractMetadata.entrypointReturnTypeHex = 
+                        await ContractParameterType.promptForTypeHex('What is the contract return type? (Press \'Escape\' to abort the deployment)');
+                    if (!this.viewState.contractMetadata.entrypointReturnTypeHex) {
+                        return false;
+                    }
+                }
+                if (missingParmeterTypes) {
+                    this.viewState.contractMetadata.entrypointParameterTypesHex = 
+                        await ContractParameterType.promptForTypeHexList(
+                            'What is the type of parameter ##? (Press \'Escape\' to abort the deployment)', 
+                            '(no more parameters)');
+                    if (this.viewState.contractMetadata.entrypointParameterTypesHex === undefined) {
+                        return false;
                     }
                 }
                 return true;
