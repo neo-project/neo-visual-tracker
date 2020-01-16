@@ -117,7 +117,7 @@ class RpcServerTreeItemIdentifier {
     }
 
     public static fromUriFetcher(extensionPath: string, label: string, uriFetch: Promise<string[]>, onUpdate: Function) {
-        const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label);
+        const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label, undefined, undefined, 'url');
         result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
         uriFetch.then(uris => {
             for (let i = 0; i < uris.length; i++) {
@@ -192,7 +192,9 @@ class RpcServerTreeItemIdentifier {
             return result;
         } else {
             // Top-level group:
-            const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
+            const result = new vscode.TreeItem(
+                '' + this.label, 
+                this.contextValue === 'url' ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.Expanded);
             result.iconPath = this.iconPath;
             result.contextValue = this.contextValue;
             return result;
