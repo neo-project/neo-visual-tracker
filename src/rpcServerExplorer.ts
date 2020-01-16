@@ -51,7 +51,7 @@ class RpcServerTreeItemIdentifier {
             }
             label = path.basename(label).replace(/\.json$/, '');
 
-            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'Neo Express instance', undefined);
+            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, 'Neo Express: ' + label, undefined, undefined);
             result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
