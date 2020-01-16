@@ -204,18 +204,14 @@
                     "command": "neo-visual-devtracker.refreshObjectExplorerNode",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
                     "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.createInstance",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
+                    "group": "navigation"
                 }
             ],
             "view/item/context": [
-                {
-                    "command": "neo-visual-devtracker.createInstance",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == neoexpresslist",
-                    "group": "inline"
-                },
-                {
-                    "command": "neo-visual-devtracker.createInstance",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == neoexpresslist"
-                },
                 {
                     "command": "neo-visual-devtracker.createServerList",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == customserverlists",
