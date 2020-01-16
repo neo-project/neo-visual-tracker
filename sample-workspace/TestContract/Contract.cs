@@ -3,6 +3,14 @@ using System.Numerics;
 using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Services.Neo;
 
+[assembly: ContractTitle("MyTestContract")]
+[assembly: ContractDescription("This is the description of my contract")]
+[assembly: ContractVersion("2.0")]
+[assembly: ContractAuthor("Some Author")]
+[assembly: ContractEmail("someone@somewhere.invalid")]
+// [assembly: ContractHasStorage]
+// [assembly: ContractHasDynamicInvoke]
+// [assembly: ContractIsPayable]
 public class TestContract : SmartContract
 {
     public static object Main(string method, object[] args)
