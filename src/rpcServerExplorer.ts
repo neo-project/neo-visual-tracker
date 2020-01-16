@@ -243,9 +243,9 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
             }
         }
 
-        newRootItems.push(RpcServerTreeItemIdentifier.fromChildren('Server lists', 'customserverlists', jsonServerLists));
         newRootItems.push(RpcServerTreeItemIdentifier.fromUriFetcher(this.extensionPath, 'Main Net', RpcServerExplorer.getAllRpcServers(MainNetServerListUrl), onUpdate));
         newRootItems.push(RpcServerTreeItemIdentifier.fromUriFetcher(this.extensionPath, 'Test Net', RpcServerExplorer.getAllRpcServers(TestNetServerListUrl), onUpdate));
+        newRootItems.push(RpcServerTreeItemIdentifier.fromChildren('Server lists', 'customserverlists', jsonServerLists));
         this.rootItems = newRootItems;
 
         onUpdate();
