@@ -179,7 +179,16 @@ class RpcServerTreeItemIdentifier {
             result.iconPath = this.iconPath;
             result.description = this.description;
             result.tooltip = 'Configuration loaded from: ' + this.jsonFile;
-            result.contextValue = 'editable';
+            if (this.children.find(_ => _.rpcUri && _.rpcUri.startsWith('http://127.0.0.1:'))) {
+                result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                if (this.children.length > 1) {
+                    result.contextValue = 'expressNodeMulti';
+                } else {
+                    result.contextValue = 'expressNode';
+                }
+            } else {
+                result.contextValue = 'editable';
+            }
             return result;
         } else {
             // Top-level group:
