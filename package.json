@@ -227,21 +227,39 @@
                 },
                 {
                     "command": "neo-visual-devtracker.startServer",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode",
                     "group": "inline"
                 },
                 {
                     "command": "neo-visual-devtracker.startServer",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti",
+                    "group": "inline"
+                },
+                {
+                    "command": "neo-visual-devtracker.startServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.startServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
                     "command": "neo-visual-devtracker.stopServer",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode",
                     "group": "inline"
                 },
                 {
                     "command": "neo-visual-devtracker.stopServer",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti",
+                    "group": "inline"
+                },
+                {
+                    "command": "neo-visual-devtracker.stopServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.stopServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
                     "command": "neo-visual-devtracker.editJson",
@@ -254,15 +272,23 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createWallet",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.createWallet",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
                     "command": "neo-visual-devtracker.createCheckpoint",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
                 },
                 {
                     "command": "neo-visual-devtracker.transferAssets",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.transferAssets",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
                     "command": "neo-visual-devtracker.transferAssets",
@@ -270,7 +296,11 @@
                 },
                 {
                     "command": "neo-visual-devtracker.claim",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.claim",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
                     "command": "neo-visual-devtracker.claim",
@@ -278,7 +308,11 @@
                 },
                 {
                     "command": "neo-visual-devtracker.deployContract",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.deployContract",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
                     "command": "neo-visual-devtracker.deployContract",
@@ -286,7 +320,11 @@
                 },
                 {
                     "command": "neo-visual-devtracker.invokeContract",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == startableUrl"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.invokeContract",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 }
             ]
         }

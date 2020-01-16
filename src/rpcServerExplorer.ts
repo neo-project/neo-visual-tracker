@@ -164,7 +164,11 @@ class RpcServerTreeItemIdentifier {
                 arguments: [ this.rpcUri ],
             };
             if (this.rpcUri.startsWith('http://127.0.0.1:')) {
-                result.contextValue = 'startableUrl';
+                if (this.parent && (this.parent.children.length > 1)) {
+                    result.contextValue = 'expressNodeMulti';
+                } else {
+                    result.contextValue = 'expressNode';
+                }
             } else {
                 result.contextValue = 'url';
             }
