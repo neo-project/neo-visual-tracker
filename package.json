@@ -51,7 +51,7 @@
             "neo-visual-devtracker-mainView": [
                 {
                     "id": "neo-visual-devtracker.rpcServerExplorer",
-                    "name": "RPC Servers"
+                    "name": "Blockchains"
                 }
             ]
         },
