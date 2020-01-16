@@ -23,34 +23,36 @@ const TestNetPlaceholder = 'TESTNET_URL';
 const TemplateInstructions = 'To add a group of RPC servers, create a JSON file anywhere in your workspace ' +
     '\n\nAn example file is being shown. Save this file to see the new servers appear in the list.';
 
+const MainNetServerListUrl = 'https://api.neoscan.io/api/main_net/v1/get_all_nodes';
+
+const TestNetServerListUrl = 'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes';
+
 class RpcServerTreeItemIdentifier {
-
-    public readonly jsonFile?: string;
-
-    public readonly label?: string;
-
-    public readonly description?: string;
-
-    public readonly rpcUri?: string;
-
-    public readonly parent?: RpcServerTreeItemIdentifier;
-
-    public readonly index?: number;
 
     public readonly children: RpcServerTreeItemIdentifier[];
 
-    public static fromNeoExpressJsonFile(allRootPaths: string[], jsonFile: string) {
+    public static fromChildren(label: string, contextValue: string, children: RpcServerTreeItemIdentifier[]) {
+        const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label, undefined, undefined, contextValue);
+        result.iconPath = vscode.ThemeIcon.Folder;
+        for (let i = 0; i < children.length; i++) {
+            result.children.push(children[i]);
+        }
+        return result;
+    }
+
+    public static fromNeoExpressJsonFile(extensionPath: string, allRootPaths: string[], jsonFile: string) {
         try {
             let label = jsonFile;
             for (let i = 0; i < allRootPaths.length; i++) {
                 label = label.replace(allRootPaths[i], '');
             }
-
             if (label.startsWith('/') || label.startsWith('\\')) {
                 label = label.substr(1);
             }
+            label = path.basename(label).replace(/\.json$/, '');
 
-            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'Neo Express Instance', undefined);
+            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, 'Neo Express: ' + label, undefined, undefined);
+            result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
             if (neoExpressConfig['consensus-nodes'] && neoExpressConfig['consensus-nodes'].length) {
@@ -71,16 +73,16 @@ class RpcServerTreeItemIdentifier {
         }
     }
 
-    public static fromNeoServersJsonFile(allRootPaths: string[], jsonFile: string) {
+    public static fromNeoServersJsonFile(extensionPath: string, allRootPaths: string[], jsonFile: string) {
         try {
             let label = jsonFile;
             for (let i = 0; i < allRootPaths.length; i++) {
                 label = label.replace(allRootPaths[i], '');
             }
-
             if (label.startsWith('/') || label.startsWith('\\')) {
                 label = label.substr(1);
             }
+            label = path.basename(label).replace(/\.json$/, '');
 
             const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'JSON server list', undefined);
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
@@ -91,6 +93,7 @@ class RpcServerTreeItemIdentifier {
                     if (server && server.url) {
                         const name = server.name || server.url;
                         const child = RpcServerTreeItemIdentifier.fromUri(server.url, name, result);
+                        child.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
                         result.children.push(child);
                     }
                 }
@@ -113,43 +116,87 @@ class RpcServerTreeItemIdentifier {
         return new RpcServerTreeItemIdentifier(jsonFile, rpcUri, parent, label, undefined, index);
     }
 
-    private constructor(
-        jsonFile?: string, 
-        rpcUri?: string, 
-        parent?: RpcServerTreeItemIdentifier,
-        label?: string,
-        description?: string,
-        index?: number) {
-
-        this.jsonFile = jsonFile;
-        this.rpcUri = rpcUri;
-        this.parent = parent;
-        this.label = label;
-        this.description = description;
-        this.index = index;
-        this.children = [];
+    public static fromUriFetcher(extensionPath: string, label: string, uriFetch: Promise<string[]>, onUpdate: Function) {
+        const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label, undefined, undefined, 'url');
+        result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
+        uriFetch.then(uris => {
+            for (let i = 0; i < uris.length; i++) {
+                try { 
+                    result.children.push(RpcServerTreeItemIdentifier.fromUri(
+                        uris[i], 
+                        vscode.Uri.parse(uris[i]).authority, 
+                        result));
+                } catch (e) {
+                    console.error('Error adding', uris[i], 'to', label, e);
+                }
+            }
+            onUpdate();
+        }).catch(e => {
+            console.error('Error populating', label, e);
+        });
+        return result;
     }
 
+    private constructor(
+        public readonly jsonFile?: string, 
+        public readonly rpcUri?: string, 
+        public readonly parent?: RpcServerTreeItemIdentifier,
+        public readonly label?: string,
+        public readonly description?: string,
+        public readonly index?: number,
+        public readonly contextValue?: string) {
+
+        this.children = [];
+        this.iconPath = vscode.ThemeIcon.File; // fallback to file icon if not specified
+    }
+
+    public iconPath: vscode.ThemeIcon | vscode.Uri;
+
     public asTreeItem(extensionPath: string) : vscode.TreeItem {
-        if (this.rpcUri) {
+        if (this.rpcUri) { 
+            // Individual node from a Neo Express configuration, or individual item from a JSON server list:
             const result = new vscode.TreeItem(this.label || this.rpcUri);
-            result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
+            result.iconPath = this.iconPath;
             result.description = this.rpcUri;
             result.command = {
                 title: 'Open tracker',
                 command: 'neo-visual-devtracker.openTracker',
-                arguments: [ this.rpcUri ],
+                arguments: [ this ],
             };
             if (this.rpcUri.startsWith('http://127.0.0.1:')) {
-                result.contextValue = 'startable';
+                if (this.parent && (this.parent.children.length > 1)) {
+                    result.contextValue = 'expressNodeMulti';
+                } else {
+                    result.contextValue = 'expressNode';
+                }
+            } else {
+                result.contextValue = 'url';
+            }
+            return result;
+        } else if (this.jsonFile) {
+            // Neo Express configuration or JSON server list:
+            const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
+            result.iconPath = this.iconPath;
+            result.description = this.description;
+            result.tooltip = this.jsonFile;
+            if (this.children.find(_ => _.rpcUri && _.rpcUri.startsWith('http://127.0.0.1:'))) {
+                result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+                if (this.children.length > 1) {
+                    result.contextValue = 'expressNodeMulti';
+                } else {
+                    result.contextValue = 'expressNode';
+                }
+            } else {
+                result.contextValue = 'editable';
             }
             return result;
         } else {
-            const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
-            result.iconPath = vscode.ThemeIcon.Folder;
-            result.description = this.description;
-            result.tooltip = 'Configuration loaded from: ' + this.jsonFile;
-            result.contextValue = 'editable';
+            // Top-level group:
+            const result = new vscode.TreeItem(
+                '' + this.label, 
+                this.contextValue === 'url' ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.Expanded);
+            result.iconPath = this.iconPath;
+            result.contextValue = this.contextValue;
             return result;
         }
     }
@@ -183,33 +230,40 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
     }
 
 	public async refresh() {
-        this.rootItems = [];
-
-        this.onDidChangeTreeDataEmitter.fire();
+        const onUpdate = () => this.onDidChangeTreeDataEmitter.fire();
 
         let allRootPaths: string[] = [];
         if (vscode.workspace.workspaceFolders) {
             allRootPaths = vscode.workspace.workspaceFolders.map(_ => _.uri.fsPath);
         }
 
+        const newRootItems = [];
+        const jsonServerLists = [];
         const allJsonFiles = await vscode.workspace.findFiles('**/*.json');
         for (let i = 0; i < allJsonFiles.length; i++) {
             const neoExpressServerFromJson = RpcServerTreeItemIdentifier.fromNeoExpressJsonFile(
+                this.extensionPath,
                 allRootPaths,
                 allJsonFiles[i].fsPath);
             if (neoExpressServerFromJson) {
-                this.rootItems.push(neoExpressServerFromJson);
-                this.onDidChangeTreeDataEmitter.fire();
+                newRootItems.push(neoExpressServerFromJson);
             }
 
             const neoServersFromJson = RpcServerTreeItemIdentifier.fromNeoServersJsonFile(
+                this.extensionPath,
                 allRootPaths,
                 allJsonFiles[i].fsPath);
             if (neoServersFromJson) {
-                this.rootItems.push(neoServersFromJson);
-                this.onDidChangeTreeDataEmitter.fire();
+                jsonServerLists.push(neoServersFromJson);
             }
         }
+
+        newRootItems.push(RpcServerTreeItemIdentifier.fromUriFetcher(this.extensionPath, 'Main Net', RpcServerExplorer.getAllRpcServers(MainNetServerListUrl), onUpdate));
+        newRootItems.push(RpcServerTreeItemIdentifier.fromUriFetcher(this.extensionPath, 'Test Net', RpcServerExplorer.getAllRpcServers(TestNetServerListUrl), onUpdate));
+        newRootItems.push(RpcServerTreeItemIdentifier.fromChildren('Server lists', 'customserverlists', jsonServerLists));
+        this.rootItems = newRootItems;
+
+        onUpdate();
 	}
 
 	public getTreeItem(element: RpcServerTreeItemIdentifier): vscode.TreeItem {
@@ -236,16 +290,28 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
     }
 
     public static async newServerList() {
-        const testNetUrl = await RpcServerExplorer.getBestRpcServer(
-            'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes');
-        const mainNetUrl = await RpcServerExplorer.getBestRpcServer(
-            'https://api.neoscan.io/api/main_net/v1/get_all_nodes');
+        const testNetUrl = await RpcServerExplorer.getBestRpcServer(TestNetServerListUrl);
+        const mainNetUrl = await RpcServerExplorer.getBestRpcServer(MainNetServerListUrl);
         const textDocument = await vscode.workspace.openTextDocument({
             language: 'json',
             content: TemplateServerList.replace(MainNetPlaceholder, mainNetUrl).replace(TestNetPlaceholder, testNetUrl),
         });
         vscode.window.showTextDocument(textDocument);
         vscode.window.showInformationMessage(TemplateInstructions, { modal: true });
+    }
+
+    private static async getAllRpcServers(apiUrl: string): Promise<string[]> {
+        try {
+            const apiResponse = JSON.parse((await request(apiUrl)).body);
+            if (apiResponse && apiResponse.length) {
+                return apiResponse.map((_: any) => _.url);
+            } else {
+                console.error('Unexpected API response when querying RPC servers ', apiUrl, apiResponse);
+            }
+        } catch(e) {
+            console.error('Could not get an example RPC server from ', apiUrl, e);
+        }
+        return [];
     }
 
     private static async getBestRpcServer(apiUrl: string): Promise<string> {

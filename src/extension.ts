@@ -79,18 +79,34 @@ export function activate(context: vscode.ExtensionContext) {
         }
     };
 
-    const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', (url?: string) => {
-        if (url) {
-            try {
+    const selectUri = async (server: any) => {
+        if (server && server.rpcUri) {
+            return server.rpcUri;
+        } else if (server && server.children && server.children.length) {
+            const possibleUris = server.children.map((_: any) => _.rpcUri).filter((_: any) => !!_);
+            if (possibleUris.length) {
+                if (possibleUris.length === 1) {
+                    return possibleUris[0];
+                } else {
+                    return await vscode.window.showQuickPick(possibleUris, { placeHolder: 'Select an RPC server to use for this operation...' });
+                }
+            }
+        } 
+        console.error('Could not select an RPC URI from node', server);
+        throw new Error('Could not select an RPC URI from node');
+    };
+
+    const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', async (server) => {
+        try {
+            const rpcUri = await selectUri(server);
+            if (rpcUri) {
                 const panel = new NeoTrackerPanel(
                     context.extensionPath,
-                    rpcConnectionPool.getConnection(url),
+                    rpcConnectionPool.getConnection(rpcUri),
                     context.subscriptions);
-            } catch (e) {
-                console.error('Error opening Neo tracker panel ', e);
             }
-        } else {
-            console.warn('Attempted to open Neo tracker without providing RPC URL');
+        } catch (e) {
+            console.error('Error opening Neo tracker panel ', e);
         }
     });
 
@@ -101,19 +117,26 @@ export function activate(context: vscode.ExtensionContext) {
 
     const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', async (server) => {
         await requireNeoExpress(() => {
-            console.log('User requested to start ', server);
-            let label = undefined;
-            if (server.parent) {
-                label = server.parent.label;
+            if (server.index !== undefined) {
+                const label = server.parent ? server.parent.label : server.label;
+                neoExpressInstanceManager.start(server.jsonFile, server.index, label);
+            } else if (server.children && server.children.length) {
+                for (let i = 0; i < server.children.length; i++) {
+                    neoExpressInstanceManager.start(server.jsonFile, server.children[i].index, server.label);
+                }
             }
-            neoExpressInstanceManager.start(server.jsonFile, server.index, label);
         });
     });
 
     const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', async (server) => {
         await requireNeoExpress(() => {
-            console.log('User requested to stop ', server);
-            neoExpressInstanceManager.stop(server.jsonFile, server.index);
+            if (server.index !== undefined) {
+                neoExpressInstanceManager.stop(server.jsonFile, server.index);
+            } else if (server.children && server.children.length) {
+                for (let i = 0; i < server.children.length; i++) {
+                    neoExpressInstanceManager.stop(server.jsonFile, server.children[i].index);
+                }
+            }
         });
     });
 
@@ -149,13 +172,16 @@ export function activate(context: vscode.ExtensionContext) {
 
     const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
         try {
-            const panel = new TransferPanel(
-                context.extensionPath,
-                server.rpcUri,
-                rpcConnectionPool.getConnection(server.rpcUri),
-                walletExplorer,
-                context.subscriptions,
-                server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+            const rpcUri = await selectUri(server);
+            if (rpcUri) {
+                const panel = new TransferPanel(
+                    context.extensionPath,
+                    rpcUri,
+                    rpcConnectionPool.getConnection(rpcUri),
+                    walletExplorer,
+                    context.subscriptions,
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+            }
         } catch (e) {
             console.error('Error opening transfer panel ', e);
         }
@@ -163,40 +189,49 @@ export function activate(context: vscode.ExtensionContext) {
 
     const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', async (server) => {
         try {
-            const panel = new ClaimPanel(
-                context.extensionPath,
-                server.rpcUri,
-                rpcConnectionPool.getConnection(server.rpcUri),
-                walletExplorer,
-                context.subscriptions,
-                server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+            const rpcUri = await selectUri(server);
+            if (rpcUri) {
+                const panel = new ClaimPanel(
+                    context.extensionPath,
+                    rpcUri,
+                    rpcConnectionPool.getConnection(rpcUri),
+                    walletExplorer,
+                    context.subscriptions,
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+            }
         } catch (e) {
             console.error('Error opening claim panel ', e);
         }
     });
 
-    const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', (server) => {
+    const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', async (server) => {
         try {
-            const panel = new DeployPanel(
-                context.extensionPath,
-                server.rpcUri,
-                walletExplorer,
-                contractDetector,
-                context.subscriptions,
-                server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+            const rpcUri = await selectUri(server);
+            if (rpcUri) {
+                const panel = new DeployPanel(
+                    context.extensionPath,
+                    rpcUri,
+                    walletExplorer,
+                    contractDetector,
+                    context.subscriptions,
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+            }
         } catch (e) {
             console.error('Error opening contract deployment panel ', e);
         }
     });
 
-    const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', (server) => {
+    const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', async (server) => {
         try {
-            const panel = new InvocationPanel(
-                context.extensionPath, 
-                server.jsonFile,
-                server.rpcUri,
-                checkpointDetector,
-                context.subscriptions);
+            const rpcUri = await selectUri(server);
+            if (rpcUri) {
+                const panel = new InvocationPanel(
+                    context.extensionPath, 
+                    server.jsonFile,
+                    rpcUri,
+                    checkpointDetector,
+                    context.subscriptions);
+            }
         } catch (e) {
             console.error('Error opening invocation panel ', e);
         }
@@ -225,7 +260,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     const createAccountCommand = vscode.commands.registerCommand('neo-visual-devtracker.createAccount', async (wallet) => {
         try {
-            await wallet.createAccount();
+            if (!wallet && vscode.window.activeTextEditor) {
+                wallet = walletExplorer.getWalletForFile(vscode.window.activeTextEditor.document.uri);
+            }
+            if (wallet) {
+                await wallet.createAccount();
+            } else {
+                vscode.window.showErrorMessage('Please open a NEP-6 wallet file before attempting to create a new account');
+            }
         } catch (e) {
             console.error('Error creating new account in wallet ', wallet, e);
         }
