@@ -18,6 +18,7 @@ may not exactly match a publicly released version.
 ### Added
 
 - Search for a specific block/transaction/address from within the block explorer
+- Support for smart contract deployment
 - Support for smart contract invocation on Neo Express instances
 - Support for smart contract invocation in the debugger
 - Support for creation of new Neo Express instances
