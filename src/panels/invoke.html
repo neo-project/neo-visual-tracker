@@ -101,39 +101,44 @@
                         </table>
                     </div>
                     <div class="half left">
-                        <table>
-                            <tr>
-                                <td class='hide'><input class="parameterInput" type="text" /></td>
-                            </tr>
-                            <tr>
-                                <td class='hide'><div class="walletDropdownOuter">&nbsp;</div></td>
-                            </tr>
-                        </table>
-                        <div>
+                        <div class="group">
                             <button class="invokeOffChainButton">Call method</button>
                         </div>
-                        <div>
-                            <button class="launchDebugger">Launch debugger</button>
+                        <div class="group">
+                            <table>
+                                <tr>
+                                    <th width="20%">Checkpoint:</th>
+                                    <td width="60%" colspan="2">
+                                        <div class="dropdownOuter checkpointDropdown"></div>
+                                    </td>
+                                    <td width="20%" class="parameterType">(Optional)</td>
+                                </tr>
+                        </table>
+                            <div>
+                                <button class="launchDebugger">Launch debugger</button>
+                            </div>
                         </div>
                     </div>
                     <div class="half right">
-                        <table>
-                                <tr>
-                                    <th width="20%">Spend:</th>
-                                    <td width="30%"><input class="parameterInput intentValue text-right" type="text" /></td>
-                                    <td width="30%"><input class="parameterInput intentSymbol" type="text" /></td>
-                                    <td width="20%" class="parameterType">(Optional)</td>
-                                </tr>
-                                <tr>
-                                    <th width="20%">Wallet:</th>
-                                    <td width="60%" colspan="2">
-                                        <div class="walletDropdownOuter walletDropdown"></div>
-                                    </td>
-                                    <td width="20%" class="parameterType">(Required)</td>
-                                </tr>
-                        </table>
-                        <div>
-                            <button class="invokeOnChainButton">Broadcast invocation transaction</button>
+                        <div class="group">
+                            <table>
+                                    <tr>
+                                        <th width="20%">Spend:</th>
+                                        <td width="30%"><input class="parameterInput intentValue text-right" type="text" /></td>
+                                        <td width="30%"><input class="parameterInput intentSymbol" type="text" /></td>
+                                        <td width="20%" class="parameterType">(Optional)</td>
+                                    </tr>
+                                    <tr>
+                                        <th width="20%">Wallet:</th>
+                                        <td width="60%" colspan="2">
+                                            <div class="dropdownOuter walletDropdown"></div>
+                                        </td>
+                                        <td width="20%" class="parameterType">(Required)</td>
+                                    </tr>
+                            </table>
+                            <div>
+                                <button class="invokeOnChainButton">Broadcast invocation transaction</button>
+                            </div>
                         </div>
                         <div>
                             <button class="generateInvokeScriptButton">Generate invocation script</button>
@@ -177,7 +182,7 @@
 
         <div id="invokeInstructions">
             <div class="stronger">Tips:</div>
-            <div class="strong"><em>Call</em> vs. <em>Invoke</em>:</div>
+            <div class="strong"><em>Call</em> vs. <em>Invoke</em> vs. <em>Debug</em>:</div>
             <div>
                 <ul>
                     <li>
@@ -187,6 +192,11 @@
                     <li>
                         <em>Invoking</em> a contract will create and broadcast an 
                         <em>InvocationTransaction</em> using the Neo Express instance.
+                    </li>
+                    <li>
+                        <em>Debugging</em> a contract will launch the contract in the Visual
+                        Studio Code debugger, optionally using a previously saved Neo Express
+                        checkpoint.
                     </li>
                 </ul>
             </div>

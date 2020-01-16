@@ -1,0 +1,58 @@
+{
+
+    "NOTE_0": "                                                ",
+    "NOTE_1": "    The password for this wallet file is:       ",
+    "NOTE_2": "        neo                                     ",
+    "NOTE_3": "    (without any whitespace or punctuation)     ",
+    "NOTE_4": "                                                ",
+    "NOTE_5": "    DO NOT USE IN PRODUCTION!                   ",
+    "NOTE_6": "                                                ",
+
+    "name": "multi-account-wallet",
+    "version": "1.0",
+    "scrypt": {
+        "n": 16384,
+        "r": 8,
+        "p": 8,
+        "size": 64
+    },
+    "accounts": [
+        {
+            "address": "AaNqRCkJKmLVUhVZRrgmTL38VWAbamqm2x",
+            "label": "Default account",
+            "isDefault": true,
+            "lock": false,
+            "key": "6PYPhod9EtsJYicTez8pE9SX9Z8wxdTTEn7WJViK11wL1jABzTSjBf5uZo",
+            "contract": {
+                "script": "2103e35a9b8762313fad5b41dd7ae8ed7152fc1e1746ee71d6358a09f083cac93f65ac",
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "type": "Signature"
+                    }
+                ],
+                "deployed": false
+            },
+            "extra": {}
+        },
+        {
+            "address": "AQs4mJuxfXk72rPgwtsEPTq2UP3kJvD3WW",
+            "label": "Account 2",
+            "isDefault": false,
+            "lock": false,
+            "key": "6PYPWuzAX7DWqs8FYsBW17TBufPZL7AU59fqN9KAinL7eWHx1qgsGKueVb",
+            "contract": {
+                "script": "210257dd534dcd036c414f49ed3c2f916920e9b5724ff4d0462302a8865c85f3dba3ac",
+                "parameters": [
+                    {
+                        "name": "signature",
+                        "type": "Signature"
+                    }
+                ],
+                "deployed": false
+            },
+            "extra": {}
+        }
+    ],
+    "extra": {}
+}

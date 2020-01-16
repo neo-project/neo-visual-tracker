@@ -3,6 +3,7 @@ import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import { CheckpointDetector } from './checkpointDetector';
 import { invokeEvents } from './panels/invokeEvents';
 
 import { api } from '@cityofzion/neon-js';
@@ -48,6 +49,7 @@ class ViewState {
     neoExpressJsonFullPath: string = '';
     neoExpressJsonFileName: string = '';
     wallets: any[] = [];
+    checkpoints: any[] = [];
     contracts: any[] = [];
     selectedContract: string = '';
     selectedMethod: string = '';
@@ -63,7 +65,8 @@ export class InvocationPanel {
 
     private readonly panel: vscode.WebviewPanel;
     private readonly avmFiles: Map<string, string>;
-
+    private readonly checkpointDetector: CheckpointDetector;
+    
     private viewState: ViewState;
     private jsonParsed: boolean;
 
@@ -71,11 +74,14 @@ export class InvocationPanel {
         extensionPath: string,
         neoExpressJsonFullPath: string,
         rpcUrl: string,
+        checkpointDetector: CheckpointDetector,
         disposables: vscode.Disposable[]) {
 
         this.avmFiles = new Map<string, string>();
 
         this.jsonParsed = false;
+
+        this.checkpointDetector = checkpointDetector;
 
         this.viewState = new ViewState();
         this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
@@ -110,7 +116,7 @@ export class InvocationPanel {
             const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
             this.viewState.wallets = neoExpressConfig.wallets || [];
-            this.viewState.contracts = neoExpressConfig.contracts || [];    
+            this.viewState.contracts = neoExpressConfig.contracts || [];
         } catch (e) {
             console.error('Error parsing ', this.viewState.neoExpressJsonFullPath, e);
             this.viewState.wallets = [];
@@ -128,6 +134,8 @@ export class InvocationPanel {
         if (!this.jsonParsed) {
             await this.reload();
         }
+
+        this.viewState.checkpoints = this.checkpointDetector.checkpoints || [];
 
         if (message.e === invokeEvents.Init) {
             this.panel.webview.postMessage({ viewState: this.viewState });
@@ -317,7 +325,7 @@ export class InvocationPanel {
                     for (let j = 0; j < contract.functions.length; j++) {
                         const method = contract.functions[j];
                         if (method.name === methodName) {
-
+                            
                             let avmFileName = this.avmFiles.get(contractHash);
                             if (!avmFileName) {
                                 const allAbiJsons = await vscode.workspace.findFiles('**/*.abi.json');
@@ -366,6 +374,10 @@ export class InvocationPanel {
                                         }
                                     }
                                 };
+                                method.selectedCheckpoint = this.viewState.checkpoints.map(c => c.fullpath).filter(fp => fp === method.selectedCheckpoint)[0];
+                                if (method.selectedCheckpoint) {
+                                    debugConfiguration['checkpoint'] = method.selectedCheckpoint;
+                                }
                                 return await vscode.debug.startDebugging(undefined, debugConfiguration);
                             } else {
                                 this.viewState.invocationError = 'Could not find an AVM file for this contract in the current workspace.';
@@ -396,7 +408,7 @@ export class InvocationPanel {
             if (parameter.type === 'ByteArray') {
                 result.push(InvocationPanel.parseStringArgument(parameter.value));
             } else if (parameter.type === 'Integer') {
-                result.push(parseInt(parameter.value));
+                result.push(parseInt(parameter.value) || 0);
             } else if (parameter.type === 'String') {
                 result.push((Buffer.from(parameter.value)).toString('hex'));
             } else if (parameter.type === 'Array') {

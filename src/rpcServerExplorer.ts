@@ -90,7 +90,7 @@ class RpcServerTreeItemIdentifier {
                     const server = contents[i];
                     if (server && server.url) {
                         const name = server.name || server.url;
-                        const child = RpcServerTreeItemIdentifier.fromUri(server.url, name, result, jsonFile);
+                        const child = RpcServerTreeItemIdentifier.fromUri(server.url, name, result);
                         result.children.push(child);
                     }
                 }

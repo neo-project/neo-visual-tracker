@@ -6,5 +6,9 @@
     {
         "name": "Neo Test Net",
         "url": "https://test3.cityofzion.io"
+    },
+    {
+        "name": "Neo Test Net - getunspents supported",
+        "url": "http://seed5.ngd.network:20332"
     }
 ]

@@ -14,6 +14,8 @@ let viewState: any = {};
 
 let vsCodePostMessage: Function;
 
+const CreateNewWallet = 'CREATE_NEW_WALLET';
+
 function enterLoadingState() {
     htmlHelpers.showHide(claimSelectors.LoadingIndicator, true, 'inline');
     const claimButton = document.querySelector(claimSelectors.ClaimButton) as HTMLButtonElement;
@@ -41,6 +43,11 @@ function populateWalletDropdown() {
             dropdown.selectedIndex = index;
         }
     }
+    dropdown.appendChild(document.createElement('option'));
+    const newWalletOption = document.createElement('option') as HTMLOptionElement;
+    newWalletOption.value = CreateNewWallet;
+    newWalletOption.appendChild(htmlHelpers.text('Create a new NEP-6 wallet file...'));
+    dropdown.appendChild(newWalletOption);
 }
 
 function render() {
@@ -91,10 +98,15 @@ function initializePanel() {
         vscode.postMessage({ e: claimEvents.Refresh });
     });
     walletDropdown.addEventListener('change', _ => {
-        viewState.walletAddress = walletDropdown.options[walletDropdown.selectedIndex].value;
-        viewState.walletDescription = walletDropdown.options[walletDropdown.selectedIndex].textContent;
-        enterLoadingState();
-        vsCodePostMessage({ e: claimEvents.Update, c: viewState });
+        if (walletDropdown.options[walletDropdown.selectedIndex].value === CreateNewWallet) {
+            vsCodePostMessage({ e: claimEvents.NewWallet, c: viewState });
+            walletDropdown.selectedIndex = 0;
+        } else {
+            viewState.walletAddress = walletDropdown.options[walletDropdown.selectedIndex].value;
+            viewState.walletDescription = walletDropdown.options[walletDropdown.selectedIndex].textContent;
+            enterLoadingState();
+            vsCodePostMessage({ e: claimEvents.Update, c: viewState });
+        }
         console.log('->', viewState);
     });
     window.addEventListener('message', msg => handleMessage(msg.data));
