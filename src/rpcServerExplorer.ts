@@ -46,12 +46,12 @@ class RpcServerTreeItemIdentifier {
             for (let i = 0; i < allRootPaths.length; i++) {
                 label = label.replace(allRootPaths[i], '');
             }
-
             if (label.startsWith('/') || label.startsWith('\\')) {
                 label = label.substr(1);
             }
+            label = path.basename(label).replace(/\.json$/, '');
 
-            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'Neo Express Instance', undefined);
+            const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'Neo Express instance', undefined);
             result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
             const neoExpressConfig = JSON.parse(jsonFileContents);
@@ -79,10 +79,10 @@ class RpcServerTreeItemIdentifier {
             for (let i = 0; i < allRootPaths.length; i++) {
                 label = label.replace(allRootPaths[i], '');
             }
-
             if (label.startsWith('/') || label.startsWith('\\')) {
                 label = label.substr(1);
             }
+            label = path.basename(label).replace(/\.json$/, '');
 
             const result = new RpcServerTreeItemIdentifier(jsonFile, undefined, undefined, label, 'JSON server list', undefined);
             const jsonFileContents = fs.readFileSync(jsonFile, { encoding: 'utf8' });
@@ -178,7 +178,7 @@ class RpcServerTreeItemIdentifier {
             const result = new vscode.TreeItem('' + this.label, vscode.TreeItemCollapsibleState.Expanded);
             result.iconPath = this.iconPath;
             result.description = this.description;
-            result.tooltip = 'Configuration loaded from: ' + this.jsonFile;
+            result.tooltip = this.jsonFile;
             if (this.children.find(_ => _.rpcUri && _.rpcUri.startsWith('http://127.0.0.1:'))) {
                 result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
                 if (this.children.length > 1) {
