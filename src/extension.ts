@@ -80,9 +80,9 @@ export function activate(context: vscode.ExtensionContext) {
     };
 
     const selectUri = async (server: any) => {
-        if (server.rpcUri) {
+        if (server && server.rpcUri) {
             return server.rpcUri;
-        } else if (server.children && server.children.length) {
+        } else if (server && server.children && server.children.length) {
             const possibleUris = server.children.map((_: any) => _.rpcUri).filter((_: any) => !!_);
             if (possibleUris.length) {
                 if (possibleUris.length === 1) {
@@ -96,18 +96,17 @@ export function activate(context: vscode.ExtensionContext) {
         throw new Error('Could not select an RPC URI from node');
     };
 
-    const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', (url?: string) => {
-        if (url) {
-            try {
+    const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', async (server) => {
+        try {
+            const rpcUri = await selectUri(server);
+            if (rpcUri) {
                 const panel = new NeoTrackerPanel(
                     context.extensionPath,
-                    rpcConnectionPool.getConnection(url),
+                    rpcConnectionPool.getConnection(rpcUri),
                     context.subscriptions);
-            } catch (e) {
-                console.error('Error opening Neo tracker panel ', e);
             }
-        } else {
-            console.warn('Attempted to open Neo tracker without providing RPC URL');
+        } catch (e) {
+            console.error('Error opening Neo tracker panel ', e);
         }
     });
 

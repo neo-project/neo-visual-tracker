@@ -279,6 +279,18 @@
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
                 },
                 {
+                    "command": "neo-visual-devtracker.openTracker",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.openTracker",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
+                },
+                {
+                    "command": "neo-visual-devtracker.openTracker",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == url"
+                },
+                {
                     "command": "neo-visual-devtracker.transferAssets",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
                 },

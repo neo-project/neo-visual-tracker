@@ -161,7 +161,7 @@ class RpcServerTreeItemIdentifier {
             result.command = {
                 title: 'Open tracker',
                 command: 'neo-visual-devtracker.openTracker',
-                arguments: [ this.rpcUri ],
+                arguments: [ this ],
             };
             if (this.rpcUri.startsWith('http://127.0.0.1:')) {
                 if (this.parent && (this.parent.children.length > 1)) {
