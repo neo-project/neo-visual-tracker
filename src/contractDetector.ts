@@ -8,6 +8,7 @@ class Contract {
     public readonly name?: string;
     public readonly path: string;
     public readonly avmHex?: string;
+    public readonly metadata: any;
     constructor(fullpath: string) {
         this.path = fullpath;
         try {
@@ -19,6 +20,23 @@ class Contract {
             this.hash = '0x' + Buffer.from(ripemd160Bytes.reverse()).toString('hex');
         } catch (e) {
             console.error('Error parsing', path, e);
+        }
+        try {
+            this.metadata = {};
+            const abiPath = fullpath.replace(/\.avm$/, '.abi.json');
+            const abiContents = fs.readFileSync(abiPath);
+            const abi = JSON.parse(abiContents.toString());
+            if (abi.hash !== this.hash) {
+                console.warn('ABI', abiPath, 'does not match', fullpath, 'expected hash:', this.hash);
+            } else {
+                if (abi.metadata) {
+                    this.metadata = abi.metadata;
+                } else {
+                    console.warn('ABI does not contain metadata', abiPath);
+                }
+            }
+        } catch (e) {
+            console.warn('Error reading contract ABI', fullpath, e);
         }
     }
 }
