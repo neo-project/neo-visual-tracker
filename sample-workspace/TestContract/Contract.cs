@@ -8,9 +8,7 @@ using Neo.SmartContract.Framework.Services.Neo;
 [assembly: ContractVersion("2.0")]
 [assembly: ContractAuthor("Some Author")]
 [assembly: ContractEmail("someone@somewhere.invalid")]
-// [assembly: ContractHasStorage]
-// [assembly: ContractHasDynamicInvoke]
-// [assembly: ContractIsPayable]
+[assembly: Features(ContractPropertyState.HasStorage)]
 public class TestContract : SmartContract
 {
     public static object Main(string method, object[] args)

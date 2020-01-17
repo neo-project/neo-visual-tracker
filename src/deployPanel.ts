@@ -81,13 +81,13 @@ export class DeployPanel {
             try {
                 // Determine flags: { none: 0x00, storage: 0x01, dynamic: 0x02, storage+dynamic: 0x03 }
                 let flags = 0x00; 
-                if (this.viewState.contractMetadata['has-storage']) {
-                    if (this.viewState.contractMetadata['has-dynamic-invoke']) {
+                if (this.viewState.contractMetadata['hasStorage']) {
+                    if (this.viewState.contractMetadata['hasDynamicInvoke']) {
                         flags = 0x03;
                     } else {
                         flags = 0x01;
                     }
-                } else if (this.viewState.contractMetadata['has-dynamic-invoke']) {
+                } else if (this.viewState.contractMetadata['hasDynamicInvoke']) {
                     flags = 0x02;
                 }
 
@@ -142,48 +142,17 @@ export class DeployPanel {
     }
 
     private async ensureMetadata() {
-        const stringFields = [ 'description', 'email', 'author', 'version', 'title' ];
         const flagFields = [ 
-            [ 'has-storage', 'storage' ],
-            [ 'has-dynamic-invoke', 'dynamic invoke' ],
+            [ 'hasStorage', 'storage' ],
+            [ 'hasDynamicInvoke', 'dynamic invoke' ],
         ];
-        const missingStringFields = stringFields.filter(_ => this.viewState.contractMetadata[_] === undefined);
         const missingFlagFields = flagFields.filter(_ => this.viewState.contractMetadata[_[0]] === undefined);
-        const missingReturnType = !this.viewState.contractMetadata.entrypointReturnTypeHex;
-        const missingParmeterTypes = this.viewState.contractMetadata.entrypointParameterTypesHex === undefined;
-        if (missingStringFields.length || missingFlagFields.length || missingReturnType || missingParmeterTypes) {
+        if (missingFlagFields.length) {
             if (await this.promptForBooleanOrCancel('Some contract metadata is missing. Would you like to provide the missing metadata manually?', false)) {
-                for (let i = 0; i < missingStringFields.length; i++) {
-                    this.viewState.contractMetadata[missingStringFields[i]] = 
-                        await vscode.window.showInputBox({ 
-                            placeHolder: 'Enter the contract ' + missingStringFields[i],
-                            prompt: 'Leave blank to omit',
-                            ignoreFocusOut: true,
-                        });
-                    if (this.viewState.contractMetadata[missingStringFields[i]] === undefined) {
-                        return false; // user canceled
-                    }
-                }
                 for (let i = 0; i < missingFlagFields.length; i++) {
                     this.viewState.contractMetadata[missingFlagFields[i][0]] = 
                         await this.promptForBooleanOrCancel('Yes or no, does this contract use ' + missingFlagFields[i][1] + '?', true);
                     if (this.viewState.contractMetadata[missingFlagFields[i][0]] === undefined) {
-                        return false; // user canceled
-                    }
-                }
-                if (missingReturnType) {
-                    this.viewState.contractMetadata.entrypointReturnTypeHex = 
-                        await ContractParameterType.promptForTypeHex('What is the contract return type? (Press \'Escape\' to abort the deployment)');
-                    if (!this.viewState.contractMetadata.entrypointReturnTypeHex) {
-                        return false; // user canceled
-                    }
-                }
-                if (missingParmeterTypes) {
-                    this.viewState.contractMetadata.entrypointParameterTypesHex = 
-                        await ContractParameterType.promptForTypeHexList(
-                            'What is the type of parameter ##? (Press \'Escape\' to abort the deployment)', 
-                            '(no more parameters)');
-                    if (this.viewState.contractMetadata.entrypointParameterTypesHex === undefined) {
                         return false; // user canceled
                     }
                 }
