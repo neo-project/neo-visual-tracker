@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { deployEvents } from './panels/deployEvents';
 
 import { ContractDetector } from './contractDetector';
+import { ContractParameterType } from './contractParameterType';
 import { NeoExpressConfig } from './neoExpressConfig';
 import { WalletExplorer } from './walletExplorer';
 
@@ -18,6 +19,7 @@ class ViewState {
     contractName?: string = undefined;
     contractHash?: string = undefined;
     contractAvmHex?: string = undefined;
+    contractMetadata: any = {};
     isValid: boolean = false;
     result: string = '';
     showError: boolean = false;
@@ -75,61 +77,91 @@ export class DeployPanel {
     }
 
     private async doDeploy() {
-        try {
-            //
-            // Construct a script that calls Neo.Contract.Create
-            //   -- see: https://docs.neo.org/docs/en-us/reference/scapi/fw/dotnet/neo/Contract/Create.html
-            //
-            // TODO: Find the contracts .abi.json and correctly determine parameters and return types. For now
-            //       we assume that all contracts take two parameters (a string and an array) and return a byte
-            //       array.
-            // TODO: Allow storage usage to be specified in the UI. For now we assume storage is used.
-            // TODO: Allow specification of description, email, etc. in the UI. For now we use blank values.
-            //
-            const sb = neon.default.create.scriptBuilder();
-            const script = sb
-                .emitPush(neon.default.u.str2hexstring('')) // description
-                .emitPush(neon.default.u.str2hexstring('')) // email
-                .emitPush(neon.default.u.str2hexstring('')) // author
-                .emitPush(neon.default.u.str2hexstring('')) // code_version
-                .emitPush(neon.default.u.str2hexstring('')) // name
-                .emitPush(0x01) // storage: {none: 0x00, storage: 0x01, dynamic: 0x02, storage+dynamic:0x03}
-                .emitPush('05') // return type - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
-                .emitPush('0710') // parameter list - see https://docs.neo.org/docs/en-us/sc/deploy/Parameter.html
-                .emitPush(this.viewState.contractAvmHex)
-                .emitSysCall('Neo.Contract.Create')
-                .str;
-
-            // Determine required GAS:
-            const rpcClient = new neon.rpc.RPCClient(this.rpcUri);
-            const invokeResult = await rpcClient.invokeScript(script);
-            const gas = parseFloat(invokeResult.gas_consumed);
-
-            const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
-            if (await walletConfig.unlock()) {
-                const api = new neon.api.neoCli.instance(this.rpcUri);
-                const config = {
-                    api: api,
-                    script: script,
-                    account: walletConfig.account,
-                    signingFunction: walletConfig.signingFunction,
-                    gas: gas,
-                };
-                const result = await neon.default.doInvoke(config);
-                if (result.response && result.response.txid) {
-                    this.viewState.result = result.response.txid;
-                    this.viewState.showError = false;
-                    this.viewState.showSuccess = true;
-                } else {
-                    this.viewState.result = 'No response from RPC server; contract may not have deployed';
-                    this.viewState.showError = true;
-                    this.viewState.showSuccess = false;
+        if (await this.ensureMetadata()) {
+            try {
+                // Determine flags: { none: 0x00, storage: 0x01, dynamic: 0x02, storage+dynamic: 0x03 }
+                let flags = 0x00; 
+                if (this.viewState.contractMetadata['hasStorage']) {
+                    if (this.viewState.contractMetadata['hasDynamicInvoke']) {
+                        flags = 0x03;
+                    } else {
+                        flags = 0x01;
+                    }
+                } else if (this.viewState.contractMetadata['hasDynamicInvoke']) {
+                    flags = 0x02;
                 }
+
+                // Construct a script that calls Neo.Contract.Create
+                //   -- see: https://docs.neo.org/docs/en-us/reference/scapi/fw/dotnet/neo/Contract/Create.html
+                const sb = neon.default.create.scriptBuilder();
+                const script = sb
+                    .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.description))
+                    .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.email))
+                    .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.author))
+                    .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.version))
+                    .emitPush(neon.default.u.str2hexstring(this.viewState.contractMetadata.title))
+                    .emitPush(flags)
+                    .emitPush(this.viewState.contractMetadata.entrypointReturnTypeHex)
+                    .emitPush(this.viewState.contractMetadata.entrypointParameterTypesHex)
+                    .emitPush(this.viewState.contractAvmHex)
+                    .emitSysCall('Neo.Contract.Create')
+                    .str;
+
+                // Determine required GAS:
+                const rpcClient = new neon.rpc.RPCClient(this.rpcUri);
+                const invokeResult = await rpcClient.invokeScript(script);
+                const gas = parseFloat(invokeResult.gas_consumed);
+
+                const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
+                if (await walletConfig.unlock()) {
+                    const api = new neon.api.neoCli.instance(this.rpcUri);
+                    const config = {
+                        api: api,
+                        script: script,
+                        account: walletConfig.account,
+                        signingFunction: walletConfig.signingFunction,
+                        gas: gas,
+                    };
+                    const result = await neon.default.doInvoke(config);
+                    if (result.response && result.response.txid) {
+                        this.viewState.result = result.response.txid;
+                        this.viewState.showError = false;
+                        this.viewState.showSuccess = true;
+                    } else {
+                        this.viewState.result = 'No response from RPC server; contract may not have deployed';
+                        this.viewState.showError = true;
+                        this.viewState.showSuccess = false;
+                    }
+                }
+            } catch (e) {
+                this.viewState.result = 'Error deploying contract: ' + e;
+                this.viewState.showError = true;
+                this.viewState.showSuccess = false;
             }
-        } catch (e) {
-            this.viewState.result = 'Error deploying contract: ' + e;
-            this.viewState.showError = true;
-            this.viewState.showSuccess = false;
+        }
+    }
+
+    private async ensureMetadata() {
+        const flagFields = [ 
+            [ 'hasStorage', 'storage' ],
+            [ 'hasDynamicInvoke', 'dynamic invoke' ],
+        ];
+        const missingFlagFields = flagFields.filter(_ => this.viewState.contractMetadata[_[0]] === undefined);
+        if (missingFlagFields.length) {
+            if (await this.promptForBooleanOrCancel('Some contract metadata is missing. Would you like to provide the missing metadata manually?', false)) {
+                for (let i = 0; i < missingFlagFields.length; i++) {
+                    this.viewState.contractMetadata[missingFlagFields[i][0]] = 
+                        await this.promptForBooleanOrCancel('Yes or no, does this contract use ' + missingFlagFields[i][1] + '?', true);
+                    if (this.viewState.contractMetadata[missingFlagFields[i][0]] === undefined) {
+                        return false; // user canceled
+                    }
+                }
+                return true; // user has now provided all missing metadata
+            } else {
+                return false; // user opted out of providing data manually
+            }
+        } else {
+            return true; // all metadata present from ABI
         }
     }
 
@@ -156,6 +188,17 @@ export class DeployPanel {
             this.initialized = false; // cause wallet list to be refreshed when this panel is next initialized
             vscode.commands.executeCommand('neo-visual-devtracker.createWalletFile');
         }
+    }
+
+    private async promptForBooleanOrCancel(prompt: string, allowNo: boolean): Promise<boolean | undefined> {
+        prompt = prompt + '\r\n\r\nUnsure? Select \'Cancel\' to abort the contract deployment.\r\n';
+        const input = allowNo ?
+            (await vscode.window.showInformationMessage(prompt, { modal: true }, 'No', 'Yes')) :
+            (await vscode.window.showInformationMessage(prompt, { modal: true }, 'Yes'));
+        if (input === undefined) {
+            return undefined;
+        }
+        return input === 'Yes';
     }
 
     private async refresh(force: boolean) {
@@ -190,10 +233,12 @@ export class DeployPanel {
             this.viewState.contractName = undefined;
             this.viewState.contractHash = undefined;
             this.viewState.contractAvmHex = undefined;
+            this.viewState.contractMetadata = undefined;
         } else {
             this.viewState.contractName = contractConfig.name;
             this.viewState.contractHash = contractConfig.hash;
             this.viewState.contractAvmHex = contractConfig.avmHex;
+            this.viewState.contractMetadata = contractConfig.metadata;
         }
 
         this.viewState.isValid =
