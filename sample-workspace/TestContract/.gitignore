@@ -1,0 +1,9 @@
+obj
+
+# Compiled .avm and .abi.json files are version controlled
+# so that it is possible to test contract deployment from the
+# sample workspace without having an operational compiler.
+bin/**
+!bin/**/
+!bin/**/*.avm
+!bin/**/*.abi.json
