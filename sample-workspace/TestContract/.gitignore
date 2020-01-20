@@ -6,4 +6,7 @@ obj
 bin/**
 !bin/**/
 !bin/**/*.avm
+!bin/**/*.avmdbgnfo
 !bin/**/*.abi.json
+!bin/**/*.debug.json
+!bin/**/*.deps.json
