@@ -12,7 +12,8 @@ class Contract {
         public readonly name: string,
         public readonly path: string,
         public readonly avmHex: string,
-        public readonly metadata: any) {
+        public readonly metadata: any,
+        public readonly abi: any) {
     }
 
     public static parse(fullPathToAvm: string): Contract | undefined {
@@ -55,6 +56,7 @@ class Contract {
                 return undefined;
             } 
 
+            abi.name = name;
             const abiMetadata = abi.metadata || {};
             const metadata = {
                 title: abiMetadata.title || name,
@@ -70,7 +72,7 @@ class Contract {
                 entrypointReturnTypeHex: entrypointReturnTypeHex,
             };
 
-            return new Contract(hash, name, fullPathToAvm, avmHex, metadata);
+            return new Contract(hash, name, fullPathToAvm, avmHex, metadata, abi);
         } catch (e) {
             console.warn('Error parsing', fullPathToAvm, e);
             return undefined;
