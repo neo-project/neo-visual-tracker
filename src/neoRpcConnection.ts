@@ -8,23 +8,11 @@ const BlocksPerPage = 20;
 const PollingInterval = 1000;
 
 export class BlockchainInfo {
-    public readonly populatedBlocksKnown: boolean;
-    public readonly populatedBlocks: BitSet;
     constructor(
-        public height: number,
-        public url: string,
-        public online: boolean,
-        populatedBlockList?: number[]) {
-
-        this.populatedBlocks = new BitSet();
-        if (populatedBlockList) {
-            this.populatedBlocksKnown = true;
-            for (let i = 0; i < populatedBlockList.length; i++) {
-                this.populatedBlocks.set(populatedBlockList[i]);
-            }
-        } else {
-            this.populatedBlocksKnown = false;
-        }
+        public readonly height: number,
+        public readonly url: string,
+        public readonly online: boolean,
+        public readonly populatedBlockFilterSupported: boolean) {
     }
 }
 
@@ -55,6 +43,69 @@ export interface INeoStatusReceiver {
     updateStatus(status: string) : void;
 }
 
+class PopulatedBlockChecker {
+    
+    private static readonly BlocksPerRequest = 100;
+
+    private readonly populatedBlocks: BitSet = new BitSet();
+    
+    private minKnown: number = Number.MAX_SAFE_INTEGER;
+    private maxKnown: number = Number.MIN_SAFE_INTEGER;
+    private queryNotPossible: boolean | undefined;
+    
+    public static async filterSupport(rpcClient: CachedRpcClient): Promise<boolean> {
+        try {   
+            await rpcClient.getPopulatedBlocks(1, 0);
+            return true;
+        } catch (e) {
+            if (e.message.toLowerCase().indexOf('method not found') !== -1) {
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    constructor(
+        private readonly forwards: boolean,
+        private readonly rpcClient: CachedRpcClient,
+        private readonly statusReceiver?: INeoStatusReceiver
+    ) {
+    }
+
+    public async isPopulated(index: number): Promise<boolean> {
+        if (this.queryNotPossible || this.populatedBlocks.get(index)) {
+            return true;
+        } else {
+            if ((index < this.minKnown) || (index > this.maxKnown)) {
+                await this.nextQuery(index);
+            }
+            return !!this.populatedBlocks.get(index);
+        }
+    }
+
+    private async nextQuery(index: number) {
+        try {   
+            const start = this.forwards ? (index - PopulatedBlockChecker.BlocksPerRequest + 1) : index;
+            const count = PopulatedBlockChecker.BlocksPerRequest;
+            if (this.statusReceiver) {
+                this.statusReceiver.updateStatus('Determining populated blocks (#' + start + ' - #' + (start + count - 1) + ')');
+            }
+            const result = (await this.rpcClient.getPopulatedBlocks(count, start)).result;
+            this.queryNotPossible = false;
+            this.minKnown = Math.min(this.minKnown, start);
+            this.maxKnown = Math.max(this.maxKnown, start + count - 1);
+            for (let i = 0; i < result.length; i++) {
+                this.populatedBlocks.set(result[i]);
+            }
+        } catch (e) {
+            if (e.message.toLowerCase().indexOf('method not found') !== -1) {
+                console.error('NeoRpcConnection could not determine known populated blocks: ' + e);
+                this.queryNotPossible = true;
+            }
+        }
+    }
+}
+
 export class NeoRpcConnection implements INeoRpcConnection {
     
     public readonly rpcUrl: string;
@@ -65,6 +116,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
     private subscriptions: INeoSubscription[];
     private timeout?: NodeJS.Timeout;
     private online: boolean = true;
+    private populatedBlockFilterSupported?: boolean = undefined;
 
     constructor(rpcUrl: string) {
         this.rpcUrl = rpcUrl;
@@ -93,28 +145,29 @@ export class NeoRpcConnection implements INeoRpcConnection {
 
     public async getBlockchainInfo(statusReceiver?: INeoStatusReceiver) {
         let height = this.lastKnownHeight;
-        let populatedBlocks: number[] | undefined = undefined;
         try {
             if (statusReceiver) {
                 statusReceiver.updateStatus('Determining current blockchain height');
             }
             height = await this.rpcClient.getBlockCount();
             this.online = true;
-            try {
-                if (statusReceiver) {
-                    statusReceiver.updateStatus('Determining populated blocks');
-                }
-                populatedBlocks = (await this.rpcClient.getPopulatedBlocks()).result;
-            } catch (e) {
-                if (e.message.toLowerCase().indexOf('method not found') === -1) {
-                    console.error('NeoRpcConnection could not determine known populated blocks: ' + e);
-                }
-            }
         } catch (e) {
             console.error('NeoRpcConnection could not retrieve block height: ' + e);
             this.online = false;
         }
-        return new BlockchainInfo(height, this.rpcUrl, this.online, populatedBlocks);
+        if (this.populatedBlockFilterSupported === undefined) {
+            try {
+                if (statusReceiver) {
+                    statusReceiver.updateStatus('Determining block filter support');
+                }
+                this.populatedBlockFilterSupported = await PopulatedBlockChecker.filterSupport(this.rpcClient);
+                this.online = true;
+            } catch (e) {
+                console.error('NeoRpcConnection could not determine populated block filter support: ' + e);
+                this.online = false;
+            }
+        }
+        return new BlockchainInfo(height, this.rpcUrl, this.online, !!this.populatedBlockFilterSupported);
     }
 
     public async getBlock(indexOrHash: string | number, statusReceiver: INeoStatusReceiver) {
@@ -146,7 +199,11 @@ export class NeoRpcConnection implements INeoRpcConnection {
         if (!blockchainInfo.online) {
             return result;
         }
-        
+
+        const populatedBlockChecker = hideEmptyBlocks ?
+            new PopulatedBlockChecker(forwards, this.rpcClient, statusReceiver) :
+            undefined;
+
         while ((result.blocks.length < BlocksPerPage) && 
             ((forwards && (index >= 0)) || (!forwards && (index < height)))) {
 
@@ -154,7 +211,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
             const promises = [];
             for (let i = 0; i < BlocksPerPage; i++) {
                 if ((index >= 0) && (index < height)) {
-                    if (!blockchainInfo.populatedBlocksKnown || blockchainInfo.populatedBlocks.get(index) || !hideEmptyBlocks) {
+                    if (!populatedBlockChecker || (await populatedBlockChecker.isPopulated(index))) {
                         const promise = (async (batchIndex, blockIndex) => {
                             try {
                                 blocksThisBatch[batchIndex] = await this.getBlock(blockIndex, statusReceiver);

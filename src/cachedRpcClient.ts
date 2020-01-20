@@ -125,11 +125,11 @@ export class CachedRpcClient {
         return this.rpcClient.query({ method: 'getclaimable', params: [ address ] });
     }
 
-    public getPopulatedBlocks(): Promise<any> {
+    public getPopulatedBlocks(count: number, start: number): Promise<any> {
         // Note that this method is not cached. The list of populated blocks could potentially
         // change every time a new block is generated.
 
-        return this.rpcClient.query({ method: 'express-get-populated-blocks' });
+        return this.rpcClient.query({ method: 'express-get-populated-blocks', params: [ count, start ] });
     }
 
     public getUnclaimed(address: string): Promise<any> {

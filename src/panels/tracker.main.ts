@@ -31,7 +31,8 @@ function handleMessage(message: any) {
         openingIndicator.style.display = (!message.viewState.blockChainInfo || !message.viewState.blockChainInfo.online) ? 'block' : 'none';
         const checkbox: any = document.querySelector(trackerSelectors.HideEmptyBlocksCheckbox);
         checkbox.checked = message.viewState.hideEmptyBlocks;
-        htmlHelpers.showHide(trackerSelectors.HideEmptyBlocksCheckboxArea, message.viewState.blockChainInfo && message.viewState.blockChainInfo.populatedBlocksKnown);
+        debugger;
+        htmlHelpers.showHide(trackerSelectors.HideEmptyBlocksCheckboxArea, message.viewState.blockChainInfo && message.viewState.blockChainInfo.populatedBlockFilterSupported);
         if (message.isSearch) {
             const searchInput = document.querySelector(trackerSelectors.SearchInput) as HTMLInputElement;
             searchInput.value = '';
