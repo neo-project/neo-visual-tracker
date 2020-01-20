@@ -229,6 +229,7 @@ export function activate(context: vscode.ExtensionContext) {
                     context.extensionPath, 
                     server.jsonFile,
                     rpcUri,
+                    contractDetector,
                     checkpointDetector,
                     context.subscriptions);
             }

@@ -101,6 +101,11 @@ export class ContractDetector {
         }
     }
 
+    public getContractByHash(hash: string): Contract | undefined {
+        hash = hash || '';
+        return this.contracts.filter(c => c.hash.replace(/^0x/, '').toLowerCase() === hash.replace(/^0x/, '').toLowerCase())[0];
+    }
+
     public async refresh() {
         const files = await vscode.workspace.findFiles(this.searchPattern);
         this.contracts = files.map(uri => Contract.parse(uri.fsPath)).filter(contract => !!contract) as Contract[];

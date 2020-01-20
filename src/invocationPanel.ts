@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { CheckpointDetector } from './checkpointDetector';
+import { ContractDetector } from './contractDetector';
 import { invokeEvents } from './panels/invokeEvents';
 
 import { api } from '@cityofzion/neon-js';
@@ -64,8 +65,8 @@ class ViewState {
 export class InvocationPanel {
 
     private readonly panel: vscode.WebviewPanel;
-    private readonly avmFiles: Map<string, string>;
     private readonly checkpointDetector: CheckpointDetector;
+    private readonly contractDetector: ContractDetector;
     
     private viewState: ViewState;
     private jsonParsed: boolean;
@@ -74,13 +75,13 @@ export class InvocationPanel {
         extensionPath: string,
         neoExpressJsonFullPath: string,
         rpcUrl: string,
+        contractDetector: ContractDetector,
         checkpointDetector: CheckpointDetector,
         disposables: vscode.Disposable[]) {
 
-        this.avmFiles = new Map<string, string>();
-
         this.jsonParsed = false;
 
+        this.contractDetector = contractDetector;
         this.checkpointDetector = checkpointDetector;
 
         this.viewState = new ViewState();
@@ -248,30 +249,8 @@ export class InvocationPanel {
                     for (let j = 0; j < contract.functions.length; j++) {
                         const method = contract.functions[j];
                         if (method.name === methodName) {
-                            
-                            let avmFileName = this.avmFiles.get(contractHash);
-                            if (!avmFileName) {
-                                const allAbiJsons = await vscode.workspace.findFiles('**/*.abi.json');
-                                for (let k = 0; k < allAbiJsons.length; k++) {
-                                    const abiJsonFile = allAbiJsons[k];
-                                    try {
-                                        const abiJson = fs.readFileSync(abiJsonFile.fsPath, { encoding: 'utf8' });
-                                        const abi = JSON.parse(abiJson);
-                                        if (abi.hash === contractHash) {
-                                            const correspondingAvm = abiJsonFile.fsPath.replace(/.abi.json$/, '.avm');
-                                            if (fs.existsSync(correspondingAvm)) {
-                                                avmFileName = correspondingAvm;
-                                                break;
-                                            }
-                                        }
-                                    } catch (e) {
-                                        console.info('Could not parse potential ABI file', abiJsonFile, e);
-                                    }
-                                }
-                            }
-
-                            if (avmFileName) {
-                                this.avmFiles.set(contractHash, avmFileName);
+                            let compiledContract = this.contractDetector.getContractByHash(contractHash);
+                            if (compiledContract) {
                                 let args = [];
                                 if (methodName === 'Main') {
                                     args = [
@@ -288,7 +267,7 @@ export class InvocationPanel {
                                     'name': contractName + '-' + methodName,
                                     'type': 'neo-contract',
                                     'request': 'launch',
-                                    'program': avmFileName,
+                                    'program': compiledContract.path,
                                     'args': args,
                                     'storage': [],
                                     'runtime': {
