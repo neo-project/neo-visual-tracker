@@ -180,6 +180,17 @@ export class InvocationPanel {
                         if (contract.functions[j].name === methodName) {
                             const method = contract.functions[j];
                             const contractHash = contract.hash.replace(/^0x/, '');
+
+                            const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
+                            try {
+                                await rpcClient.getContractState(contractHash);
+                            } catch (e) {
+                                this.viewState.showResult = false;
+                                this.viewState.broadcastResult = undefined;
+                                this.viewState.invocationError = 'Could not invoke ' + methodName + '; the contract is not deployed';
+                                return;
+                            }
+
                             const sb = neon.default.create.scriptBuilder();
                             let script = '';
                             if (method.name === 'Main') {
