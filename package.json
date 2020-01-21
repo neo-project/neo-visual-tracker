@@ -215,6 +215,10 @@
                     "command": "neo-visual-devtracker.createInstance",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer",
                     "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.createWalletFile",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer"
                 }
             ],
             "view/item/context": [
