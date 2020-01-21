@@ -262,11 +262,13 @@ export class WalletExplorer implements vscode.CodeLensProvider {
         let walletName: string | undefined = undefined;
         while (!walletName) {
             walletName = await vscode.window.showInputBox({ prompt: 'Enter a name for the new wallet', ignoreFocusOut: true });
-            if (!walletName) {
+            if (walletName === '') {
                 const selection = (await vscode.window.showWarningMessage('The wallet name cannot be empty', { modal: true }, 'Ok'));
                 if (!selection) {
                     return; // User selected 'Cancel'; abort.
                 }
+            } else if (!walletName) {
+                return; // User pressed 'Escape'; abort.
             }
         }
 
