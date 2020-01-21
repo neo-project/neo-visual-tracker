@@ -6,6 +6,8 @@ import * as vscode from 'vscode';
 import { CheckpointDetector } from './checkpointDetector';
 import { ContractDetector } from './contractDetector';
 import { invokeEvents } from './panels/invokeEvents';
+import { NeoExpressConfig } from './neoExpressConfig';
+import { WalletExplorer } from './walletExplorer';
 
 import { api } from '@cityofzion/neon-js';
 import { DoInvokeConfig } from '@cityofzion/neon-api/lib/funcs/types';
@@ -47,8 +49,7 @@ class ResultValue {
 
 class ViewState {
     rpcUrl: string = '';
-    neoExpressJsonFullPath: string = '';
-    neoExpressJsonFileName: string = '';
+    rpcDescription: string = '';
     wallets: any[] = [];
     checkpoints: any[] = [];
     contracts: any[] = [];
@@ -64,7 +65,9 @@ class ViewState {
 
 export class InvocationPanel {
 
+    private readonly neoExpressConfig?: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
+    private readonly walletExplorer: WalletExplorer;
     private readonly checkpointDetector: CheckpointDetector;
     private readonly contractDetector: ContractDetector;
     
@@ -73,25 +76,27 @@ export class InvocationPanel {
 
     constructor(
         extensionPath: string,
-        neoExpressJsonFullPath: string,
         rpcUrl: string,
+        walletExplorer: WalletExplorer,
         contractDetector: ContractDetector,
         checkpointDetector: CheckpointDetector,
-        disposables: vscode.Disposable[]) {
+        disposables: vscode.Disposable[],
+        neoExpressConfig?: NeoExpressConfig) {
 
         this.jsonParsed = false;
 
+        this.walletExplorer = walletExplorer;
         this.contractDetector = contractDetector;
         this.checkpointDetector = checkpointDetector;
+        this.neoExpressConfig = neoExpressConfig;
 
         this.viewState = new ViewState();
-        this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
-        this.viewState.neoExpressJsonFileName = path.basename(neoExpressJsonFullPath);
+        this.viewState.rpcDescription = neoExpressConfig ? neoExpressConfig.neoExpressJsonFullPath : '';
         this.viewState.rpcUrl = rpcUrl;
 
         this.panel = vscode.window.createWebviewPanel(
             'invocationPanel',
-            this.viewState.neoExpressJsonFileName + ' - Invoke contract',
+            (neoExpressConfig ? neoExpressConfig.basename : rpcUrl) + ' - Invoke contract',
             vscode.ViewColumn.Active,
             { enableScripts: true });
 
@@ -111,17 +116,12 @@ export class InvocationPanel {
             .replace(CssHrefPlaceholder, cssHref);
     }
 
-    private async reload() {
-        console.log('InvocationPanel is parsing ', this.viewState.neoExpressJsonFullPath);
-        try {
-            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
-            const neoExpressConfig = JSON.parse(jsonFileContents);
-            this.viewState.wallets = neoExpressConfig.wallets || [];
-            this.viewState.contracts = neoExpressConfig.contracts || [];
-        } catch (e) {
-            console.error('Error parsing ', this.viewState.neoExpressJsonFullPath, e);
-            this.viewState.wallets = [];
-            this.viewState.contracts = [];
+    private async reload() {        
+        this.viewState.contracts = [];
+
+        if (this.neoExpressConfig) {
+            this.neoExpressConfig.refresh();
+            this.viewState.contracts = this.neoExpressConfig.contracts.slice();
         }
 
         // TODO: Don't assume all contracts found in the workspace have been deployed. Query neo-express
@@ -137,7 +137,6 @@ export class InvocationPanel {
     }
 
     private onClose() {
-
     }
 
     private async onMessage(message: any) {
@@ -146,6 +145,14 @@ export class InvocationPanel {
         }
 
         this.viewState.checkpoints = this.checkpointDetector.checkpoints || [];
+
+        this.viewState.wallets = [];
+        if (this.neoExpressConfig) {
+            this.viewState.wallets = this.neoExpressConfig.wallets.slice();
+        }
+        for (let i = 0; i < this.walletExplorer.allAccounts.length; i++) {
+            this.viewState.wallets.push(this.walletExplorer.allAccounts[i]);
+        }
 
         if (message.e === invokeEvents.Init) {
             this.panel.webview.postMessage({ viewState: this.viewState });
@@ -208,25 +215,31 @@ export class InvocationPanel {
                             }
                             
                             if (onChain) {
-                                const selectedWallet = method.selectedWallet;
-                                if (!selectedWallet) {
+                                const walletConfig = this.viewState.wallets.filter(_ => _.address === method.walletAddress)[0];
+                                const walletAddress = walletConfig ? walletConfig.address : undefined;
+                                if (!walletAddress) {
+                                    method.walletAddress = '';
                                     this.viewState.broadcastResult = '';
                                     this.viewState.showResult = false;
                                     this.viewState.invocationError = 'Please select a wallet';
                                 } else {
-                                    const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
-                                    const config: DoInvokeConfig = {
-                                        api: api,
-                                        script: script,
-                                        account: new neon.wallet.Account(selectedWallet),
-                                        intents: InvocationPanel.extractIntents(method, contractHash),
-                                    };
-                                    const result = await neon.default.doInvoke(config);
-                                    if (result.response && result.response.txid) {
-                                        this.viewState.broadcastResult = 'Transaction ' + result.response.txid + ' created.';
+                                    if (await walletConfig.unlock()) {
+                                        const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
+                                        const config: DoInvokeConfig = {
+                                            api: api,
+                                            script: script,
+                                            account: walletConfig.account,
+                                            intents: InvocationPanel.extractIntents(method, contractHash),
+                                        };
+                                        const result = await neon.default.doInvoke(config);
+                                        if (result.response && result.response.txid) {
+                                            this.viewState.broadcastResult = 'Transaction ' + result.response.txid + ' created.';
+                                        } else {
+                                            this.viewState.broadcastResult = undefined;
+                                            this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
+                                        }
                                     } else {
-                                        this.viewState.broadcastResult = undefined;
-                                        this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
+                                        return;
                                     }
                                 }
                             } else {
