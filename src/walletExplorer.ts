@@ -7,6 +7,43 @@ import { wallet } from '@cityofzion/neon-core';
 
 const NewWalletFileInstructions = 'Save this JSON file anywhere in your workspace.';
 
+const NoPasswordWarning = 'Continue without protecting the wallet with a password?\r\n\r\n(Anyone with access to the wallet file will be able to easily retrieve the private key.)\r\n';
+
+const WrongPassword = undefined;
+const BlankPassword = '';
+const unlockWalletAndReturnPassphrase = async function(
+    fullPath: string, 
+    parsedWallet: wallet.Wallet): Promise<string | undefined> {
+    
+    // First, try and unlock with a blank password:
+    try {
+        if ((await parsedWallet.decryptAll(BlankPassword)).reduce((a, b) => a && b, true)) {
+            return BlankPassword;
+        }
+    } catch(e) {
+    }
+
+    const passphrase = await vscode.window.showInputBox({
+        prompt: 'Enter the passphrase for ' + path.basename(fullPath),
+        password: true,
+        ignoreFocusOut: true,
+    });
+
+    if (passphrase) {
+        try {
+            if ((await parsedWallet.decryptAll(passphrase)).reduce((a, b) => a && b, true)) {
+                return passphrase;
+            } else {
+                return WrongPassword;
+            }
+        } catch (e) {
+            console.error('Wallet decryption error', fullPath, e);
+        }
+    }
+
+    return WrongPassword;
+};
+
 class WalletExplorerAccount implements IWallet {
 
     public readonly isMultiSig: boolean = false;
@@ -25,19 +62,7 @@ class WalletExplorerAccount implements IWallet {
     }
 
     public async unlock(): Promise<boolean> {
-        const passphrase = await vscode.window.showInputBox({
-            prompt: 'Enter the passphrase for ' + path.basename(this.filename),
-            password: true,
-            ignoreFocusOut: true,
-        });
-        if (passphrase) {
-            try {
-                return (await this.parsedWallet.decryptAll(passphrase)).reduce((a, b) => a && b, true);
-            } catch (e) {
-                console.error('Wallet decryption error', this.filename, e);
-            }
-        }
-        return false;
+        return (await unlockWalletAndReturnPassphrase(this.filename, this.parsedWallet)) !== WrongPassword;
     }
 }
 
@@ -85,35 +110,23 @@ class WalletExplorerWallet {
             const jsonFileContents = fs.readFileSync(this.jsonFile, { encoding: 'utf8' });
             const contents = JSON.parse(jsonFileContents);
             const parsedWallet = new wallet.Wallet(contents);
-            const passphrase = await vscode.window.showInputBox({
-                prompt: 'Enter the passphrase for ' + path.basename(this.jsonFile),
-                password: true,
-                ignoreFocusOut: true,
-            });
-            if (passphrase) {
-                let decrypted = false;
-                try {
-                    decrypted = (await parsedWallet.decryptAll(passphrase)).reduce((a, b) => a && b, true);
-                } catch (e) {
-                    console.error('Wallet decryption error', this.jsonFile, e);
-                }
-                if (decrypted) {
-                    const accountName = await vscode.window.showInputBox({
-                        prompt: 'Enter a name for the new account',
-                        ignoreFocusOut: true,
-                    });
-                    if (accountName) {
-                        const account = new wallet.Account(wallet.generatePrivateKey());
-                        account.label = accountName;
-                        parsedWallet.addAccount(account);
-                        if (await parsedWallet.encryptAll(passphrase)) {
-                            fs.writeFileSync(this.jsonFile, JSON.stringify(parsedWallet.export(), undefined, 4));
-                        } else {
-                            vscode.window.showErrorMessage('The wallet file could not be encrypted using the supplied passphrase, the account was not added.', { modal: true });
-                        }
+            const passphrase = await unlockWalletAndReturnPassphrase(this.jsonFile, parsedWallet);
+            if (passphrase === WrongPassword) {
+                vscode.window.showErrorMessage('The passphrase supplied was incorrect.', { modal: true });
+            } else {
+                const accountName = await vscode.window.showInputBox({
+                    prompt: 'Enter a name for the new account',
+                    ignoreFocusOut: true,
+                });
+                if (accountName) {
+                    const account = new wallet.Account(wallet.generatePrivateKey());
+                    account.label = accountName;
+                    parsedWallet.addAccount(account);
+                    if (await parsedWallet.encryptAll(passphrase)) {
+                        fs.writeFileSync(this.jsonFile, JSON.stringify(parsedWallet.export(), undefined, 4));
+                    } else {
+                        vscode.window.showErrorMessage('The wallet file could not be encrypted using the supplied passphrase, the account was not added.', { modal: true });
                     }
-                } else {
-                    vscode.window.showErrorMessage('The passphrase supplied was incorrect.', { modal: true });
                 }
             }
         }
@@ -207,15 +220,25 @@ export class WalletExplorer implements vscode.CodeLensProvider {
             return;
         }
 
-        const passphrase = await vscode.window.showInputBox({
-            prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
-            password: true,
-            ignoreFocusOut: true,
-        });
-        if (!passphrase) {
-            return;
+        let passphrase: string | undefined = undefined;
+        while (passphrase === undefined) {
+            passphrase = await vscode.window.showInputBox({
+                prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
+                password: true,
+                ignoreFocusOut: true,
+            });
+            if (passphrase === '') {
+                const selection = (await vscode.window.showWarningMessage(NoPasswordWarning, { modal: true }, 'No', 'Yes'));
+                if ('No' === selection) {
+                    passphrase = undefined; // Cause password prompt to re-appear.
+                } else if (!selection) {
+                    return; // user selected 'Cancel'; abort.
+                }
+            } else if (!passphrase) {
+                return; // user pressed 'Escape'; abort.
+            }
         }
-
+        
         const newWallet = new wallet.Wallet({ name: walletName });
         const account = new wallet.Account(wallet.generatePrivateKey());
         account.label = 'Default account';
