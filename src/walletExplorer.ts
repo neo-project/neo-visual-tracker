@@ -7,22 +7,25 @@ import { wallet } from '@cityofzion/neon-core';
 
 const NewWalletFileInstructions = 'Save this JSON file anywhere in your workspace.';
 
-const NoPasswordWarning = 'Continue without protecting the wallet with a password?\r\n\r\n(Anyone with access to the wallet file will be able to easily retrieve the private key.)\r\n';
+const ContinueWithoutPassphrase = 'Continue without protecting the wallet with a password?\r\n\r\n(Anyone with access to the wallet file will be able to easily retrieve the private key.)\r\n';
 
 const WrongPassword = undefined;
-const BlankPassword = '';
+
+const BlankPassphrase = '';
+
 const unlockWalletAndReturnPassphrase = async function(
     fullPath: string, 
     parsedWallet: wallet.Wallet): Promise<string | undefined> {
     
-    // First, try and unlock with a blank password:
+    // First, try and unlock with a blank passphrase:
     try {
-        if ((await parsedWallet.decryptAll(BlankPassword)).reduce((a, b) => a && b, true)) {
-            return BlankPassword;
+        if ((await parsedWallet.decryptAll(BlankPassphrase)).reduce((a, b) => a && b, true)) {
+            return BlankPassphrase;
         }
     } catch(e) {
     }
 
+    // If passphrase is not blank, prompt user for input:
     const passphrase = await vscode.window.showInputBox({
         prompt: 'Enter the passphrase for ' + path.basename(fullPath),
         password: true,
@@ -42,6 +45,50 @@ const unlockWalletAndReturnPassphrase = async function(
     }
 
     return WrongPassword;
+};
+
+const promptForNewPassphrase = async function(): Promise<string | undefined> {
+    let passphrase: string | undefined = undefined;
+    while (passphrase === undefined) {
+
+        // Prompt for passphrase (a blank passphrase is Ok if the user accepts the security warning):
+        passphrase = await vscode.window.showInputBox({
+            prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
+            password: true,
+            ignoreFocusOut: true,
+        });
+        if (passphrase === BlankPassphrase) {
+            const selection = (await vscode.window.showWarningMessage(ContinueWithoutPassphrase, { modal: true }, 'No', 'Yes'));
+            if ('No' === selection) {
+                passphrase = undefined; // Cause passphrase prompt to re-appear.
+            } else if (!selection) {
+                return; // User selected 'Cancel'; abort.
+            }
+        } else if (!passphrase) {
+            return; // User pressed 'Escape'; abort.
+        }
+
+        // If a passphrase has been chosen (and it is non-blank), re-prompt for confirmation:
+        if ((passphrase !== undefined) && (passphrase !== BlankPassphrase)) {
+            const passphraseConfirmation = await vscode.window.showInputBox({
+                prompt: 'Please re-enter the passphrase (for confirmation)',
+                password: true,
+                ignoreFocusOut: true,
+            });
+            if (passphraseConfirmation || (passphraseConfirmation === BlankPassphrase)) {
+                if (passphraseConfirmation !== passphrase) {
+                    passphrase = undefined; // Confirmation did not match original entry; restart.
+                    if ('Ok' !== await vscode.window.showWarningMessage('The passphrases that you entered did not match, please try again', { modal: true }, 'Ok')) {
+                        return; // User selected 'Cancel'; abort.
+                    }
+                }
+            } else {
+                return; // User pressed 'Escape'; abort.
+            }
+        }
+    }
+
+    return passphrase;
 };
 
 class WalletExplorerAccount implements IWallet {
@@ -220,23 +267,9 @@ export class WalletExplorer implements vscode.CodeLensProvider {
             return;
         }
 
-        let passphrase: string | undefined = undefined;
-        while (passphrase === undefined) {
-            passphrase = await vscode.window.showInputBox({
-                prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
-                password: true,
-                ignoreFocusOut: true,
-            });
-            if (passphrase === '') {
-                const selection = (await vscode.window.showWarningMessage(NoPasswordWarning, { modal: true }, 'No', 'Yes'));
-                if ('No' === selection) {
-                    passphrase = undefined; // Cause password prompt to re-appear.
-                } else if (!selection) {
-                    return; // user selected 'Cancel'; abort.
-                }
-            } else if (!passphrase) {
-                return; // user pressed 'Escape'; abort.
-            }
+        const passphrase = await promptForNewPassphrase();
+        if (!passphrase && (passphrase !== BlankPassphrase)) {
+            return;
         }
         
         const newWallet = new wallet.Wallet({ name: walletName });
