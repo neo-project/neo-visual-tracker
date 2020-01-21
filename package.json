@@ -157,6 +157,12 @@
             }
         ],
         "menus": {
+            "explorer/context": [
+                {
+                    "command": "neo-visual-devtracker.createWalletFile",
+                    "when": "isFileSystemResource"
+                }
+            ],
             "commandPalette": [
                 {
                     "command": "neo-visual-devtracker.openTracker",

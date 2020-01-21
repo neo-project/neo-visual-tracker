@@ -198,34 +198,66 @@ export class WalletExplorer implements vscode.CodeLensProvider {
         return [];
     }
 
-    public static async newWalletFile() {
+    public static async newWalletFile(locationHint: string | undefined) {
         const walletName = await vscode.window.showInputBox({
-            prompt: 'Enter a name for the new wallet',
+            prompt: 'Enter a name for the new wallet (e.g. testWallet)',
             ignoreFocusOut: true,
         });
-        if (walletName) {
-            const passphrase = await vscode.window.showInputBox({
-                prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
-                password: true,
-                ignoreFocusOut: true,
-            });
-            if (passphrase) {
-                const newWallet = new wallet.Wallet({ name: walletName });
-                const account = new wallet.Account(wallet.generatePrivateKey());
-                account.label = 'Default account';
-                account.isDefault = true;
-                newWallet.addAccount(account);
-                if (await newWallet.encryptAll(passphrase)) {
-                    const textDocument = await vscode.workspace.openTextDocument({
-                        language: 'json',
-                        content: JSON.stringify(newWallet.export(), undefined, 4),
-                    });
-                    vscode.window.showTextDocument(textDocument);
-                    vscode.window.showInformationMessage(NewWalletFileInstructions, { modal: true });
-                } else {
-                    vscode.window.showErrorMessage('A new wallet file could not be encrypted using the supplied passphrase.', { modal: true });
+        if (!walletName) {
+            return;
+        }
+
+        const passphrase = await vscode.window.showInputBox({
+            prompt: 'Choose a passphrase to encrypt account keys in the new wallet',
+            password: true,
+            ignoreFocusOut: true,
+        });
+        if (!passphrase) {
+            return;
+        }
+
+        const newWallet = new wallet.Wallet({ name: walletName });
+        const account = new wallet.Account(wallet.generatePrivateKey());
+        account.label = 'Default account';
+        account.isDefault = true;
+        newWallet.addAccount(account);
+        if (!(await newWallet.encryptAll(passphrase))) {
+            vscode.window.showErrorMessage('A new wallet file could not be encrypted using the supplied passphrase.', { modal: true });
+            return;
+        }
+
+        let fullPathToNewFile: string | undefined = undefined;
+        try {
+            if (locationHint) {
+                if (!fs.statSync(locationHint).isDirectory()) {
+                    locationHint = path.dirname(locationHint);
+                } 
+                fullPathToNewFile = path.join(locationHint, walletName.replace(/[^-_.a-z0-9]/gi, '-') + '.neo-wallet.json');
+                if (fs.existsSync(fullPathToNewFile)) {
+                    console.warn('Wallet file exists; prompting user to save manually to avoid accidental overwrite', fullPathToNewFile);
+                    fullPathToNewFile = undefined;
                 }
             }
+        } catch (e) {
+            console.warn('Error determining filename for new wallet, user must save manually', locationHint, fullPathToNewFile, e);
+            fullPathToNewFile = undefined;
         }
+
+        const content = JSON.stringify(newWallet.export(), undefined, 4);
+
+        if (fullPathToNewFile) {
+            try {
+                fs.writeFileSync(fullPathToNewFile, content);
+                const textDocument = await vscode.workspace.openTextDocument(fullPathToNewFile);
+                vscode.window.showTextDocument(textDocument);
+                return;
+            } catch (e) {
+                console.warn('Error saving new wallet to', fullPathToNewFile, '(user must save manually)', e);
+            }
+        }
+
+        const textDocument = await vscode.workspace.openTextDocument({ language: 'json', content: content });
+        vscode.window.showTextDocument(textDocument);
+        vscode.window.showInformationMessage(NewWalletFileInstructions, { modal: true });
     }
 }
