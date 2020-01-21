@@ -124,8 +124,7 @@ export class InvocationPanel {
             this.viewState.contracts = this.neoExpressConfig.contracts.slice();
         }
 
-        // TODO: Don't assume all contracts found in the workspace have been deployed. Query neo-express
-        //       to determine what contracts are deployed.
+        // TODO: Don't assume all contracts found in the workspace have been deployed.
         const workspaceContracts = this.contractDetector.contracts;
         for (let i = 0; i < workspaceContracts.length; i++) {
             if (this.viewState.contracts.filter(c => c.hash.toLowerCase() === workspaceContracts[i].hash.toLowerCase()).length === 0) {
