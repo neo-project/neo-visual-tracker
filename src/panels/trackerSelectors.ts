@@ -44,6 +44,8 @@ const trackerSelectors = {
     TransactionApplicationLogBody: '#transactiondetail #application-log-body',
     AddressDetailsClose: '#addressdetail .close',
     AddressDetailsHash: '#addressdetail .hash',
+    AddressDetailsUnspentGas: '#addressdetail .unspentGas',
+    AddressDetailsUnspentNeo: '#addressdetail .unspentNeo',
     AddressDetailsAvailableGas: '#addressdetail .availableGas',
     AddressDetailsUnavailableGas: '#addressdetail .unavailableGas',
     AddressDetailsUnclaimedGas: '#addressdetail .unclaimedGas',

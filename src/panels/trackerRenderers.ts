@@ -31,6 +31,7 @@ const trackerRenderers = {
         claimableInfo: any | undefined, 
         postMessage: any) {
 
+        const unspentTotals: Map<string, number> = new Map<string, number>();
         if (unspentsInfo) {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(unspentsInfo.address));
             htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !unspentsInfo.getUnspentsSupport);
@@ -63,6 +64,7 @@ const trackerRenderers = {
                                         htmlHelpers.text('Total'), 
                                         htmlHelpers.text(htmlHelpers.number(assetBalance) + ' ' + assetName),
                                         htmlHelpers.text(' ')));
+                                unspentTotals.set(assetName, assetBalance);
                             }
                             htmlHelpers.clearChildren(assetNameElement);
                             assetNameElement.appendChild(htmlHelpers.text(assetName));
@@ -81,6 +83,18 @@ const trackerRenderers = {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsAvailableGas, htmlHelpers.text('N/A'));
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnavailableGas, htmlHelpers.text('N/A'));
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text('N/A'));
+        }
+
+        if (unspentTotals.has('NEO')) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentNeo, htmlHelpers.text(htmlHelpers.number(unspentTotals.get('NEO') as number) + ' NEO'));
+        } else {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentNeo, htmlHelpers.text('N/A'));
+        }
+
+        if (unspentTotals.has('GAS')) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentGas, htmlHelpers.text(htmlHelpers.number(unspentTotals.get('GAS') as number) + ' GAS'));
+        } else {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentGas, htmlHelpers.text('N/A'));
         }
 
         if (claimableInfo) {
