@@ -37,7 +37,7 @@ export class Blocks {
 export interface INeoRpcConnection {
     readonly rpcUrl: string;
     getBlockchainInfo(statusReceiver?: INeoStatusReceiver): Promise<BlockchainInfo> | BlockchainInfo;
-    getBlock(index: number, statusReceiver: INeoStatusReceiver): Promise<any>;
+    getBlock(index: string | number, statusReceiver: INeoStatusReceiver): Promise<any>;
     getBlocks(index: number | undefined, hideEmptyBlocks: boolean, forwards: boolean, statusReceiver: INeoStatusReceiver): Promise<Blocks>;
     getClaimable(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     getTransaction(txid: string, statusReceiver: INeoStatusReceiver): Promise<any>;

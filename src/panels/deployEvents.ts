@@ -6,6 +6,7 @@ const deployEvents = {
     Init: 'init',
     NewWallet: 'newwallet',
     Refresh: 'refresh',
+    Search: 'search',
     Update: 'update',
 };
 

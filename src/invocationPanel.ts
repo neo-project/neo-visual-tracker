@@ -4,7 +4,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { CheckpointDetector } from './checkpointDetector';
+import { INeoRpcConnection } from './neoRpcConnection';
 import { invokeEvents } from './panels/invokeEvents';
+import { NeoTrackerPanel } from './neoTrackerPanel';
 
 import { api } from '@cityofzion/neon-js';
 import { DoInvokeConfig } from '@cityofzion/neon-api/lib/funcs/types';
@@ -66,6 +68,7 @@ export class InvocationPanel {
     private readonly panel: vscode.WebviewPanel;
     private readonly avmFiles: Map<string, string>;
     private readonly checkpointDetector: CheckpointDetector;
+    private readonly startSearch: Function;
     
     private viewState: ViewState;
     private jsonParsed: boolean;
@@ -74,6 +77,9 @@ export class InvocationPanel {
         extensionPath: string,
         neoExpressJsonFullPath: string,
         rpcUrl: string,
+        rpcConnection: INeoRpcConnection,
+        historyId: string,
+        state: vscode.Memento,
         checkpointDetector: CheckpointDetector,
         disposables: vscode.Disposable[]) {
 
@@ -82,6 +88,10 @@ export class InvocationPanel {
         this.jsonParsed = false;
 
         this.checkpointDetector = checkpointDetector;
+        
+        this.startSearch = async (q: string) => {
+            await NeoTrackerPanel.newSearch(q, extensionPath, rpcConnection, historyId, state, disposables);
+        };
 
         this.viewState = new ViewState();
         this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
@@ -158,6 +168,8 @@ export class InvocationPanel {
                 this.viewState.invocationError = this.viewState.invocationError || 'There was an error launching the debugger.';
                 this.panel.webview.postMessage({ viewState: this.viewState });
             }
+        } else if (message.e === invokeEvents.Search) {
+            await this.startSearch(message.c);
         }
     }
 
@@ -202,7 +214,7 @@ export class InvocationPanel {
                                     };
                                     const result = await neon.default.doInvoke(config);
                                     if (result.response && result.response.txid) {
-                                        this.viewState.broadcastResult = 'Transaction ' + result.response.txid + ' created.';
+                                        this.viewState.broadcastResult = result.response.txid;
                                     } else {
                                         this.viewState.broadcastResult = undefined;
                                         this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';

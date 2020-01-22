@@ -233,13 +233,17 @@ const trackerRenderers = {
         if (transaction) {
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailType, htmlHelpers.text(transaction.type));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
-            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, htmlHelpers.text(htmlHelpers.time(transaction.blocktime)));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, htmlHelpers.text(transaction.blocktime ? htmlHelpers.time(transaction.blocktime) : 'Unconfirmed'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailNetworkFee, htmlHelpers.text(htmlHelpers.number(transaction.net_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSystemFee, htmlHelpers.text(htmlHelpers.number(transaction.sys_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
-            htmlHelpers.setPlaceholder(
-                trackerSelectors.TransactionDetailBlock, 
-                htmlHelpers.newEventLink(transaction.blockhash, trackerEvents.ShowBlock, transaction.blockhash, postMessage));
+            if (transaction.blockhash) {
+                htmlHelpers.setPlaceholder(
+                    trackerSelectors.TransactionDetailBlock, 
+                    htmlHelpers.newEventLink(transaction.blockhash, trackerEvents.ShowBlock, transaction.blockhash, postMessage));
+            } else {
+                htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailBlock, htmlHelpers.text('Unconfirmed'));
+            }
             let valueTransferCount = 0;
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);

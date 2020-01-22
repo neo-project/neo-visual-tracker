@@ -54,9 +54,18 @@ function render() {
     const claimButton = document.querySelector(claimSelectors.ClaimButton) as HTMLButtonElement;
     const walletDropdown = document.querySelector(claimSelectors.WalletDropdown) as HTMLSelectElement;
     populateWalletDropdown();
+    if (viewState.showSuccess) {
+        const resultPlaceholder = document.querySelector(claimSelectors.SearchLinkPlaceholder) as HTMLElement;
+        htmlHelpers.clearChildren(resultPlaceholder);
+        const searchLink = htmlHelpers.newEventLink(
+            viewState.result,
+            claimEvents.Search,
+            viewState.result,
+            vsCodePostMessage);
+        resultPlaceholder.appendChild(searchLink);
+    }
     htmlHelpers.setPlaceholder(claimSelectors.DisplayWallet, htmlHelpers.text(viewState.walletDescription || '(unknown)'));
     htmlHelpers.setPlaceholder(claimSelectors.DisplayClaimable, htmlHelpers.text(htmlHelpers.number(viewState.claimable || 0)));
-    htmlHelpers.setPlaceholder(claimSelectors.ResultText, htmlHelpers.text(viewState.result));
     htmlHelpers.setPlaceholder(claimSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(claimSelectors.ErrorClaimableRetrievalFailure, viewState.getClaimableError);
     htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletAddress && !viewState.showError && !(viewState.getClaimableError || (viewState.claimable > 0)));

@@ -5,6 +5,7 @@ const transferEvents = {
     Init: 'init',
     NewWallet: 'newwallet',
     Refresh: 'refresh',
+    Search: 'search',
     Transfer: 'transfer',
     Update: 'update',
 };

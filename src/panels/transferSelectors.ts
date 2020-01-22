@@ -12,6 +12,7 @@ const transferSelectors = {
     LoadingIndicator: '.loading',
     RefreshBalancesLink: '#refreshBalancesLink',
     ResultText: '.result-text',
+    SearchLinkPlaceholder: '#searchLink',
     SourceBalancesTable: '#sourceBalancesTable',
     SourceBalancesTableBody: '#sourceBalancesTableBody',
     SourceWalletDropdown: '#sourceWalletDropdown',

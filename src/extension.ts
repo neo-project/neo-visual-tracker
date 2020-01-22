@@ -189,6 +189,8 @@ export function activate(context: vscode.ExtensionContext) {
                     context.extensionPath,
                     rpcUri,
                     rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     walletExplorer,
                     context.subscriptions,
                     server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
@@ -206,6 +208,8 @@ export function activate(context: vscode.ExtensionContext) {
                     context.extensionPath,
                     rpcUri,
                     rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     walletExplorer,
                     context.subscriptions,
                     server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
@@ -222,6 +226,9 @@ export function activate(context: vscode.ExtensionContext) {
                 const panel = new DeployPanel(
                     context.extensionPath,
                     rpcUri,
+                    rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     walletExplorer,
                     contractDetector,
                     context.subscriptions,
@@ -240,6 +247,9 @@ export function activate(context: vscode.ExtensionContext) {
                     context.extensionPath, 
                     server.jsonFile,
                     rpcUri,
+                    rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     checkpointDetector,
                     context.subscriptions);
             }

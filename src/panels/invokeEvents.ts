@@ -7,6 +7,7 @@ const invokeEvents = {
     Update: 'update',
     Dismiss: 'dismiss',
     Debug: 'debug',
+    Search: 'search',
 };
 
 export { invokeEvents };

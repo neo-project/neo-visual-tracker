@@ -73,12 +73,21 @@ function render() {
         viewState.wallets.map((_: any) => _.address), 
         viewState.walletAddress,
         'Create a new NEP-6 wallet file...');
+    if (viewState.showSuccess) {
+        const resultPlaceholder = document.querySelector(deploySelectors.Result) as HTMLElement;
+        htmlHelpers.clearChildren(resultPlaceholder);
+        const searchLink = htmlHelpers.newEventLink(
+            viewState.result,
+            deployEvents.Search,
+            viewState.result,
+            vsCodePostMessage);
+        resultPlaceholder.appendChild(searchLink);
+    }
     htmlHelpers.showHide(deploySelectors.ContractDetail, !!viewState.contractPath);
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractHash, htmlHelpers.text(viewState.contractHash));
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractName, htmlHelpers.text(viewState.contractName));
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractPath, htmlHelpers.text(viewState.contractPath));
     htmlHelpers.setPlaceholder(deploySelectors.ErrorMessage, htmlHelpers.text(viewState.result));
-    htmlHelpers.setPlaceholder(deploySelectors.Result, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(deploySelectors.ErrorNoContracts, viewState.contracts.length === 0);
     htmlHelpers.showHide(deploySelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(deploySelectors.ViewResults, viewState.showSuccess);

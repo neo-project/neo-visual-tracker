@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 
 import { INeoRpcConnection } from './neoRpcConnection';
 import { NeoExpressConfig } from './neoExpressConfig';
+import { NeoTrackerPanel } from './neoTrackerPanel';
 import { transferEvents } from './panels/transferEvents';
 import { WalletExplorer } from './walletExplorer';
 
@@ -35,6 +36,7 @@ export class TransferPanel {
     private readonly rpcUri: string;
     private readonly rpcConnection: INeoRpcConnection;
     private readonly walletExplorer: WalletExplorer;
+    private readonly startSearch: Function;
 
     private viewState: ViewState;
 
@@ -42,6 +44,8 @@ export class TransferPanel {
         extensionPath: string,
         rpcUri: string,
         rpcConnection: INeoRpcConnection,
+        historyId: string,
+        state: vscode.Memento,
         walletExplorer: WalletExplorer,
         disposables: vscode.Disposable[],
         neoExpressConfig?: NeoExpressConfig) {
@@ -51,6 +55,10 @@ export class TransferPanel {
         this.walletExplorer = walletExplorer;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
+
+        this.startSearch = async (q: string) => {
+            await NeoTrackerPanel.newSearch(q, extensionPath, rpcConnection, historyId, state, disposables);
+        };
 
         this.panel = vscode.window.createWebviewPanel(
             'transferPanel',
@@ -145,6 +153,8 @@ export class TransferPanel {
             this.dispose();
         } else if (message.e === transferEvents.NewWallet) {
             vscode.commands.executeCommand('neo-visual-devtracker.createWalletFile');
+        } else if (message.e === transferEvents.Search) {
+            await this.startSearch(message.c);
         }
     }
 

@@ -38,12 +38,25 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     public readonly panel: vscode.WebviewPanel;
     public readonly ready: Promise<void>;
     public readonly viewState: ViewState;
+    
+    private readonly historyId: string;
+    private readonly state: vscode.Memento;
 
     private onIncomingMessage?: () => void;
     private rpcConnection: INeoRpcConnection;
     private isPageLoading: boolean;
-    private historyId: string;
-    private state: vscode.Memento;
+
+    public static async newSearch(
+        query: string,
+        extensionPath: string,
+        rpcConnection: INeoRpcConnection,
+        historyId: string,
+        state: vscode.Memento,
+        disposables: vscode.Disposable[]) {
+
+        const panel = new NeoTrackerPanel(extensionPath, rpcConnection, historyId, state, disposables);
+        await panel.search(query);
+    }
 
     constructor(
         extensionPath: string,
@@ -103,8 +116,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     }
 
     private async augmentSearchHistory(query: string) {
-        if (query) {
-            query = (query + '').replace(/^0x/, '');
+        query = (query + '').replace(/^0x/, '');
+        if (query.length) {
             const oldHistory = this.state.get<string[]>('searchHistory:' + this.historyId, []);
             const newHistory = [ query ];
             let i = 0;
@@ -138,6 +151,52 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
 
     private onClose() {
         this.rpcConnection.unsubscribe(this);
+    }
+
+    private async search(query: string) {
+        let resultFound = false;
+        const input = query.trim();
+        const inputIsAddress = wallet.isAddress(input);
+        const inputIsHash = !!input.match(/^(0x)?[0-9a-f]{64}$/i);
+        const inputIsNumber = parseInt(input) + '' === input;
+        // If the input is obviously (based on its format) an address, just get the data for that address:
+        if (inputIsAddress) {
+            this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(input, this);
+            this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(input, this);
+            this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(input, this);
+            await this.augmentSearchHistory(input);
+            this.viewState.activePage = ActivePage.AddressDetail;
+            resultFound = true;
+        }
+        // Next, see if the input is a block number or a block hash (only do the RPC call if the input is a valid integer or hash):
+        if (!resultFound && (inputIsNumber || inputIsHash)) {
+            const block = await this.rpcConnection.getBlock(inputIsNumber ? parseInt(input) : input, this);
+            if (block) {
+                this.viewState.currentBlock = block;
+                await this.augmentSearchHistory(block.index);
+                this.viewState.activePage = ActivePage.BlockDetail;
+                resultFound = true;
+            }
+        }
+        // Next, see if the input corresponds to a transaction hash (only do the RPC call if the input looks like a valid hash):
+        if (!resultFound && inputIsHash) {
+            const transaction = await this.rpcConnection.getTransaction(input, this);
+            if (transaction) {
+                this.viewState.currentTransaction = transaction;
+                this.viewState.activePage = ActivePage.TransactionDetail;
+                await this.augmentSearchHistory(input);
+                resultFound = true;
+            }
+        }
+        // Go to first page of block explorer when no results found:
+        if (!resultFound) {
+            this.viewState.firstBlock = undefined;
+            this.viewState.forwards = true;
+            await this.updateBlockList(true);
+            this.viewState.activePage = ActivePage.Blocks;
+        }
+        this.refreshSearchHistory();
+        this.panel.webview.postMessage({ viewState: this.viewState, isSearch: true });
     }
 
     private async onMessage(message: any) {
@@ -207,50 +266,12 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
             } else if (message.e === trackerEvents.ClearHistory) {
                 await this.clearSearchHistory();
             } else if (message.e === trackerEvents.Search) {
-                let resultFound = false;
-                const input = message.c.trim();
-                const inputIsAddress = wallet.isAddress(input);
-                const inputIsHash = !!input.match(/^(0x)?[0-9a-f]{64}$/i);
-                const inputIsNumber = parseInt(input) + '' === input;
-                // If the input is obviously (based on its format) an address, just get the data for that address:
-                if (inputIsAddress) {
-                    this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(input, this);
-                    this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(input, this);
-                    this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(input, this);
-                    await this.augmentSearchHistory(input);
-                    this.viewState.activePage = ActivePage.AddressDetail;
-                    resultFound = true;
-                }
-                // Next, see if the input is a block number or a block hash (only do the RPC call if the input is a valid integer or hash):
-                if (!resultFound && (inputIsNumber || inputIsHash)) {
-                    const block = await this.rpcConnection.getBlock(inputIsNumber ? parseInt(input) : input, this);
-                    if (block) {
-                        this.viewState.currentBlock = block;
-                        await this.augmentSearchHistory(block.index);
-                        this.viewState.activePage = ActivePage.BlockDetail;
-                        resultFound = true;
-                    }
-                }
-                // Next, see if the input corresponds to a transaction hash (only do the RPC call if the input looks like a valid hash):
-                if (!resultFound && inputIsHash) {
-                    const transaction = await this.rpcConnection.getTransaction(input, this);
-                    if (transaction) {
-                        this.viewState.currentTransaction = transaction;
-                        this.viewState.activePage = ActivePage.TransactionDetail;
-                        await this.augmentSearchHistory(input);
-                        resultFound = true;
-                    }
-                }
-                // Go to first page of block explorer when no results found:
-                if (!resultFound) {
-                    this.viewState.firstBlock = undefined;
-                    this.viewState.forwards = true;
-                    await this.updateBlockList(true);
-                    this.viewState.activePage = ActivePage.Blocks;
-                }
+                await this.search(message.c);
             }
-            this.refreshSearchHistory();
-            this.panel.webview.postMessage({ viewState: this.viewState, isSearch: (message.e === trackerEvents.Search) });
+            if (message.e !== trackerEvents.Search) {
+                this.refreshSearchHistory();
+                this.panel.webview.postMessage({ viewState: this.viewState, isSearch: false });
+            }
         } finally {
             this.isPageLoading = false;
             this.updateStatus();
