@@ -15,6 +15,7 @@ const trackerEvents = {
     ChangeHideEmpty: 'changeHideEmpty',
     Copy: 'copy',
     Search: 'search',
+    ClearHistory: 'clear',
 };
 
 export { trackerEvents };

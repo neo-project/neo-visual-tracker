@@ -10,6 +10,8 @@ import { trackerEvents } from './panels/trackerEvents';
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
 
+const MaxSearchHistorySize = 10;
+
 enum ActivePage {
     Blocks = 'blocks',
     BlockDetail = 'blockdetail',
@@ -29,6 +31,7 @@ class ViewState {
     public currentAddressClaimable: any = undefined;
     public currentAddressUnclaimed: any = undefined;
     public hideEmptyBlocks: boolean = false;
+    public searchHistory: string[] = [];
 }
 
 export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
@@ -39,11 +42,15 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     private onIncomingMessage?: () => void;
     private rpcConnection: INeoRpcConnection;
     private isPageLoading: boolean;
+    private historyId: string;
+    private state: vscode.Memento;
 
     constructor(
-        extensionPath : string,
-        rpcConnection : INeoRpcConnection,
-        disposables : vscode.Disposable[]) {
+        extensionPath: string,
+        rpcConnection: INeoRpcConnection,
+        historyId: string,
+        state: vscode.Memento,
+        disposables: vscode.Disposable[]) {
 
         this.rpcConnection = rpcConnection;
         this.rpcConnection.subscribe(this);
@@ -55,6 +62,9 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         });
 
         this.isPageLoading = true;
+        
+        this.historyId = historyId;
+        this.state = state;
 
         this.panel = vscode.window.createWebviewPanel(
             'newExpressTracker',
@@ -90,6 +100,30 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
 
     public updateStatus(status?: string) : void {
         this.panel.webview.postMessage({ status: { message: status, isLoading: this.isPageLoading } });
+    }
+
+    private async augmentSearchHistory(query: string) {
+        if (query) {
+            query = (query + '').replace(/^0x/, '');
+            const oldHistory = this.state.get<string[]>('searchHistory:' + this.historyId, []);
+            const newHistory = [ query ];
+            let i = 0;
+            while ((i < oldHistory.length) && (newHistory.length < MaxSearchHistorySize)) {
+                if (oldHistory[i] !== query) {
+                    newHistory.push(oldHistory[i]);
+                }
+                i++;
+            }
+            await this.state.update('searchHistory:' + this.historyId, newHistory);
+        }
+    }
+
+    private async clearSearchHistory() {
+        await this.state.update('searchHistory:' + this.historyId, []);
+    }
+
+    private refreshSearchHistory() {
+        this.viewState.searchHistory = this.state.get<string[]>('searchHistory:' + this.historyId, []);
     }
 
     private async updateBlockList(force?: boolean) {
@@ -140,6 +174,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 await this.updateBlockList(true);
             } else if (message.e === trackerEvents.ShowBlock) {
                 this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);
+                await this.augmentSearchHistory(this.viewState.currentBlock.index);
                 this.viewState.activePage = ActivePage.BlockDetail;
             } else if (message.e === trackerEvents.CloseBlock) {
                 this.viewState.currentBlock = undefined;
@@ -147,6 +182,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     ActivePage.Blocks : ActivePage.TransactionDetail;
             } else if (message.e === trackerEvents.ShowTransaction) {
                 this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c, this);
+                await this.augmentSearchHistory(message.c);
                 this.viewState.activePage = ActivePage.TransactionDetail;
             } else if (message.e === trackerEvents.CloseTransaction) {
                 this.viewState.currentTransaction = undefined;
@@ -157,6 +193,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(message.c, this);
                 this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(message.c, this);
                 this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(message.c, this);
+                await this.augmentSearchHistory(message.c);
                 this.viewState.activePage = ActivePage.AddressDetail;
             } else if (message.e === trackerEvents.CloseAddress) {
                 this.viewState.currentAddressUnspents = undefined;
@@ -167,6 +204,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     ((this.viewState.currentBlock !== undefined) ? ActivePage.BlockDetail : ActivePage.Blocks );
             } else if (message.e === trackerEvents.Copy) {
                 await vscode.env.clipboard.writeText(message.c);
+            } else if (message.e === trackerEvents.ClearHistory) {
+                await this.clearSearchHistory();
             } else if (message.e === trackerEvents.Search) {
                 let resultFound = false;
                 const input = message.c.trim();
@@ -178,6 +217,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(input, this);
                     this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(input, this);
                     this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(input, this);
+                    await this.augmentSearchHistory(input);
                     this.viewState.activePage = ActivePage.AddressDetail;
                     resultFound = true;
                 }
@@ -186,6 +226,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     const block = await this.rpcConnection.getBlock(inputIsNumber ? parseInt(input) : input, this);
                     if (block) {
                         this.viewState.currentBlock = block;
+                        await this.augmentSearchHistory(block.index);
                         this.viewState.activePage = ActivePage.BlockDetail;
                         resultFound = true;
                     }
@@ -196,6 +237,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     if (transaction) {
                         this.viewState.currentTransaction = transaction;
                         this.viewState.activePage = ActivePage.TransactionDetail;
+                        await this.augmentSearchHistory(input);
                         resultFound = true;
                     }
                 }
@@ -207,6 +249,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     this.viewState.activePage = ActivePage.Blocks;
                 }
             }
+            this.refreshSearchHistory();
             this.panel.webview.postMessage({ viewState: this.viewState, isSearch: (message.e === trackerEvents.Search) });
         } finally {
             this.isPageLoading = false;

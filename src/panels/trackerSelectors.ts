@@ -61,6 +61,9 @@ const trackerSelectors = {
     OpeningIndicator: '#opening-indicator',
     SearchInput: '#searchinput',
     SearchButton: '#searchbutton',
+    HistorySection: '#searcharea .historySection',
+    HistoryItems: '#searcharea .historyItems',
+    HistoryClearLink: '#searcharea .clearLink',
 };
 
 export { trackerSelectors };

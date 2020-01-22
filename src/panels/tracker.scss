@@ -113,6 +113,25 @@ table {
             top: 6px;
         }
     }
+    .historySection {
+        padding-top: 8px;
+        .historyHead {
+            a {
+                margin-left: 10px;
+                cursor: pointer;
+            }
+        }
+        .historyItems {
+            a {
+                display: inline-block;
+                margin: 8px 8px 0px 0px;
+                padding: 5px;
+                background-color: var(--vscode-button-background);
+                color: var(--vscode-button-foreground);
+                text-decoration: none;
+            }
+        }
+    }
     padding: 15px 20px 15px 20px;
     margin: 0px -20px 10px -20px;
     border-bottom: 1px solid var(--vscode-sideBar-border);

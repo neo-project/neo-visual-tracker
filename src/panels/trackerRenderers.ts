@@ -209,6 +209,26 @@ const trackerRenderers = {
         return 0;
     },
 
+    renderSearchHistory: function(searchHistory: string[], postMessage: any) {
+        const itemsSpan = document.querySelector(trackerSelectors.HistoryItems) as HTMLElement;
+        htmlHelpers.clearChildren(itemsSpan);
+        for (let i = 0; i < searchHistory.length; i++) {
+            let abbreviation = searchHistory[i] + '';
+            if (abbreviation.length > 34) {
+                abbreviation = abbreviation.substr(0, 10) + '...' + abbreviation.substr(-10);
+            }
+            const link = htmlHelpers.newEventLink(
+                abbreviation,
+                trackerEvents.Search,
+                searchHistory[i],
+                postMessage,
+                searchHistory[i]);
+            itemsSpan.appendChild(link);
+            itemsSpan.appendChild(htmlHelpers.text(' ')); // allow wrapping between items
+        }
+        htmlHelpers.showHide(trackerSelectors.HistorySection, !!searchHistory.length);
+    },
+
     renderTransaction: function(transaction: any | undefined, postMessage: any) {
         if (transaction) {
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailType, htmlHelpers.text(transaction.type));

@@ -96,6 +96,15 @@ export function activate(context: vscode.ExtensionContext) {
         throw new Error('Could not select an RPC URI from node');
     };
 
+    const getHistoryId = (server: any) => {
+        let result = server.label;
+        while (server.parent) {
+            server = server.parent;
+            result = server.label || result;
+        }
+        return result;
+    };
+
     const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', async (server) => {
         try {
             const rpcUri = await selectUri(server);
@@ -103,6 +112,8 @@ export function activate(context: vscode.ExtensionContext) {
                 const panel = new NeoTrackerPanel(
                     context.extensionPath,
                     rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     context.subscriptions);
             }
         } catch (e) {

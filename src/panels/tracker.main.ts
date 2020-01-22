@@ -20,6 +20,7 @@ function handleMessage(message: any) {
         trackerRenderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
         trackerRenderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
         trackerRenderers.renderAddress(message.viewState.currentAddressUnspents, message.viewState.currentAddressUnclaimed, message.viewState.currentAddressClaimable, vsCodePostMessage);
+        trackerRenderers.renderSearchHistory(message.viewState.searchHistory, vsCodePostMessage);
         trackerRenderers.setPage(message.viewState.activePage);
         if (message.viewState.activePage !== 'addressdetail') {
             htmlHelpers.showHide(trackerSelectors.AddressDetailsGasExpando, false);
@@ -58,6 +59,7 @@ function initializePanel() {
     htmlHelpers.setOnClickEvent(trackerSelectors.BlockDetailClose, trackerEvents.CloseBlock, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(trackerSelectors.TransactionDetailClose, trackerEvents.CloseTransaction, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(trackerSelectors.AddressDetailsClose, trackerEvents.CloseAddress, null, vsCodePostMessage);
+    htmlHelpers.setOnClickEvent(trackerSelectors.HistoryClearLink, trackerEvents.ClearHistory, null, vsCodePostMessage);
 
     htmlHelpers.showHide(trackerSelectors.AddressDetailsGasExpando, false);
     htmlHelpers.showHide(trackerSelectors.AddressDetailsShowGasDetails, true, 'inline');
