@@ -230,6 +230,9 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 this.viewState.hideEmptyBlocks = !!message.c;
                 await this.updateBlockList(true);
             } else if (message.e === trackerEvents.ShowBlock) {
+                // Fix the position in the block list (so that user sees the same blocks after hitting 'Back'):
+                this.viewState.firstBlock = this.viewState.blocks.firstIndex;
+                this.viewState.forwards = true;
                 this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);
                 await this.augmentSearchHistory(this.viewState.currentBlock.index);
                 this.viewState.activePage = ActivePage.BlockDetail;
