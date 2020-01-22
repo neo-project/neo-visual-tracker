@@ -28,7 +28,6 @@ class ViewState {
     public currentBlock: any = undefined;
     public currentTransaction: any = undefined;
     public currentAddressUnspents: any = undefined;
-    public currentAddressClaimable: any = undefined;
     public currentAddressUnclaimed: any = undefined;
     public hideEmptyBlocks: boolean = false;
     public searchHistory: string[] = [];
@@ -162,7 +161,6 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         // If the input is obviously (based on its format) an address, just get the data for that address:
         if (inputIsAddress) {
             this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(input, this);
-            this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(input, this);
             this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(input, this);
             await this.augmentSearchHistory(input);
             this.viewState.activePage = ActivePage.AddressDetail;
@@ -250,13 +248,11 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                     ((this.viewState.currentBlock === undefined) ? ActivePage.Blocks : ActivePage.BlockDetail);
             } else if (message.e === trackerEvents.ShowAddress) {
                 this.viewState.currentAddressUnspents = await this.rpcConnection.getUnspents(message.c, this);
-                this.viewState.currentAddressClaimable = await this.rpcConnection.getClaimable(message.c, this);
                 this.viewState.currentAddressUnclaimed = await this.rpcConnection.getUnclaimed(message.c, this);
                 await this.augmentSearchHistory(message.c);
                 this.viewState.activePage = ActivePage.AddressDetail;
             } else if (message.e === trackerEvents.CloseAddress) {
                 this.viewState.currentAddressUnspents = undefined;
-                this.viewState.currentAddressClaimable = undefined;
                 this.viewState.currentAddressUnclaimed = undefined;
                 this.viewState.activePage = (this.viewState.currentTransaction !== undefined) ?
                     ActivePage.TransactionDetail : 

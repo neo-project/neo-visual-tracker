@@ -28,7 +28,6 @@ const trackerRenderers = {
     renderAddress: function(
         unspentsInfo: any | undefined, 
         unclaimedInfo: any | undefined, 
-        claimableInfo: any | undefined, 
         postMessage: any) {
 
         const unspentTotals: Map<string, number> = new Map<string, number>();
@@ -95,32 +94,6 @@ const trackerRenderers = {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentGas, htmlHelpers.text(htmlHelpers.number(unspentTotals.get('GAS') as number) + ' GAS'));
         } else {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentGas, htmlHelpers.text('N/A'));
-        }
-
-        if (claimableInfo) {
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableNotSupported, !claimableInfo.getClaimableSupport);
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, !!claimableInfo.getClaimableSupport);
-            if (claimableInfo.getClaimableSupport) {
-                const placeholderArea = document.querySelector(trackerSelectors.AddressDetailsGetClaimableSupported);
-                if (placeholderArea) {
-                    const tbody = placeholderArea.querySelector('tbody');
-                    if (tbody) {
-                        htmlHelpers.clearChildren(tbody);
-                        if (claimableInfo.claimable && claimableInfo.claimable.length) {
-                            for (let i = 0; i < claimableInfo.claimable.length; i++) {
-                                const txid = claimableInfo.claimable[i].txid;
-                                const value = parseFloat(claimableInfo.claimable[i].unclaimed);
-                                const row = htmlHelpers.newTableRow(
-                                    htmlHelpers.newEventLink(txid, trackerEvents.ShowTransaction, txid, postMessage),
-                                    htmlHelpers.text(htmlHelpers.number(value) + ' GAS'));
-                                tbody.appendChild(row);
-                            }
-                        } else {
-                            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, false);
-                        }
-                    }
-                }
-            } 
         }
     },
 
