@@ -105,7 +105,7 @@ const trackerRenderers = {
         }
     },
 
-    renderBlock: function(block: any | undefined, postMessage : any) {
+    renderBlock: function(block: any | undefined, transactionHighlight: string | undefined, postMessage: any) {
         if (block) {
             htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailHash, htmlHelpers.text(block.hash));
             htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailIndex, htmlHelpers.text(htmlHelpers.number(block.index)));
@@ -146,12 +146,15 @@ const trackerRenderers = {
                         htmlHelpers.text(htmlHelpers.number(tx.net_fee) + ' GAS'),
                         htmlHelpers.text(htmlHelpers.number(tx.sys_fee) + ' GAS'));
                         txTbody.appendChild(row);
+                    if (transactionHighlight === tx.txid) {
+                        row.className = 'highlight';
+                    }
                 }
             }
         }
     },
 
-    renderBlocks: function (blocks: any[], firstBlock: number | undefined, postMessage: any) {
+    renderBlocks: function (blocks: any[], firstBlock: number | undefined, blockHighlight: number | undefined, postMessage: any) {
         htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationPrevious, firstBlock !== undefined);
         htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationFirst, firstBlock !== undefined);
         if (blocks.length) {
@@ -170,6 +173,9 @@ const trackerRenderers = {
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.newEventLink(contents.nextconsensus, trackerEvents.ShowAddress, contents.nextconsensus, postMessage),
                     htmlHelpers.text(htmlHelpers.number(contents.size) + ' bytes'));
+                if (blockHighlight === contents.index) {
+                    row.className = 'highlight';
+                }
                 tbody.appendChild(row);
             }
         }

@@ -20,12 +20,14 @@ enum ActivePage {
 }
 
 class ViewState {
-    public blockChainInfo? : BlockchainInfo = undefined;
-    public activePage : ActivePage = ActivePage.Blocks;
-    public firstBlock? : number = undefined;
+    public blockChainInfo?: BlockchainInfo = undefined;
+    public activePage: ActivePage = ActivePage.Blocks;
+    public firstBlock?: number = undefined;
     public forwards: boolean = true;
     public blocks: Blocks = new Blocks();
     public currentBlock: any = undefined;
+    public blockHighlight?: number = undefined;
+    public transactionHighlight?: string = undefined;
     public currentTransaction: any = undefined;
     public currentAddressUnspents: any = undefined;
     public currentAddressUnclaimed: any = undefined;
@@ -233,14 +235,17 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 // Fix the position in the block list (so that user sees the same blocks after hitting 'Back'):
                 this.viewState.firstBlock = this.viewState.blocks.firstIndex;
                 this.viewState.forwards = true;
+                this.viewState.blockHighlight = message.c;
                 this.viewState.currentBlock = await this.rpcConnection.getBlock(message.c, this);
                 await this.augmentSearchHistory(this.viewState.currentBlock.index);
                 this.viewState.activePage = ActivePage.BlockDetail;
             } else if (message.e === trackerEvents.CloseBlock) {
                 this.viewState.currentBlock = undefined;
+                this.viewState.transactionHighlight = undefined;
                 this.viewState.activePage = (this.viewState.currentTransaction === undefined) ?
                     ActivePage.Blocks : ActivePage.TransactionDetail;
             } else if (message.e === trackerEvents.ShowTransaction) {
+                this.viewState.transactionHighlight = message.c;
                 this.viewState.currentTransaction = await this.rpcConnection.getTransaction(message.c, this);
                 await this.augmentSearchHistory(message.c);
                 this.viewState.activePage = ActivePage.TransactionDetail;
@@ -263,8 +268,12 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
             } else if (message.e === trackerEvents.Copy) {
                 await vscode.env.clipboard.writeText(message.c);
             } else if (message.e === trackerEvents.ClearHistory) {
+                this.viewState.blockHighlight = undefined;
+                this.viewState.transactionHighlight = undefined;
                 await this.clearSearchHistory();
             } else if (message.e === trackerEvents.Search) {
+                this.viewState.blockHighlight = undefined;
+                this.viewState.transactionHighlight = undefined;
                 await this.search(message.c);
             }
             if (message.e !== trackerEvents.Search) {

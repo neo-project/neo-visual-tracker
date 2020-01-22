@@ -10,6 +10,10 @@ table {
         background-color: var(--vscode-editor-background);
         filter: contrast(0.90);
     }
+    tr.highlight {
+        border: 1px solid var(--vscode-focusBorder);
+        border-style: dashed;
+    }
 }
 
 .table {

@@ -16,8 +16,8 @@ function handleMessage(message: any) {
     if (message.viewState) {
         console.log(message.viewState);
         trackerRenderers.renderBlockchainInfo(message.viewState.blockChainInfo);
-        trackerRenderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, vsCodePostMessage);
-        trackerRenderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
+        trackerRenderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, message.viewState.blockHighlight, vsCodePostMessage);
+        trackerRenderers.renderBlock(message.viewState.currentBlock, message.viewState.transactionHighlight, vsCodePostMessage);
         trackerRenderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
         trackerRenderers.renderAddress(message.viewState.currentAddressUnspents, message.viewState.currentAddressUnclaimed, vsCodePostMessage);
         trackerRenderers.renderSearchHistory(message.viewState.searchHistory, vsCodePostMessage);
