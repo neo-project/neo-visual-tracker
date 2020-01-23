@@ -227,10 +227,12 @@ export function activate(context: vscode.ExtensionContext) {
             if (rpcUri) {
                 const panel = new InvocationPanel(
                     context.extensionPath, 
-                    server.jsonFile,
                     rpcUri,
+                    walletExplorer,
+                    contractDetector,
                     checkpointDetector,
-                    context.subscriptions);
+                    context.subscriptions,
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
             }
         } catch (e) {
             console.error('Error opening invocation panel ', e);
