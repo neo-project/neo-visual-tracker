@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const rpcConnectionPool = new RpcConnectionPool();
 
-    const rpcServerExplorer = new RpcServerExplorer(context.extensionPath);
+    const rpcServerExplorer = new RpcServerExplorer(context.extensionPath, rpcConnectionPool);
 
     const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
@@ -295,16 +295,12 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    const createServerListCommand = vscode.commands.registerCommand('neo-visual-devtracker.createServerList', async () => {
-        await RpcServerExplorer.newServerList();
+    const customizeServerListCommand = vscode.commands.registerCommand('neo-visual-devtracker.customizeServerList', async () => {
+        await rpcServerExplorer.customizeServerList();
     });
 
     const createWalletFileCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWalletFile', async () => {
         await WalletExplorer.newWalletFile();
-    });
-
-    const editJsonCommand = vscode.commands.registerCommand('neo-visual-devtracker.editJson', async (item) => {
-        await RpcServerExplorer.editJsonFile(item);
     });
 
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
@@ -323,9 +319,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(invokeContractCommand);
     context.subscriptions.push(createInstanceCommand);
     context.subscriptions.push(createAccountCommand);
-    context.subscriptions.push(createServerListCommand);
+    context.subscriptions.push(customizeServerListCommand);
     context.subscriptions.push(createWalletFileCommand);
-    context.subscriptions.push(editJsonCommand);
     context.subscriptions.push(serverExplorerProvider);
     context.subscriptions.push(waletExplorerProvider);
 }
