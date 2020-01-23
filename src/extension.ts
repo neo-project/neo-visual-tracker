@@ -79,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     };
 
-    const selectUri = async (server: any) => {
+    const selectUri = async (title: string, server: any, state: vscode.Memento) => {
         if (server && server.rpcUri) {
             return server.rpcUri;
         } else if (server && server.children && server.children.length) {
@@ -88,7 +88,29 @@ export function activate(context: vscode.ExtensionContext) {
                 if (possibleUris.length === 1) {
                     return possibleUris[0];
                 } else {
-                    return await vscode.window.showQuickPick(possibleUris, { placeHolder: 'Select an RPC server to use for this operation...' });
+                    let node = server;
+                    let uriSelectionId = '';
+                    while (node) {
+                        uriSelectionId = '|' + (node.jsonFile || node.label || '*').replace(/[|]/g, '?') + uriSelectionId;
+                        node = node.parent;
+                    }
+                    let lastUsedUri = state.get<string | undefined>('LastUri:' + uriSelectionId, undefined);
+                    if (possibleUris.indexOf(lastUsedUri) === -1) {
+                        lastUsedUri = undefined;
+                    }
+                    const quickPick = vscode.window.createQuickPick();
+                    quickPick.title = title;
+                    quickPick.placeholder = 'Select an RPC server (Press \'Enter\' to confirm or \'Escape\' to cancel)';
+                    quickPick.items = possibleUris.map((_: string) => { return { label: _ }; });
+                    quickPick.activeItems = quickPick.items.filter((_: any) => _.label === lastUsedUri);
+                    const result = await new Promise(resolve => {
+                        quickPick.onDidAccept(() => resolve(quickPick.activeItems[0].label));
+                        quickPick.show();
+                    });
+                    if (result) {
+                        state.update('LastUri:' + uriSelectionId, result);
+                    }
+                    return result;
                 }
             }
         } 
@@ -98,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', async (server) => {
         try {
-            const rpcUri = await selectUri(server);
+            const rpcUri = await selectUri('Open Neo Visual DevTracker', server, context.globalState);
             if (rpcUri) {
                 const panel = new NeoTrackerPanel(
                     context.extensionPath,
@@ -172,7 +194,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
         try {
-            const rpcUri = await selectUri(server);
+            const rpcUri = await selectUri('Transfer assets', server, context.globalState);
             if (rpcUri) {
                 const panel = new TransferPanel(
                     context.extensionPath,
@@ -189,7 +211,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', async (server) => {
         try {
-            const rpcUri = await selectUri(server);
+            const rpcUri = await selectUri('Claim GAS', server, context.globalState);
             if (rpcUri) {
                 const panel = new ClaimPanel(
                     context.extensionPath,
@@ -206,7 +228,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', async (server) => {
         try {
-            const rpcUri = await selectUri(server);
+            const rpcUri = await selectUri('Deploy contract', server, context.globalState);
             if (rpcUri) {
                 const panel = new DeployPanel(
                     context.extensionPath,
@@ -223,7 +245,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', async (server) => {
         try {
-            const rpcUri = await selectUri(server);
+            const rpcUri = await selectUri('Invoke contract', server, context.globalState);
             if (rpcUri) {
                 const panel = new InvocationPanel(
                     context.extensionPath, 
