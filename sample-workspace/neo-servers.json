@@ -1,7 +1,7 @@
 {
     "neo-rpc-uris": [
-        "http://seed2.ngd.network:10332",
-        "https://test3.cityofzion.io",
+        "https://node1.nl.neoblocks.org",
+        "http://seed1.ngd.network:20332",
         "http://seed5.ngd.network:20332",
         "(invalid URLs are ignored))",
         "http://127.0.0.1:49154"
