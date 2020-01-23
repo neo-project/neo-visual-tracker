@@ -70,6 +70,8 @@ export class NeoExpressConfig {
 
     public readonly wallets: IWallet[] = [];
 
+    public readonly contracts: any[] = [];
+
     public constructor(public readonly neoExpressJsonFullPath: string) {
         this.basename = path.basename(neoExpressJsonFullPath);
         this.refresh();
@@ -78,7 +80,17 @@ export class NeoExpressConfig {
     public refresh() {
         const jsonFileContents = fs.readFileSync(this.neoExpressJsonFullPath, { encoding: 'utf8' });
         const neoExpressConfig = JSON.parse(jsonFileContents);
+        this.parseContracts(neoExpressConfig);
         this.parseWallets(neoExpressConfig);
+    }
+
+    private parseContracts(neoExpressConfig: any) {
+        this.contracts.length = 0;
+        if (neoExpressConfig.contracts && neoExpressConfig.contracts.length) {
+            for (let i = 0; i < neoExpressConfig.contracts.length; i++) {
+                this.contracts.push(neoExpressConfig.contracts[i]);
+            }
+        }
     }
 
     private parseWallets(neoExpressConfig: any) {

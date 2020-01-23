@@ -342,6 +342,10 @@
                 {
                     "command": "neo-visual-devtracker.invokeContract",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
+                },
+                {
+                    "command": "neo-visual-devtracker.invokeContract",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == url"
                 }
             ]
         }
