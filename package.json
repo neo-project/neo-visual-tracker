@@ -157,6 +157,12 @@
             }
         ],
         "menus": {
+            "explorer/context": [
+                {
+                    "command": "neo-visual-devtracker.createWalletFile",
+                    "when": "isFileSystemResource"
+                }
+            ],
             "commandPalette": [
                 {
                     "command": "neo-visual-devtracker.openTracker",
@@ -207,8 +213,11 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createInstance",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer",
-                    "group": "navigation"
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer"
+                },
+                {
+                    "command": "neo-visual-devtracker.createWalletFile",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer"
                 }
             ],
             "view/item/context": [

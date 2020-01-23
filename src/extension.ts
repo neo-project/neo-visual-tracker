@@ -279,8 +279,15 @@ export function activate(context: vscode.ExtensionContext) {
         await RpcServerExplorer.newServerList();
     });
 
-    const createWalletFileCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWalletFile', async () => {
-        await WalletExplorer.newWalletFile();
+    const createWalletFileCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWalletFile', async (commandContext) => {
+        if (commandContext && commandContext.fsPath) {
+            await WalletExplorer.newWalletFile(commandContext.fsPath);
+        } else {
+            const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ?
+                vscode.workspace.workspaceFolders[0].uri.fsPath :
+                undefined;
+            await WalletExplorer.newWalletFile(defaultPath);
+        }
     });
 
     const editJsonCommand = vscode.commands.registerCommand('neo-visual-devtracker.editJson', async (item) => {
