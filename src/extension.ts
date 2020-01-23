@@ -301,8 +301,15 @@ export function activate(context: vscode.ExtensionContext) {
         await rpcServerExplorer.customizeServerList();
     });
 
-    const createWalletFileCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWalletFile', async () => {
-        await WalletExplorer.newWalletFile();
+    const createWalletFileCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWalletFile', async (commandContext) => {
+        if (commandContext && commandContext.fsPath) {
+            await WalletExplorer.newWalletFile(commandContext.fsPath);
+        } else {
+            const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ?
+                vscode.workspace.workspaceFolders[0].uri.fsPath :
+                undefined;
+            await WalletExplorer.newWalletFile(defaultPath);
+        }
     });
 
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
