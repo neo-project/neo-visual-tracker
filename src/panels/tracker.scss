@@ -10,6 +10,10 @@ table {
         background-color: var(--vscode-editor-background);
         filter: contrast(0.90);
     }
+    tr.highlight {
+        border: 1px solid var(--vscode-focusBorder);
+        border-style: dashed;
+    }
 }
 
 .table {
@@ -111,6 +115,25 @@ table {
             z-index: 1;
             right: 5px;
             top: 6px;
+        }
+    }
+    .historySection {
+        padding-top: 8px;
+        .historyHead {
+            a {
+                margin-left: 10px;
+                cursor: pointer;
+            }
+        }
+        .historyItems {
+            a {
+                display: inline-block;
+                margin: 8px 8px 0px 0px;
+                padding: 5px;
+                background-color: var(--vscode-button-background);
+                color: var(--vscode-button-foreground);
+                text-decoration: none;
+            }
         }
     }
     padding: 15px 20px 15px 20px;

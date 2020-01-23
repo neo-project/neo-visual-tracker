@@ -44,6 +44,8 @@ const trackerSelectors = {
     TransactionApplicationLogBody: '#transactiondetail #application-log-body',
     AddressDetailsClose: '#addressdetail .close',
     AddressDetailsHash: '#addressdetail .hash',
+    AddressDetailsUnspentGas: '#addressdetail .unspentGas',
+    AddressDetailsUnspentNeo: '#addressdetail .unspentNeo',
     AddressDetailsAvailableGas: '#addressdetail .availableGas',
     AddressDetailsUnavailableGas: '#addressdetail .unavailableGas',
     AddressDetailsUnclaimedGas: '#addressdetail .unclaimedGas',
@@ -51,16 +53,14 @@ const trackerSelectors = {
     AddressDetailsUnspentAssetName: '.assetName',
     AddressDetailsGetUnspentsSupported: '#addressdetail .unspentsSupported',
     AddressDetailsGetUnspentsNotSupported: '#addressdetail .unspentsNotSupported',
-    AddressDetailsGetClaimableSupported: '#addressdetail .claimableSupported',
-    AddressDetailsGetClaimableNotSupported: '#addressdetail .claimableNotSupported',
-    AddressDetailsShowGasDetails: '#addressdetail .showAvailableGasDetails',
-    AddressDetailsHideGasDetails: '#addressdetail .hideAvailableGasDetails',
-    AddressDetailsGasExpando: '#addressdetail .gas-expando',
     LoadingIndicator: '#loading-indicator',
     LoadingMessage: '#loading-indicator .message',
     OpeningIndicator: '#opening-indicator',
     SearchInput: '#searchinput',
     SearchButton: '#searchbutton',
+    HistorySection: '#searcharea .historySection',
+    HistoryItems: '#searcharea .historyItems',
+    HistoryClearLink: '#searcharea .clearLink',
 };
 
 export { trackerSelectors };

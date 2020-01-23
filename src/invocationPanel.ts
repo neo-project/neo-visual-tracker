@@ -5,8 +5,10 @@ import * as vscode from 'vscode';
 
 import { CheckpointDetector } from './checkpointDetector';
 import { ContractDetector } from './contractDetector';
+import { INeoRpcConnection } from './neoRpcConnection';
 import { invokeEvents } from './panels/invokeEvents';
 import { NeoExpressConfig } from './neoExpressConfig';
+import { NeoTrackerPanel } from './neoTrackerPanel';
 import { WalletExplorer } from './walletExplorer';
 
 import { api } from '@cityofzion/neon-js';
@@ -68,8 +70,9 @@ export class InvocationPanel {
     private readonly neoExpressConfig?: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
     private readonly walletExplorer: WalletExplorer;
-    private readonly checkpointDetector: CheckpointDetector;
     private readonly contractDetector: ContractDetector;
+    private readonly checkpointDetector: CheckpointDetector;
+    private readonly startSearch: Function;
     
     private viewState: ViewState;
     private jsonParsed: boolean;
@@ -77,6 +80,9 @@ export class InvocationPanel {
     constructor(
         extensionPath: string,
         rpcUrl: string,
+        rpcConnection: INeoRpcConnection,
+        historyId: string,
+        state: vscode.Memento,
         walletExplorer: WalletExplorer,
         contractDetector: ContractDetector,
         checkpointDetector: CheckpointDetector,
@@ -89,6 +95,10 @@ export class InvocationPanel {
         this.contractDetector = contractDetector;
         this.checkpointDetector = checkpointDetector;
         this.neoExpressConfig = neoExpressConfig;
+
+        this.startSearch = async (q: string) => {
+            await NeoTrackerPanel.newSearch(q, extensionPath, rpcConnection, historyId, state, disposables);
+        };
 
         this.viewState = new ViewState();
         this.viewState.rpcDescription = neoExpressConfig ? neoExpressConfig.neoExpressJsonFullPath : '';
@@ -174,6 +184,8 @@ export class InvocationPanel {
                 this.viewState.invocationError = this.viewState.invocationError || 'There was an error launching the debugger.';
                 this.panel.webview.postMessage({ viewState: this.viewState });
             }
+        } else if (message.e === invokeEvents.Search) {
+            await this.startSearch(message.c);
         }
     }
 
@@ -232,7 +244,7 @@ export class InvocationPanel {
                                         };
                                         const result = await neon.default.doInvoke(config);
                                         if (result.response && result.response.txid) {
-                                            this.viewState.broadcastResult = 'Transaction ' + result.response.txid + ' created.';
+                                            this.viewState.broadcastResult = result.response.txid;
                                         } else {
                                             this.viewState.broadcastResult = undefined;
                                             this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';

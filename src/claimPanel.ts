@@ -7,6 +7,7 @@ import { claimEvents } from './panels/claimEvents';
 
 import { INeoRpcConnection } from './neoRpcConnection';
 import { NeoExpressConfig } from './neoExpressConfig';
+import { NeoTrackerPanel } from './neoTrackerPanel';
 import { WalletExplorer } from './walletExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
@@ -31,6 +32,7 @@ export class ClaimPanel {
     private readonly rpcUri: string;
     private readonly rpcConnection: INeoRpcConnection;
     private readonly walletExplorer: WalletExplorer;
+    private readonly startSearch: Function;
 
     private viewState: ViewState;
     private initialized: boolean = false;
@@ -39,6 +41,8 @@ export class ClaimPanel {
         extensionPath: string,
         rpcUri: string,
         rpcConnection: INeoRpcConnection,
+        historyId: string,
+        state: vscode.Memento,
         walletExplorer: WalletExplorer,
         disposables: vscode.Disposable[],
         neoExpressConfig?: NeoExpressConfig) {
@@ -48,6 +52,10 @@ export class ClaimPanel {
         this.walletExplorer = walletExplorer;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
+
+        this.startSearch = async (q: string) => {
+            await NeoTrackerPanel.newSearch(q, extensionPath, rpcConnection, historyId, state, disposables);
+        };
 
         this.panel = vscode.window.createWebviewPanel(
             'claimPanel',
@@ -136,6 +144,8 @@ export class ClaimPanel {
         } else if (message.e === claimEvents.NewWallet) {
             this.initialized = false; // cause wallet list to be refreshed when this panel is next initialized
             vscode.commands.executeCommand('neo-visual-devtracker.createWalletFile');
+        } else if (message.e === claimEvents.Search) {
+            await this.startSearch(message.c);
         }
     }
 

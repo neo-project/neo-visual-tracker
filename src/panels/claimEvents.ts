@@ -7,6 +7,7 @@ const claimEvents = {
     Claim: 'claim',
     Update: 'update',
     NewWallet: 'newwallet',
+    Search: 'search',
 };
 
 export { claimEvents };

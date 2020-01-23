@@ -15,15 +15,23 @@ const invokeRenderers = {
             viewState.checkpoints,
             updateViewState, 
             postMessage);
-        this.renderBroadcastResult(viewState.broadcastResult);
+        this.renderBroadcastResult(viewState.broadcastResult, postMessage);
         this.renderInvokeError(viewState.invocationError);
         this.renderInvokeResult(viewState);
     },
 
-    renderBroadcastResult: function(result: string) {
-        if (result) {
+    renderBroadcastResult: function(txid: string, postMessage: Function) {
+        if (txid) {
+            const resultPlaceholder = document.querySelector(invokeSelectors.BroadcastResultText) as HTMLElement;
+            htmlHelpers.clearChildren(resultPlaceholder);
+            const searchLink = htmlHelpers.newEventLink(
+                txid,
+                invokeEvents.Search,
+                txid,
+                postMessage);
+            resultPlaceholder.appendChild(htmlHelpers.text('Transaction created: '));
+            resultPlaceholder.appendChild(searchLink);
             htmlHelpers.showHide(invokeSelectors.BroadcastResultPopup, true);
-            htmlHelpers.setPlaceholder(invokeSelectors.BroadcastResultText, htmlHelpers.text(result));
         } else {
             htmlHelpers.showHide(invokeSelectors.BroadcastResultPopup, false);
         }

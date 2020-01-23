@@ -23,9 +23,12 @@ const htmlHelpers = {
         return this.newEventLink('Copy', trackerEvents.Copy, text, postMessage);
     },
 
-    newEventLink: function(text: string, event: string, context: any | undefined, postMessage: any) {
+    newEventLink: function(text: string, event: string, context: any | undefined, postMessage: any, title?: string) {
         const link = document.createElement('a');
         link.href = '#';
+        if (title) {
+            link.title = title;
+        }
         link.appendChild(document.createTextNode(text));
         this.setOnClickEvent(link, event, context, postMessage);
         return link;

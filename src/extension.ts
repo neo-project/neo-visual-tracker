@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
                     const quickPick = vscode.window.createQuickPick();
                     quickPick.title = title;
                     quickPick.placeholder = 'Select an RPC server (Press \'Enter\' to confirm or \'Escape\' to cancel)';
-                    quickPick.items = possibleUris.map((_: string) => { return { label: _ }; });
+                    quickPick.items = possibleUris.sort((a: string, b: string) => a > b ? 1 : -1).map((_: string) => { return { label: _ }; });
                     quickPick.activeItems = quickPick.items.filter((_: any) => _.label === lastUsedUri);
                     const result = await new Promise(resolve => {
                         quickPick.onDidAccept(() => resolve(quickPick.activeItems[0].label));
@@ -118,6 +118,15 @@ export function activate(context: vscode.ExtensionContext) {
         throw new Error('Could not select an RPC URI from node');
     };
 
+    const getHistoryId = (server: any) => {
+        let result = server.label;
+        while (server.parent) {
+            server = server.parent;
+            result = server.label || result;
+        }
+        return result;
+    };
+
     const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', async (server) => {
         try {
             const rpcUri = await selectUri('Open Neo Visual DevTracker', server, context.globalState);
@@ -125,6 +134,8 @@ export function activate(context: vscode.ExtensionContext) {
                 const panel = new NeoTrackerPanel(
                     context.extensionPath,
                     rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     context.subscriptions);
             }
         } catch (e) {
@@ -200,6 +211,8 @@ export function activate(context: vscode.ExtensionContext) {
                     context.extensionPath,
                     rpcUri,
                     rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     walletExplorer,
                     context.subscriptions,
                     server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
@@ -217,6 +230,8 @@ export function activate(context: vscode.ExtensionContext) {
                     context.extensionPath,
                     rpcUri,
                     rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     walletExplorer,
                     context.subscriptions,
                     server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
@@ -233,6 +248,9 @@ export function activate(context: vscode.ExtensionContext) {
                 const panel = new DeployPanel(
                     context.extensionPath,
                     rpcUri,
+                    rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     walletExplorer,
                     contractDetector,
                     context.subscriptions,
@@ -250,6 +268,9 @@ export function activate(context: vscode.ExtensionContext) {
                 const panel = new InvocationPanel(
                     context.extensionPath, 
                     rpcUri,
+                    rpcConnectionPool.getConnection(rpcUri),
+                    getHistoryId(server),
+                    context.workspaceState,
                     walletExplorer,
                     contractDetector,
                     checkpointDetector,

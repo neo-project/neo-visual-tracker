@@ -84,8 +84,17 @@ function render() {
     populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWalletAddress);
     populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWalletAddress);
     populateAssetDropdown();
+    if (viewState.showSuccess) {
+        const resultPlaceholder = document.querySelector(transferSelectors.SearchLinkPlaceholder) as HTMLElement;
+        htmlHelpers.clearChildren(resultPlaceholder);
+        const searchLink = htmlHelpers.newEventLink(
+            viewState.result,
+            transferEvents.Search,
+            viewState.result,
+            vsCodePostMessage);
+        resultPlaceholder.appendChild(searchLink);
+    }
     htmlHelpers.setPlaceholder(transferSelectors.DisplaySourceWallet, htmlHelpers.text(viewState.sourceWalletDescription || '(unknown)'));
-    htmlHelpers.setPlaceholder(transferSelectors.ResultText, htmlHelpers.text(viewState.result));
     htmlHelpers.setPlaceholder(transferSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(transferSelectors.ErrorBalanceRetrievalFailure, viewState.sourceWalletBalancesError);
     htmlHelpers.showHide(transferSelectors.ErrorSourceWalletEmpty, viewState.sourceWalletAddress && !viewState.sourceWalletBalancesError && !viewState.sourceWalletBalances.length);

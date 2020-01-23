@@ -12,6 +12,7 @@ const claimSelectors = {
     LoadingIndicator: '.loading',
     RefreshClaimableLink: '#refreshClaimableLink',
     ResultText: '.result-text',
+    SearchLinkPlaceholder: '#searchLink',
     ViewDataEntry: '#data-entry-view',
     ViewResults: '#results-view',
     WalletDropdown: '#walletDropdown',

@@ -32,6 +32,14 @@
                 placeholder="Enter an address, transaction ID, block index or block hash" />
             <button id="searchbutton">Search</button>
         </div>
+        <div class="historySection">
+            <div class="historyHead">
+                Recently viewed: 
+                <a class="clearLink">Clear history</a>
+            </div>
+            <div class="historyItems">
+            </div>
+        </div>
     </div>
 
     <div class="page" id="blocks">
@@ -215,6 +223,14 @@
                 <td class="hash"></td>
             </tr>
             <tr>
+                <th>Unspent NEO</th>
+                <td class="unspentNeo"></td>
+            </tr>
+            <tr>
+                <th>Unspent GAS</th>
+                <td class="unspentGas"></td>
+            </tr>
+            <tr>
                 <th>Unclaimed GAS</th>
                 <td class="unclaimedGas"></td>
             </tr>
@@ -224,24 +240,7 @@
             </tr>
             <tr>
                 <th>Available GAS</th>
-                <td>
-                    <div>
-                        <span class="availableGas"></span>
-                        <a class="showAvailableGasDetails" href="#">Show details</a>
-                        <a class="hideAvailableGasDetails" href="#">Hide details</a>
-                    </div>
-                    <div class="gas-expando">
-                        <div class="claimableSupported">
-                            <table>
-                                <tbody>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="error claimableNotSupported">
-                            This Neo RPC server does not support the 'getclaimable' method, so unclaimed GAS cannot be shown.
-                        </div>
-                    </div>
-                </td>
+                <td class="availableGas"></td>
             </tr>
         </table>
         <div class="error unspentsNotSupported">

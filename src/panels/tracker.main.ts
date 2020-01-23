@@ -16,16 +16,12 @@ function handleMessage(message: any) {
     if (message.viewState) {
         console.log(message.viewState);
         trackerRenderers.renderBlockchainInfo(message.viewState.blockChainInfo);
-        trackerRenderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, vsCodePostMessage);
-        trackerRenderers.renderBlock(message.viewState.currentBlock, vsCodePostMessage);
+        trackerRenderers.renderBlocks(message.viewState.blocks.blocks, message.viewState.firstBlock, message.viewState.blockHighlight, vsCodePostMessage);
+        trackerRenderers.renderBlock(message.viewState.currentBlock, message.viewState.transactionHighlight, vsCodePostMessage);
         trackerRenderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
-        trackerRenderers.renderAddress(message.viewState.currentAddressUnspents, message.viewState.currentAddressUnclaimed, message.viewState.currentAddressClaimable, vsCodePostMessage);
+        trackerRenderers.renderAddress(message.viewState.currentAddressUnspents, message.viewState.currentAddressUnclaimed, vsCodePostMessage);
+        trackerRenderers.renderSearchHistory(message.viewState.searchHistory, vsCodePostMessage);
         trackerRenderers.setPage(message.viewState.activePage);
-        if (message.viewState.activePage !== 'addressdetail') {
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGasExpando, false);
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsShowGasDetails, true, 'inline');
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsHideGasDetails, false);
-        } 
         htmlHelpers.showHide(trackerSelectors.StatusBar, !!message.viewState.blockChainInfo);
         const openingIndicator: any = document.querySelector(trackerSelectors.OpeningIndicator);
         openingIndicator.style.display = (!message.viewState.blockChainInfo || !message.viewState.blockChainInfo.online) ? 'block' : 'none';
@@ -58,24 +54,7 @@ function initializePanel() {
     htmlHelpers.setOnClickEvent(trackerSelectors.BlockDetailClose, trackerEvents.CloseBlock, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(trackerSelectors.TransactionDetailClose, trackerEvents.CloseTransaction, null, vsCodePostMessage);
     htmlHelpers.setOnClickEvent(trackerSelectors.AddressDetailsClose, trackerEvents.CloseAddress, null, vsCodePostMessage);
-
-    htmlHelpers.showHide(trackerSelectors.AddressDetailsGasExpando, false);
-    htmlHelpers.showHide(trackerSelectors.AddressDetailsShowGasDetails, true, 'inline');
-    htmlHelpers.showHide(trackerSelectors.AddressDetailsHideGasDetails, false);
-
-    const showGasDetail = document.querySelector(trackerSelectors.AddressDetailsShowGasDetails) as HTMLAnchorElement;
-    showGasDetail.addEventListener('click', _ => {
-        htmlHelpers.showHide(trackerSelectors.AddressDetailsGasExpando, true);
-        htmlHelpers.showHide(trackerSelectors.AddressDetailsShowGasDetails, false);
-        htmlHelpers.showHide(trackerSelectors.AddressDetailsHideGasDetails, true, 'inline');
-    });
-
-    const hideGasDetail = document.querySelector(trackerSelectors.AddressDetailsHideGasDetails) as HTMLAnchorElement;
-    hideGasDetail.addEventListener('click', _ => {
-        htmlHelpers.showHide(trackerSelectors.AddressDetailsGasExpando, false);
-        htmlHelpers.showHide(trackerSelectors.AddressDetailsShowGasDetails, true, 'inline');
-        htmlHelpers.showHide(trackerSelectors.AddressDetailsHideGasDetails, false);
-    });
+    htmlHelpers.setOnClickEvent(trackerSelectors.HistoryClearLink, trackerEvents.ClearHistory, null, vsCodePostMessage);
 
     const checkbox = document.querySelector(trackerSelectors.HideEmptyBlocksCheckbox);
     if (checkbox) {

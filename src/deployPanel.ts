@@ -6,8 +6,9 @@ import * as vscode from 'vscode';
 import { deployEvents } from './panels/deployEvents';
 
 import { ContractDetector } from './contractDetector';
-import { ContractParameterType } from './contractParameterType';
+import { INeoRpcConnection } from './neoRpcConnection';
 import { NeoExpressConfig } from './neoExpressConfig';
+import { NeoTrackerPanel } from './neoTrackerPanel';
 import { WalletExplorer } from './walletExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
@@ -35,6 +36,7 @@ export class DeployPanel {
     private readonly panel: vscode.WebviewPanel;
     private readonly rpcUri: string;
     private readonly walletExplorer: WalletExplorer;
+    private readonly startSearch: Function;
 
     private viewState: ViewState;
     private initialized: boolean = false;
@@ -42,6 +44,9 @@ export class DeployPanel {
     constructor(
         extensionPath: string,
         rpcUri: string,
+        rpcConnection: INeoRpcConnection,
+        historyId: string,
+        state: vscode.Memento,
         walletExplorer: WalletExplorer,
         contractDetector: ContractDetector,
         disposables: vscode.Disposable[],
@@ -52,6 +57,10 @@ export class DeployPanel {
         this.walletExplorer = walletExplorer;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
+
+        this.startSearch = async (q: string) => {
+            await NeoTrackerPanel.newSearch(q, extensionPath, rpcConnection, historyId, state, disposables);
+        };
 
         this.panel = vscode.window.createWebviewPanel(
             'deployPanel',
@@ -184,6 +193,8 @@ export class DeployPanel {
             await this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === deployEvents.Close) {
             this.dispose();
+        } else if (message.e === deployEvents.Search) {
+            await this.startSearch(message.c);
         } else if (message.e === deployEvents.NewWallet) {
             this.initialized = false; // cause wallet list to be refreshed when this panel is next initialized
             vscode.commands.executeCommand('neo-visual-devtracker.createWalletFile');

@@ -28,9 +28,9 @@ const trackerRenderers = {
     renderAddress: function(
         unspentsInfo: any | undefined, 
         unclaimedInfo: any | undefined, 
-        claimableInfo: any | undefined, 
         postMessage: any) {
 
+        const unspentTotals: Map<string, number> = new Map<string, number>();
         if (unspentsInfo) {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsHash, htmlHelpers.text(unspentsInfo.address));
             htmlHelpers.showHide(trackerSelectors.AddressDetailsGetUnspentsNotSupported, !unspentsInfo.getUnspentsSupport);
@@ -63,6 +63,7 @@ const trackerRenderers = {
                                         htmlHelpers.text('Total'), 
                                         htmlHelpers.text(htmlHelpers.number(assetBalance) + ' ' + assetName),
                                         htmlHelpers.text(' ')));
+                                unspentTotals.set(assetName, assetBalance);
                             }
                             htmlHelpers.clearChildren(assetNameElement);
                             assetNameElement.appendChild(htmlHelpers.text(assetName));
@@ -83,30 +84,16 @@ const trackerRenderers = {
             htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnclaimedGas, htmlHelpers.text('N/A'));
         }
 
-        if (claimableInfo) {
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableNotSupported, !claimableInfo.getClaimableSupport);
-            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, !!claimableInfo.getClaimableSupport);
-            if (claimableInfo.getClaimableSupport) {
-                const placeholderArea = document.querySelector(trackerSelectors.AddressDetailsGetClaimableSupported);
-                if (placeholderArea) {
-                    const tbody = placeholderArea.querySelector('tbody');
-                    if (tbody) {
-                        htmlHelpers.clearChildren(tbody);
-                        if (claimableInfo.claimable && claimableInfo.claimable.length) {
-                            for (let i = 0; i < claimableInfo.claimable.length; i++) {
-                                const txid = claimableInfo.claimable[i].txid;
-                                const value = parseFloat(claimableInfo.claimable[i].unclaimed);
-                                const row = htmlHelpers.newTableRow(
-                                    htmlHelpers.newEventLink(txid, trackerEvents.ShowTransaction, txid, postMessage),
-                                    htmlHelpers.text(htmlHelpers.number(value) + ' GAS'));
-                                tbody.appendChild(row);
-                            }
-                        } else {
-                            htmlHelpers.showHide(trackerSelectors.AddressDetailsGetClaimableSupported, false);
-                        }
-                    }
-                }
-            } 
+        if (unspentTotals.has('NEO')) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentNeo, htmlHelpers.text(htmlHelpers.number(unspentTotals.get('NEO') as number) + ' NEO'));
+        } else {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentNeo, htmlHelpers.text('N/A'));
+        }
+
+        if (unspentTotals.has('GAS')) {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentGas, htmlHelpers.text(htmlHelpers.number(unspentTotals.get('GAS') as number) + ' GAS'));
+        } else {
+            htmlHelpers.setPlaceholder(trackerSelectors.AddressDetailsUnspentGas, htmlHelpers.text('N/A'));
         }
     },
 
@@ -118,7 +105,7 @@ const trackerRenderers = {
         }
     },
 
-    renderBlock: function(block: any | undefined, postMessage : any) {
+    renderBlock: function(block: any | undefined, transactionHighlight: string | undefined, postMessage: any) {
         if (block) {
             htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailHash, htmlHelpers.text(block.hash));
             htmlHelpers.setPlaceholder(trackerSelectors.BlockDetailIndex, htmlHelpers.text(htmlHelpers.number(block.index)));
@@ -159,12 +146,15 @@ const trackerRenderers = {
                         htmlHelpers.text(htmlHelpers.number(tx.net_fee) + ' GAS'),
                         htmlHelpers.text(htmlHelpers.number(tx.sys_fee) + ' GAS'));
                         txTbody.appendChild(row);
+                    if (transactionHighlight === tx.txid) {
+                        row.className = 'highlight';
+                    }
                 }
             }
         }
     },
 
-    renderBlocks: function (blocks: any[], firstBlock: number | undefined, postMessage: any) {
+    renderBlocks: function (blocks: any[], firstBlock: number | undefined, blockHighlight: number | undefined, postMessage: any) {
         htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationPrevious, firstBlock !== undefined);
         htmlHelpers.setEnabled(trackerSelectors.BlocksPaginationFirst, firstBlock !== undefined);
         if (blocks.length) {
@@ -183,6 +173,9 @@ const trackerRenderers = {
                     htmlHelpers.text(contents.tx.length),
                     htmlHelpers.newEventLink(contents.nextconsensus, trackerEvents.ShowAddress, contents.nextconsensus, postMessage),
                     htmlHelpers.text(htmlHelpers.number(contents.size) + ' bytes'));
+                if (blockHighlight === contents.index) {
+                    row.className = 'highlight';
+                }
                 tbody.appendChild(row);
             }
         }
@@ -209,17 +202,41 @@ const trackerRenderers = {
         return 0;
     },
 
+    renderSearchHistory: function(searchHistory: string[], postMessage: any) {
+        const itemsSpan = document.querySelector(trackerSelectors.HistoryItems) as HTMLElement;
+        htmlHelpers.clearChildren(itemsSpan);
+        for (let i = 0; i < searchHistory.length; i++) {
+            let abbreviation = searchHistory[i] + '';
+            if (abbreviation.length > 34) {
+                abbreviation = abbreviation.substr(0, 10) + '...' + abbreviation.substr(-10);
+            }
+            const link = htmlHelpers.newEventLink(
+                abbreviation,
+                trackerEvents.Search,
+                searchHistory[i],
+                postMessage,
+                searchHistory[i]);
+            itemsSpan.appendChild(link);
+            itemsSpan.appendChild(htmlHelpers.text(' ')); // allow wrapping between items
+        }
+        htmlHelpers.showHide(trackerSelectors.HistorySection, !!searchHistory.length);
+    },
+
     renderTransaction: function(transaction: any | undefined, postMessage: any) {
         if (transaction) {
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailType, htmlHelpers.text(transaction.type));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
-            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, htmlHelpers.text(htmlHelpers.time(transaction.blocktime)));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, htmlHelpers.text(transaction.blocktime ? htmlHelpers.time(transaction.blocktime) : 'Unconfirmed'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailNetworkFee, htmlHelpers.text(htmlHelpers.number(transaction.net_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSystemFee, htmlHelpers.text(htmlHelpers.number(transaction.sys_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
-            htmlHelpers.setPlaceholder(
-                trackerSelectors.TransactionDetailBlock, 
-                htmlHelpers.newEventLink(transaction.blockhash, trackerEvents.ShowBlock, transaction.blockhash, postMessage));
+            if (transaction.blockhash) {
+                htmlHelpers.setPlaceholder(
+                    trackerSelectors.TransactionDetailBlock, 
+                    htmlHelpers.newEventLink(transaction.blockhash, trackerEvents.ShowBlock, transaction.blockhash, postMessage));
+            } else {
+                htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailBlock, htmlHelpers.text('Unconfirmed'));
+            }
             let valueTransferCount = 0;
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.vinAugmented, transaction.assets, false, true, postMessage);
