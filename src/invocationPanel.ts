@@ -4,9 +4,12 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { CheckpointDetector } from './checkpointDetector';
+import { ContractDetector } from './contractDetector';
 import { INeoRpcConnection } from './neoRpcConnection';
 import { invokeEvents } from './panels/invokeEvents';
+import { NeoExpressConfig } from './neoExpressConfig';
 import { NeoTrackerPanel } from './neoTrackerPanel';
+import { WalletExplorer } from './walletExplorer';
 
 import { api } from '@cityofzion/neon-js';
 import { DoInvokeConfig } from '@cityofzion/neon-api/lib/funcs/types';
@@ -48,8 +51,7 @@ class ResultValue {
 
 class ViewState {
     rpcUrl: string = '';
-    neoExpressJsonFullPath: string = '';
-    neoExpressJsonFileName: string = '';
+    rpcDescription: string = '';
     wallets: any[] = [];
     checkpoints: any[] = [];
     contracts: any[] = [];
@@ -65,8 +67,10 @@ class ViewState {
 
 export class InvocationPanel {
 
+    private readonly neoExpressConfig?: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
-    private readonly avmFiles: Map<string, string>;
+    private readonly walletExplorer: WalletExplorer;
+    private readonly contractDetector: ContractDetector;
     private readonly checkpointDetector: CheckpointDetector;
     private readonly startSearch: Function;
     
@@ -75,32 +79,34 @@ export class InvocationPanel {
 
     constructor(
         extensionPath: string,
-        neoExpressJsonFullPath: string,
         rpcUrl: string,
         rpcConnection: INeoRpcConnection,
         historyId: string,
         state: vscode.Memento,
+        walletExplorer: WalletExplorer,
+        contractDetector: ContractDetector,
         checkpointDetector: CheckpointDetector,
-        disposables: vscode.Disposable[]) {
-
-        this.avmFiles = new Map<string, string>();
+        disposables: vscode.Disposable[],
+        neoExpressConfig?: NeoExpressConfig) {
 
         this.jsonParsed = false;
 
+        this.walletExplorer = walletExplorer;
+        this.contractDetector = contractDetector;
         this.checkpointDetector = checkpointDetector;
-        
+        this.neoExpressConfig = neoExpressConfig;
+
         this.startSearch = async (q: string) => {
             await NeoTrackerPanel.newSearch(q, extensionPath, rpcConnection, historyId, state, disposables);
         };
 
         this.viewState = new ViewState();
-        this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
-        this.viewState.neoExpressJsonFileName = path.basename(neoExpressJsonFullPath);
+        this.viewState.rpcDescription = neoExpressConfig ? neoExpressConfig.neoExpressJsonFullPath : '';
         this.viewState.rpcUrl = rpcUrl;
 
         this.panel = vscode.window.createWebviewPanel(
             'invocationPanel',
-            this.viewState.neoExpressJsonFileName + ' - Invoke contract',
+            (neoExpressConfig ? neoExpressConfig.basename : rpcUrl) + ' - Invoke contract',
             vscode.ViewColumn.Active,
             { enableScripts: true });
 
@@ -120,24 +126,26 @@ export class InvocationPanel {
             .replace(CssHrefPlaceholder, cssHref);
     }
 
-    private async reload() {
-        console.log('InvocationPanel is parsing ', this.viewState.neoExpressJsonFullPath);
-        try {
-            const jsonFileContents = fs.readFileSync(this.viewState.neoExpressJsonFullPath, { encoding: 'utf8' });
-            const neoExpressConfig = JSON.parse(jsonFileContents);
-            this.viewState.wallets = neoExpressConfig.wallets || [];
-            this.viewState.contracts = neoExpressConfig.contracts || [];
-        } catch (e) {
-            console.error('Error parsing ', this.viewState.neoExpressJsonFullPath, e);
-            this.viewState.wallets = [];
-            this.viewState.contracts = [];
+    private async reload() {        
+        this.viewState.contracts = [];
+
+        if (this.neoExpressConfig) {
+            this.neoExpressConfig.refresh();
+            this.viewState.contracts = this.neoExpressConfig.contracts.slice();
+        }
+
+        // TODO: Don't assume all contracts found in the workspace have been deployed.
+        const workspaceContracts = this.contractDetector.contracts;
+        for (let i = 0; i < workspaceContracts.length; i++) {
+            if (this.viewState.contracts.filter(c => c.hash.toLowerCase() === workspaceContracts[i].hash.toLowerCase()).length === 0) {
+                this.viewState.contracts.push(workspaceContracts[i].abi);
+            }
         }
 
         this.jsonParsed = true;
     }
 
     private onClose() {
-
     }
 
     private async onMessage(message: any) {
@@ -146,6 +154,14 @@ export class InvocationPanel {
         }
 
         this.viewState.checkpoints = this.checkpointDetector.checkpoints || [];
+
+        this.viewState.wallets = [];
+        if (this.neoExpressConfig) {
+            this.viewState.wallets = this.neoExpressConfig.wallets.slice();
+        }
+        for (let i = 0; i < this.walletExplorer.allAccounts.length; i++) {
+            this.viewState.wallets.push(this.walletExplorer.allAccounts[i]);
+        }
 
         if (message.e === invokeEvents.Init) {
             this.panel.webview.postMessage({ viewState: this.viewState });
@@ -182,6 +198,17 @@ export class InvocationPanel {
                         if (contract.functions[j].name === methodName) {
                             const method = contract.functions[j];
                             const contractHash = contract.hash.replace(/^0x/, '');
+
+                            const rpcClient = new neon.rpc.RPCClient(this.viewState.rpcUrl);
+                            try {
+                                await rpcClient.getContractState(contractHash);
+                            } catch (e) {
+                                this.viewState.showResult = false;
+                                this.viewState.broadcastResult = undefined;
+                                this.viewState.invocationError = 'Could not invoke ' + methodName + '; the contract is not deployed';
+                                return;
+                            }
+
                             const sb = neon.default.create.scriptBuilder();
                             let script = '';
                             if (method.name === 'Main') {
@@ -199,25 +226,31 @@ export class InvocationPanel {
                             }
                             
                             if (onChain) {
-                                const selectedWallet = method.selectedWallet;
-                                if (!selectedWallet) {
+                                const walletConfig = this.viewState.wallets.filter(_ => _.address === method.walletAddress)[0];
+                                const walletAddress = walletConfig ? walletConfig.address : undefined;
+                                if (!walletAddress) {
+                                    method.walletAddress = '';
                                     this.viewState.broadcastResult = '';
                                     this.viewState.showResult = false;
                                     this.viewState.invocationError = 'Please select a wallet';
                                 } else {
-                                    const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
-                                    const config: DoInvokeConfig = {
-                                        api: api,
-                                        script: script,
-                                        account: new neon.wallet.Account(selectedWallet),
-                                        intents: InvocationPanel.extractIntents(method, contractHash),
-                                    };
-                                    const result = await neon.default.doInvoke(config);
-                                    if (result.response && result.response.txid) {
-                                        this.viewState.broadcastResult = result.response.txid;
+                                    if (await walletConfig.unlock()) {
+                                        const api = new neon.api.neoCli.instance(this.viewState.rpcUrl);
+                                        const config: DoInvokeConfig = {
+                                            api: api,
+                                            script: script,
+                                            account: walletConfig.account,
+                                            intents: InvocationPanel.extractIntents(method, contractHash),
+                                        };
+                                        const result = await neon.default.doInvoke(config);
+                                        if (result.response && result.response.txid) {
+                                            this.viewState.broadcastResult = result.response.txid;
+                                        } else {
+                                            this.viewState.broadcastResult = undefined;
+                                            this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
+                                        }
                                     } else {
-                                        this.viewState.broadcastResult = undefined;
-                                        this.viewState.invocationError = 'No response from RPC server; transaction may not have been relayed';
+                                        return;
                                     }
                                 }
                             } else {
@@ -260,30 +293,8 @@ export class InvocationPanel {
                     for (let j = 0; j < contract.functions.length; j++) {
                         const method = contract.functions[j];
                         if (method.name === methodName) {
-                            
-                            let avmFileName = this.avmFiles.get(contractHash);
-                            if (!avmFileName) {
-                                const allAbiJsons = await vscode.workspace.findFiles('**/*.abi.json');
-                                for (let k = 0; k < allAbiJsons.length; k++) {
-                                    const abiJsonFile = allAbiJsons[k];
-                                    try {
-                                        const abiJson = fs.readFileSync(abiJsonFile.fsPath, { encoding: 'utf8' });
-                                        const abi = JSON.parse(abiJson);
-                                        if (abi.hash === contractHash) {
-                                            const correspondingAvm = abiJsonFile.fsPath.replace(/.abi.json$/, '.avm');
-                                            if (fs.existsSync(correspondingAvm)) {
-                                                avmFileName = correspondingAvm;
-                                                break;
-                                            }
-                                        }
-                                    } catch (e) {
-                                        console.info('Could not parse potential ABI file', abiJsonFile, e);
-                                    }
-                                }
-                            }
-
-                            if (avmFileName) {
-                                this.avmFiles.set(contractHash, avmFileName);
+                            let compiledContract = this.contractDetector.getContractByHash(contractHash);
+                            if (compiledContract) {
                                 let args = [];
                                 if (methodName === 'Main') {
                                     args = [
@@ -300,7 +311,7 @@ export class InvocationPanel {
                                     'name': contractName + '-' + methodName,
                                     'type': 'neo-contract',
                                     'request': 'launch',
-                                    'program': avmFileName,
+                                    'program': compiledContract.path,
                                     'args': args,
                                     'storage': [],
                                     'runtime': {

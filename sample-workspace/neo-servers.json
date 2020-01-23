@@ -1,14 +1,12 @@
-[
-    {
-        "name": "Neo Main Net",
-        "url": "http://seed2.ngd.network:10332"
-    },
-    {
-        "name": "Neo Test Net",
-        "url": "https://test3.cityofzion.io"
-    },
-    {
-        "name": "Neo Test Net - getunspents supported",
-        "url": "http://seed5.ngd.network:20332"
+{
+    "neo-rpc-uris": [
+        "https://node1.nl.neoblocks.org",
+        "http://seed1.ngd.network:20332",
+        "http://seed5.ngd.network:20332",
+        "(invalid URLs are ignored)",
+        "http://127.0.0.1:49154"
+    ],
+    "neo-blockchain-names": {
+        "4661f92562043b8cf39caa79a9f0de1ed462371aec26746c0998225fa5b8b2ca": "My Private Net"
     }
-]
+}
