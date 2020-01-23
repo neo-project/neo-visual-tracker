@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
                     const quickPick = vscode.window.createQuickPick();
                     quickPick.title = title;
                     quickPick.placeholder = 'Select an RPC server (Press \'Enter\' to confirm or \'Escape\' to cancel)';
-                    quickPick.items = possibleUris.map((_: string) => { return { label: _ }; });
+                    quickPick.items = possibleUris.sort((a: string, b: string) => a > b ? 1 : -1).map((_: string) => { return { label: _ }; });
                     quickPick.activeItems = quickPick.items.filter((_: any) => _.label === lastUsedUri);
                     const result = await new Promise(resolve => {
                         quickPick.onDidAccept(() => resolve(quickPick.activeItems[0].label));
