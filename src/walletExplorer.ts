@@ -102,7 +102,7 @@ class WalletExplorerAccount implements IWallet {
         private readonly parsedWallet: wallet.Wallet,
         public readonly account: wallet.Account,
         private readonly filename: string,
-        walletName: string) {
+        public readonly walletName: string) {
 
         this.description = filename + ' - ' + walletName + ' - ' + account.label;
         this.address = account.address;
