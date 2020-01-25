@@ -153,7 +153,7 @@ class RpcServerTreeItemIdentifier {
                 command: 'neo-visual-devtracker.openTracker',
                 arguments: [ this ],
             };
-            if (this.rpcUri.startsWith('http://127.0.0.1:')) {
+            if (this.jsonFile && this.rpcUri.startsWith('http://127.0.0.1:')) {
                 if (this.parent && (this.parent.children.length > 1)) {
                     result.contextValue = 'expressNodeMulti';
                 } else {
@@ -169,7 +169,7 @@ class RpcServerTreeItemIdentifier {
             result.iconPath = this.iconPath;
             result.description = this.description;
             result.tooltip = this.jsonFile;
-            if (this.children.find(_ => _.rpcUri && _.rpcUri.startsWith('http://127.0.0.1:'))) {
+            if (this.children.find(_ => _.jsonFile && _.rpcUri && _.rpcUri.startsWith('http://127.0.0.1:'))) {
                 result.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
                 if (this.children.length > 1) {
                     result.contextValue = 'expressNodeMulti';
@@ -270,7 +270,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
                 node = RpcServerTreeItemIdentifier.forCustomBlockchain(extensionPath, label);
                 otherBlockChains.set(genesisBlockHash, node);
             }
-            const urlNode = RpcServerTreeItemIdentifier.fromUri(customUrl.toString(), customUrl.authority, node, jsonFile);
+            const urlNode = RpcServerTreeItemIdentifier.fromUri(customUrl.toString(), customUrl.authority, node);
             urlNode.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'custom-blockchain-server.svg')); 
             node.children.push(urlNode);
             node.children.sort((a, b) => (a.label || '') > (b.label || '') ? 1 : -1);

@@ -107,8 +107,16 @@ export class CachedRpcClient {
         return this.memoizedGetBlock(indexOrHash, verbose);
     }
 
-    public getRawTransaction(txid: string, verbose?: number): Promise<any> {
-        return this.memoizedGetRawTransaction(txid, verbose);
+    public async getRawTransaction(txid: string, verbose?: number): Promise<any> {
+        // Note that the result is not cached if the transaction is unconfirmed.
+        // The block hash will initially be null, so the transaction must be 
+        // re-retrieved later to get a version with the block hash populated.
+
+        const result = await this.memoizedGetRawTransaction(txid, verbose);
+        if (!result.blockhash) {
+            await this.memoizedGetRawTransaction.delete(txid, verbose);
+        }
+        return result;
     }
 
     public getAssetState(assetId: string): Promise<any> {

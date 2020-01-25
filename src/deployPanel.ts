@@ -124,13 +124,21 @@ export class DeployPanel {
                 const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
                 if (await walletConfig.unlock()) {
                     const api = new neon.api.neoCli.instance(this.rpcUri);
-                    const config = {
+                    const config: any = {
                         api: api,
                         script: script,
                         account: walletConfig.account,
                         signingFunction: walletConfig.signingFunction,
                         gas: gas,
                     };
+                    if (walletConfig.isMultiSig) {
+                        // The neon.default.doInvoke function expects the config.account property to be present and 
+                        // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
+                        // the multisig group); however it also uses config.account.address when looking up the available
+                        // GAS. So we manually lookup the available GAS (using the multisig address) and then pass it in
+                        // (thus avoiding the lookup within doInvoke).
+                        config.balance = await api.getBalance(this.viewState.walletAddress as string);
+                    }
                     const result = await neon.default.doInvoke(config);
                     if (result.response && result.response.txid) {
                         this.viewState.result = result.response.txid;

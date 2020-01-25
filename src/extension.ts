@@ -11,7 +11,6 @@ import { NeoExpressConfig } from './neoExpressConfig';
 import { NeoExpressHelper } from './neoExpressHelper';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
-import { NewWalletPanel } from './newWalletPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
 import { TransferPanel } from './transferPanel';
@@ -40,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
             const action = postInstallAction;
             postInstallAction = null;
             if (await NeoExpressHelper.isNeoExpressInstalled()) {
-                action();
+                await action();
             } else {
                 await vscode.window.showErrorMessage(
                     'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.\n',
@@ -51,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const requireNeoExpress = async (then: Function) => {
         if (await NeoExpressHelper.isNeoExpressInstalled()) {
-            then();
+            await then();
         } else if (postInstallAction) {
             await vscode.window.showErrorMessage(
                 'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.\n',
@@ -174,14 +173,39 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', async (server) => {
-        await requireNeoExpress(() => {
+        await requireNeoExpress(async () => {
             try {
-                const panel = new NewWalletPanel(
-                    context.extensionPath,
-                    server.jsonFile,
-                    context.subscriptions);
+                const walletName = await vscode.window.showInputBox({ 
+                    ignoreFocusOut: true, 
+                    prompt: 'Choose a name for the new wallet',
+                    validateInput: _ => _ && _.length ? '' : 'The wallet name cannot be empty',
+                });
+                if (walletName) {
+                    const neoExpressConfig = new NeoExpressConfig(server.jsonFile);
+                    let allowOverwrite = false;
+                    if (neoExpressConfig.wallets.filter(_ => _.walletName.toLowerCase() === walletName.toLowerCase()).length) {
+                        const selection = await vscode.window.showWarningMessage(
+                            'A wallet with name \'' + walletName + '\' already exists. Overwrite?', 
+                            { modal: true }, 
+                            'Overwrite');
+                        if (selection !== 'Overwrite') {
+                            return;
+                        }
+                        allowOverwrite = true;
+                    } 
+                    const result = await NeoExpressHelper.createWallet(server.jsonFile, walletName, allowOverwrite);
+                    if (result.isError) {
+                        await vscode.window.showErrorMessage(
+                            'There was an unexpected error creating the wallet:\r\n\r\n' + result.output,
+                            { modal: true });
+                    } else {
+                        await vscode.window.showInformationMessage(
+                            'Wallet created:\r\n' + result.output.replace(/[\r\n]/g, ' ').replace(/( )+/g, ' '),
+                            { modal: true });
+                    }
+                }
             } catch (e) {
-                console.error('Error opening new wallet panel ', e);
+                console.error('Error creating new neo-express wallet ', e);
             }
         });
     });
