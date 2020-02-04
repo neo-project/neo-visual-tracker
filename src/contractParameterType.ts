@@ -14,7 +14,7 @@ export class ContractParameterType {
         ['Map', '12'],
         ['InteropInterface', 'f0'],
         ['Any', 'fe'],
-        ['Void', 'ff'],
+        ['Void', 'ff00'],
     ];
 
     public static typeNameToHexString(typeName: string | undefined): string | undefined {
