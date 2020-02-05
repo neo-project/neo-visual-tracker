@@ -212,11 +212,19 @@ export class InvocationPanel {
                             const sb = neon.default.create.scriptBuilder();
                             let script = '';
                             if (method.name === 'Main') {
-                                const args = InvocationPanel.parseArrayArgument(method.parameters[1].value);
-                                script = sb.emitAppCall(
-                                    contractHash, 
-                                    method.parameters[0].value, 
-                                    args).str;
+                                if (method.parameters.length === 0) {
+                                    script = sb.emitAppCall(contractHash).str;
+                                    script = script.substr(2); // remove the unnecessary PUSH0 instruction (that leaves a 0 on the call stack after execution)
+                                } else if (method.parameters.length === 1) {
+                                    script = sb.emitAppCall(contractHash, method.parameters[0].value).str;
+                                    script = script.substr(2); // remove the unnecessary PUSH0 instruction (that leaves a 0 on the call stack after execution)
+                                } else {
+                                    const args = InvocationPanel.parseArrayArgument(method.parameters[1].value);
+                                    script = sb.emitAppCall(
+                                        contractHash, 
+                                        method.parameters[0].value, 
+                                        args).str;
+                                }
                             } else {
                                 const args = InvocationPanel.extractArguments(method.parameters);
                                 script = sb.emitAppCall(
@@ -295,12 +303,18 @@ export class InvocationPanel {
                         if (method.name === methodName) {
                             let compiledContract = this.contractDetector.getContractByHash(contractHash);
                             if (compiledContract) {
-                                let args = [];
+                                let args: any[] = [];
                                 if (methodName === 'Main') {
-                                    args = [
-                                        method.parameters[0].value,
-                                        InvocationPanel.parseArrayArgument(method.parameters[1].value || '[]'),
-                                    ];
+                                    if (method.parameters.length === 0) {
+                                        args = [];
+                                    } else if (method.parameters.length === 1) {
+                                        args = [ method.parameters[0].value, '[]' ];
+                                    } else {
+                                        args = [
+                                            method.parameters[0].value,
+                                            InvocationPanel.parseArrayArgument(method.parameters[1].value || '[]'),
+                                        ];
+                                    }
                                 } else {
                                     args = [
                                         methodName,
