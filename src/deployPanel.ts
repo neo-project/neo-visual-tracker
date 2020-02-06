@@ -59,7 +59,15 @@ export class DeployPanel {
         this.viewState = new ViewState();
 
         this.startSearch = async (q: string) => {
-            await NeoTrackerPanel.newSearch(q, extensionPath, rpcConnection, historyId, state, disposables);
+            await NeoTrackerPanel.newSearch(
+                q, 
+                extensionPath, 
+                rpcConnection, 
+                historyId, 
+                state, 
+                walletExplorer, 
+                disposables, 
+                neoExpressConfig);
         };
 
         this.panel = vscode.window.createWebviewPanel(

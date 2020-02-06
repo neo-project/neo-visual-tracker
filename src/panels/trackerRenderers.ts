@@ -2,6 +2,8 @@ import { htmlHelpers } from "./htmlHelpers";
 import { trackerEvents } from "./trackerEvents";
 import { trackerSelectors } from "./trackerSelectors";
 
+let previousSearchCompletionsRender: string = '';
+
 const trackerRenderers = {
     
     assetName: function(assetId: string, assets: any) {
@@ -220,6 +222,21 @@ const trackerRenderers = {
             itemsSpan.appendChild(htmlHelpers.text(' ')); // allow wrapping between items
         }
         htmlHelpers.showHide(trackerSelectors.HistorySection, !!searchHistory.length);
+    },
+
+    renderSearchCompletions: function(searchCompletions: any[]) {
+        const asString = searchCompletions.map(_ => _.label).join();
+        if (previousSearchCompletionsRender !== asString) { // avoid flicker if list has not changed
+            previousSearchCompletionsRender = asString;
+            const completionsList = document.querySelector(trackerSelectors.SearchCompletions) as HTMLDataListElement;
+            htmlHelpers.clearChildren(completionsList);
+            for (let i = 0; i < searchCompletions.length; i++) {
+                const searchCompletion = searchCompletions[i].label;
+                const option = document.createElement('option');
+                option.value = searchCompletion;
+                completionsList.appendChild(option);
+            }
+        }
     },
 
     renderTransaction: function(transaction: any | undefined, postMessage: any) {
