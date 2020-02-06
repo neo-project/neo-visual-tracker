@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 class Checkpoint {
-    constructor(public readonly name: string, public readonly fullpath: string) {
+    constructor(public readonly label: string, public readonly fullpath: string) {
     }
 }
 

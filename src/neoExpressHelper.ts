@@ -1,5 +1,6 @@
 import * as childProcess from 'child_process';
 import * as shellEscape from 'shell-escape';
+import * as vscode from 'vscode';
 
 class StringResult {
     private constructor(public isError: boolean, public output: string) {
@@ -69,7 +70,6 @@ export class NeoExpressHelper {
         } else {
             return offlineModeResult;
         }
-
     }
 
     public static async createWallet(
@@ -114,6 +114,27 @@ export class NeoExpressHelper {
         });
     }
 
+    public static async restoreCheckpoint(
+        neoExpressJsonFullPath: string, 
+        fullCheckpointPath: string,
+        checkpointLabel: string): Promise<StringResult | undefined> {
+
+        // TODO: First try without '-f' option, and only show overwrite warning to user if '-f' is needed.
+        //       See: https://github.com/neo-project/neo-express/issues/38
+        const allowOverwrite = (await vscode.window.showWarningMessage(
+            'Overwrite existing blockchain data (if any) with the contents of checkpoint ' + checkpointLabel + '?',
+            { modal: true },
+            'Overwrite')) === 'Overwrite';
+        if (allowOverwrite) {
+            return await this.restoreCheckpointInternal(
+                neoExpressJsonFullPath,
+                fullCheckpointPath,
+                true);
+        } else {
+            return undefined;
+        }
+    }
+
     private static async createCheckpointInternal(
         neoExpressJsonFullPath: string,
         checkpointPath: string,
@@ -132,11 +153,36 @@ export class NeoExpressHelper {
         return await new Promise((resolve) => {
             childProcess.exec(command, { cwd: checkpointPath }, (error, stdout, stderr) => {
                 if (error) {
-                    console.error('Error creating checkpoint', command, error, stderr);
+                    console.warn('Error creating checkpoint', command, error, stderr);
                     resolve(StringResult.Error(error.message));
                 } else if (stderr) {
-                    console.error('Error creating checkpoint', command, error, stderr);
+                    console.warn('Error creating checkpoint', command, error, stderr);
                     resolve(StringResult.Error(stderr));
+                } else {
+                    resolve(StringResult.Success(stdout));
+                }
+            });
+        });
+    }
+
+    private static async restoreCheckpointInternal(
+        neoExpressJsonFullPath: string,
+        fullCheckpointPath: string,
+        allowOverwrite: boolean): Promise<StringResult> {
+
+        let command = shellEscape.default([
+            'neo-express',
+            'checkpoint',
+            'restore', 
+            allowOverwrite ? '-f' : '']);
+        command += ' -i ' + NeoExpressHelper.doubleQuoteEscape(neoExpressJsonFullPath);
+        command += ' ' + NeoExpressHelper.doubleQuoteEscape(fullCheckpointPath);
+        return await new Promise((resolve) => {
+            childProcess.exec(command, (error, stdout, stderr) => {
+                if (error || stderr) {
+                    const message = stdout ? stdout.split(/[\r\n]/)[0].trim() : (stderr || error?.message);
+                    console.warn('Error restoring checkpoint', command, error, stdout, stderr);
+                    resolve(StringResult.Error(message || 'Unknown error'));
                 } else {
                     resolve(StringResult.Success(stdout));
                 }

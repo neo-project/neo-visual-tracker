@@ -94,6 +94,11 @@
                 "category": "Neo Express"
             },
             {
+                "command": "neo-visual-devtracker.restoreCheckpoint",
+                "title": "Restore checkpoint",
+                "category": "Neo Express"
+            },
+            {
                 "command": "neo-visual-devtracker.createWallet",
                 "title": "Create Neo Express wallet",
                 "category": "Neo Express"
@@ -169,6 +174,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createCheckpoint",
+                    "when": "false"
+                },
+                {
+                    "command": "neo-visual-devtracker.restoreCheckpoint",
                     "when": "false"
                 },
                 {
@@ -254,6 +263,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createCheckpoint",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.restoreCheckpoint",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
                 },
                 {
