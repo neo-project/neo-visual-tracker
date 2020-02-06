@@ -224,9 +224,10 @@ const trackerRenderers = {
 
     renderTransaction: function(transaction: any | undefined, postMessage: any) {
         if (transaction) {
+            const newRefreshLink = () => htmlHelpers.newEventLink('Unconfirmed', trackerEvents.ShowTransaction, transaction.txid, postMessage, 'Click to refresh');
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailType, htmlHelpers.text(transaction.type));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
-            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, htmlHelpers.text(transaction.blocktime ? htmlHelpers.time(transaction.blocktime) : 'Unconfirmed'));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, transaction.blocktime ? htmlHelpers.text(htmlHelpers.time(transaction.blocktime)) : newRefreshLink());
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailNetworkFee, htmlHelpers.text(htmlHelpers.number(transaction.net_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSystemFee, htmlHelpers.text(htmlHelpers.number(transaction.sys_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
@@ -235,7 +236,7 @@ const trackerRenderers = {
                     trackerSelectors.TransactionDetailBlock, 
                     htmlHelpers.newEventLink(transaction.blockhash, trackerEvents.ShowBlock, transaction.blockhash, postMessage));
             } else {
-                htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailBlock, htmlHelpers.text('Unconfirmed'));
+                htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailBlock, newRefreshLink());
             }
             let valueTransferCount = 0;
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
