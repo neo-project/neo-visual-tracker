@@ -160,6 +160,19 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    const startServerAdvancedCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServerAdvanced', async (server) => {
+        await requireNeoExpress(() => {
+            if (server.index !== undefined) {
+                const label = server.parent ? server.parent.label : server.label;
+                neoExpressInstanceManager.start(server.jsonFile, server.index, label);
+            } else if (server.children && server.children.length) {
+                for (let i = 0; i < server.children.length; i++) {
+                    neoExpressInstanceManager.start(server.jsonFile, server.children[i].index, server.label);
+                }
+            }
+        });
+    });
+
     const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', async (server) => {
         await requireNeoExpress(() => {
             if (server.index !== undefined) {
@@ -364,6 +377,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(openTrackerCommand);
     context.subscriptions.push(refreshServersCommand);
     context.subscriptions.push(startServerCommand);
+    context.subscriptions.push(startServerAdvancedCommand);
     context.subscriptions.push(stopServerCommand);
     context.subscriptions.push(createWalletCommand);
     context.subscriptions.push(createCheckpointCommand);

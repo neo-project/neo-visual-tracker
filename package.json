@@ -72,7 +72,7 @@
             },
             {
                 "command": "neo-visual-devtracker.startServer",
-                "title": "Start Neo Express (with default options)",
+                "title": "Start Neo Express (default options)",
                 "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/play.svg",
@@ -234,6 +234,10 @@
                 {
                     "command": "neo-visual-devtracker.startServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
+                },
+                {
+                    "command": "neo-visual-devtracker.startServerAdvanced",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
                 },
                 {
                     "command": "neo-visual-devtracker.startServerAdvanced",
