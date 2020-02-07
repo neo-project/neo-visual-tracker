@@ -13,6 +13,7 @@ import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
+import { StartPanel } from './startPanel';
 import { TransferPanel } from './transferPanel';
 import { WalletExplorer } from './walletExplorer';
 
@@ -151,9 +152,11 @@ export function activate(context: vscode.ExtensionContext) {
         await requireNeoExpress(() => {
             if (server.index !== undefined) {
                 const label = server.parent ? server.parent.label : server.label;
+                neoExpressInstanceManager.stop(server.jsonFile, server.index);
                 neoExpressInstanceManager.start(server.jsonFile, server.index, label);
             } else if (server.children && server.children.length) {
                 for (let i = 0; i < server.children.length; i++) {
+                    neoExpressInstanceManager.stop(server.jsonFile, server.children[i].index);
                     neoExpressInstanceManager.start(server.jsonFile, server.children[i].index, server.label);
                 }
             }
@@ -162,13 +165,15 @@ export function activate(context: vscode.ExtensionContext) {
 
     const startServerAdvancedCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServerAdvanced', async (server) => {
         await requireNeoExpress(() => {
-            if (server.index !== undefined) {
-                const label = server.parent ? server.parent.label : server.label;
-                neoExpressInstanceManager.start(server.jsonFile, server.index, label);
-            } else if (server.children && server.children.length) {
-                for (let i = 0; i < server.children.length; i++) {
-                    neoExpressInstanceManager.start(server.jsonFile, server.children[i].index, server.label);
-                }
+            try {            
+                const panel = new StartPanel(
+                    context.extensionPath,
+                    new NeoExpressConfig(server.jsonFile),
+                    neoExpressInstanceManager,
+                    checkpointDetector,
+                    context.subscriptions);
+            } catch (e) {
+                console.error('Error opening advanced start panel ', e);
             }
         });
     });

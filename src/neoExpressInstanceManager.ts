@@ -17,10 +17,18 @@ export class NeoExpressInstanceManager {
 
     private readonly terminals: Map<string, vscode.Terminal> = new Map<string, vscode.Terminal>();
 
-    public start(jsonFile: string, index: number, label?: string, dontReincarnate?: boolean) {
+    public start(
+        jsonFile: string, 
+        index: number, 
+        label?: string, 
+        dontReincarnate?: boolean,
+        secondsPerBlock?: number) {
+
         if (!label) {
             label = jsonFile;
         }
+
+        secondsPerBlock = secondsPerBlock || 15;
 
         const key = new InstanceIdentifier(jsonFile, index);
         let terminal = this.terminals.get(key.asString());
@@ -30,12 +38,12 @@ export class NeoExpressInstanceManager {
                 terminal = vscode.window.createTerminal(
                     'NEO: ' + label + ':' + index,
                     'cmd.exe',
-                    ['/c', 'neo-express', 'run', '-i', jsonFile, '' + index]);
+                    ['/c', 'neo-express', 'run', '-s', secondsPerBlock + '', '-i', jsonFile, '' + index]);
             } else {
                 terminal = vscode.window.createTerminal(
                     'NEO: ' + label + ':' + index,
                     'neo-express',
-                    ['run', '-i', jsonFile, '' + index]);
+                    ['run', '-s', secondsPerBlock + '', '-i', jsonFile, '' + index]);
             }
 
             this.terminals.set(key.asString(), terminal);

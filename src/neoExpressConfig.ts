@@ -68,12 +68,17 @@ export class NeoExpressConfig {
 
     public readonly basename: string;
 
+    public readonly instancename: string;
+
     public readonly wallets: IWallet[] = [];
 
     public readonly contracts: any[] = [];
 
+    public nodeCount: number = 1;
+
     public constructor(public readonly neoExpressJsonFullPath: string) {
         this.basename = path.basename(neoExpressJsonFullPath);
+        this.instancename = this.basename.replace(/.json$/, '');
         this.refresh();
     }
 
@@ -100,6 +105,7 @@ export class NeoExpressConfig {
         const genesisPrivateKeys: string[] = [];
         let genesisThreshold = 0;
         const consensusNodes = neoExpressConfig['consensus-nodes'] || [];
+        this.nodeCount = consensusNodes.length || 1;
         consensusNodes.forEach((consensusNode: any) => {
             const nodeWallet = consensusNode.wallet || {};
             if (nodeWallet.accounts && nodeWallet.accounts.length) {

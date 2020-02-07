@@ -72,7 +72,7 @@
             },
             {
                 "command": "neo-visual-devtracker.startServer",
-                "title": "Start Neo Express (default options)",
+                "title": "Start Neo Express (using default options)",
                 "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/play.svg",
