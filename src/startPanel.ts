@@ -72,9 +72,6 @@ export class StartPanel {
         }
 
         for (let i = 0; i < this.neoExpressConfig.nodeCount; i++) {
-            this.neoExpressInstanceManager.stop(
-                this.neoExpressConfig.neoExpressJsonFullPath, 
-                i);
             this.neoExpressInstanceManager.start(
                 this.neoExpressConfig.neoExpressJsonFullPath, 
                 i, 

@@ -152,11 +152,9 @@ export function activate(context: vscode.ExtensionContext) {
         await requireNeoExpress(() => {
             if (server.index !== undefined) {
                 const label = server.parent ? server.parent.label : server.label;
-                neoExpressInstanceManager.stop(server.jsonFile, server.index);
                 neoExpressInstanceManager.start(server.jsonFile, server.index, label);
             } else if (server.children && server.children.length) {
                 for (let i = 0; i < server.children.length; i++) {
-                    neoExpressInstanceManager.stop(server.jsonFile, server.children[i].index);
                     neoExpressInstanceManager.start(server.jsonFile, server.children[i].index, server.label);
                 }
             }
