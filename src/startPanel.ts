@@ -64,24 +64,34 @@ export class StartPanel {
     }
 
     private async doStart(): Promise<boolean> {
-        
         if (this.viewState.selectedCheckpoint) {
-            // TODO: Add support for this scenario
-            this.viewState.error = 'Starting from a specific checkpoint is not yet supported';
-            return false;
-        }
-
-        for (let i = 0; i < this.neoExpressConfig.nodeCount; i++) {
-            this.neoExpressInstanceManager.start(
+            if (!( await this.neoExpressInstanceManager.startCheckpoint(
                 this.neoExpressConfig.neoExpressJsonFullPath, 
-                i, 
+                this.viewState.selectedCheckpoint,
                 this.neoExpressConfig.instancename,
-                undefined,
-                this.viewState.secondsPerBlock);
+                this.viewState.secondsPerBlock))) {
+                
+                this.viewState.error = 'The selected checkpoint cannot be applied to this Neo Express instance';
+                return false;
+            }
+        } else {
+            for (let i = 0; i < this.neoExpressConfig.nodeCount; i++) {
+                if (!(await this.neoExpressInstanceManager.start(
+                    this.neoExpressConfig.neoExpressJsonFullPath, 
+                    i, 
+                    this.neoExpressConfig.instancename,
+                    this.viewState.secondsPerBlock))) {
+                    if (i > 0) {
+                        this.viewState.error = 'One or more of the nodes in this Neo Express instance failed to start';
+                    } else {
+                        this.viewState.error = 'The Neo Express instance failed to start';
+                    }
+                    return false;
+                }
+            }
         }
 
         this.dispose(); // close panel after successful start
-
         return true;
     }
 
