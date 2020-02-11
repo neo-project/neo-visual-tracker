@@ -72,6 +72,8 @@ export class NeoExpressConfig {
 
     public readonly contracts: any[] = [];
 
+    public magic?: number;
+
     public constructor(public readonly neoExpressJsonFullPath: string) {
         this.basename = path.basename(neoExpressJsonFullPath);
         this.refresh();
@@ -80,6 +82,7 @@ export class NeoExpressConfig {
     public refresh() {
         const jsonFileContents = fs.readFileSync(this.neoExpressJsonFullPath, { encoding: 'utf8' });
         const neoExpressConfig = JSON.parse(jsonFileContents);
+        this.magic = parseInt(neoExpressConfig.magic);
         this.parseContracts(neoExpressConfig);
         this.parseWallets(neoExpressConfig);
     }

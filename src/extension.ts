@@ -231,8 +231,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const restoreCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.restoreCheckpoint', async (server) => {
         await requireNeoExpress(async () => {
-            if (checkpointDetector.checkpoints.length) {
-                const checkpoint = await vscode.window.showQuickPick(checkpointDetector.checkpoints);
+            const neoExpressConfig = new NeoExpressConfig(server.jsonFile);
+            const checkpoints = checkpointDetector.checkpoints.filter(_ => _.magic === neoExpressConfig.magic);
+            if (checkpoints.length) {
+                const checkpoint = await vscode.window.showQuickPick(checkpoints);
                 if (checkpoint) {
                     const result = await NeoExpressHelper.restoreCheckpoint(
                         server.jsonFile, 
@@ -252,7 +254,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             } else {
                 vscode.window.showErrorMessage(
-                    'No checkpoint files were found in the current workspace', 
+                    'No checkpoints for this Neo Express instance were found in the current workspace', 
                     { modal: true });
             }
         });

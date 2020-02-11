@@ -342,6 +342,7 @@
         "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
+        "@types/adm-zip": "^0.4.32",
         "@types/glob": "^7.1.1",
         "@types/gulp": "^4.0.6",
         "@types/memoizee": "^0.4.3",
@@ -366,6 +367,7 @@
     "dependencies": {
         "@cityofzion/neon-js": "^4.7.0",
         "@neo-one/node-core": "^1.2.2",
+        "adm-zip": "^0.4.14",
         "bignumber.js": "^9.0.0",
         "bitset": "^5.0.5",
         "bs58": "^4.0.1",
