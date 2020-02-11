@@ -148,6 +148,10 @@
                 {
                     "command": "neo-visual-devtracker.createWalletFile",
                     "when": "isFileSystemResource"
+                },
+                {
+                    "command": "neo-visual-devtracker.deployContract",
+                    "when": "isFileSystemResource && resourceExtname == .avm"
                 }
             ],
             "commandPalette": [
