@@ -60,8 +60,7 @@ function populateWalletDropdown(selector: string, currentSelection?: string) {
     dropdown.appendChild(newWalletOption);
 }
 
-function populateAssetDropdown() {
-    const dropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
+function populateAssetDropdown(dropdown: HTMLSelectElement) {
     htmlHelpers.clearChildren(dropdown);
     let index = 0;
     dropdown.appendChild(document.createElement('option'));
@@ -81,9 +80,10 @@ function render() {
     const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
     const balancesTableBody = document.querySelector(transferSelectors.SourceBalancesTableBody) as HTMLTableSectionElement;
     const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
+    const assetDropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
     populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWalletAddress);
     populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWalletAddress);
-    populateAssetDropdown();
+    populateAssetDropdown(assetDropdown);
     if (viewState.showSuccess) {
         const resultPlaceholder = document.querySelector(transferSelectors.SearchLinkPlaceholder) as HTMLElement;
         htmlHelpers.clearChildren(resultPlaceholder);
@@ -107,9 +107,17 @@ function render() {
     htmlHelpers.clearChildren(balancesTableBody);
     for (let i = 0; i < viewState.sourceWalletBalances.length; i++) {
         const assetDetails = viewState.sourceWalletBalances[i];
+        const clickableAmount = htmlHelpers.newActionLink(
+            htmlHelpers.number(assetDetails.value),
+            () => {
+                viewState.assetName = assetDetails.asset;
+                viewState.amount = assetDetails.value;
+                postViewState();
+            },
+            'Click to transfer ' + htmlHelpers.number(assetDetails.value) + ' ' + assetDetails.asset);
         const row = htmlHelpers.newTableRow(
             htmlHelpers.text(assetDetails.asset + ':'),
-            htmlHelpers.text(htmlHelpers.number(assetDetails.value)));
+            clickableAmount);
         balancesTableBody.appendChild(row);
     }
     transferButton.disabled = !viewState.isValid;

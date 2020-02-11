@@ -135,7 +135,9 @@ export function activate(context: vscode.ExtensionContext) {
                     rpcConnectionPool.getConnection(rpcUri),
                     getHistoryId(server),
                     context.workspaceState,
-                    context.subscriptions);
+                    walletExplorer,
+                    context.subscriptions,
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
             }
         } catch (e) {
             console.error('Error opening Neo tracker panel ', e);

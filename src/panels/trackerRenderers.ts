@@ -2,6 +2,8 @@ import { htmlHelpers } from "./htmlHelpers";
 import { trackerEvents } from "./trackerEvents";
 import { trackerSelectors } from "./trackerSelectors";
 
+let previousSearchCompletionsRender: string = '';
+
 const trackerRenderers = {
     
     assetName: function(assetId: string, assets: any) {
@@ -222,11 +224,27 @@ const trackerRenderers = {
         htmlHelpers.showHide(trackerSelectors.HistorySection, !!searchHistory.length);
     },
 
+    renderSearchCompletions: function(searchCompletions: any[]) {
+        const asString = searchCompletions.map(_ => _.label).join();
+        if (previousSearchCompletionsRender !== asString) { // avoid flicker if list has not changed
+            previousSearchCompletionsRender = asString;
+            const completionsList = document.querySelector(trackerSelectors.SearchCompletions) as HTMLDataListElement;
+            htmlHelpers.clearChildren(completionsList);
+            for (let i = 0; i < searchCompletions.length; i++) {
+                const searchCompletion = searchCompletions[i].label;
+                const option = document.createElement('option');
+                option.value = searchCompletion;
+                completionsList.appendChild(option);
+            }
+        }
+    },
+
     renderTransaction: function(transaction: any | undefined, postMessage: any) {
         if (transaction) {
+            const newRefreshLink = () => htmlHelpers.newEventLink('Unconfirmed', trackerEvents.ShowTransaction, transaction.txid, postMessage, 'Click to refresh');
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailType, htmlHelpers.text(transaction.type));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailHash, htmlHelpers.text(transaction.txid));
-            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, htmlHelpers.text(transaction.blocktime ? htmlHelpers.time(transaction.blocktime) : 'Unconfirmed'));
+            htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailTime, transaction.blocktime ? htmlHelpers.text(htmlHelpers.time(transaction.blocktime)) : newRefreshLink());
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailNetworkFee, htmlHelpers.text(htmlHelpers.number(transaction.net_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSystemFee, htmlHelpers.text(htmlHelpers.number(transaction.sys_fee) + ' GAS'));
             htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailSize, htmlHelpers.text(htmlHelpers.number(transaction.size) + ' bytes'));
@@ -235,7 +253,7 @@ const trackerRenderers = {
                     trackerSelectors.TransactionDetailBlock, 
                     htmlHelpers.newEventLink(transaction.blockhash, trackerEvents.ShowBlock, transaction.blockhash, postMessage));
             } else {
-                htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailBlock, htmlHelpers.text('Unconfirmed'));
+                htmlHelpers.setPlaceholder(trackerSelectors.TransactionDetailBlock, newRefreshLink());
             }
             let valueTransferCount = 0;
             valueTransferCount += this.renderInputsOutputs(trackerSelectors.TransactionDetailInputsClaimsTable, transaction.claimsAugmented, transaction.assets, true, false, postMessage);
