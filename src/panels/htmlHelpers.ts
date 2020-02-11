@@ -19,6 +19,17 @@ const htmlHelpers = {
         }
     },
 
+    newActionLink: function(text: string, action: Function, title?: string) {
+        const link = document.createElement('a');
+        link.href = '#';
+        if (title) {
+            link.title = title;
+        }
+        link.appendChild(document.createTextNode(text));
+        link.addEventListener('click', () => action());
+        return link;
+    },
+
     newCopyLink: function(text: string, postMessage: any) { 
         return this.newEventLink('Copy', trackerEvents.Copy, text, postMessage);
     },
