@@ -21,6 +21,7 @@ function handleMessage(message: any) {
         trackerRenderers.renderTransaction(message.viewState.currentTransaction, vsCodePostMessage);
         trackerRenderers.renderAddress(message.viewState.currentAddressUnspents, message.viewState.currentAddressUnclaimed, vsCodePostMessage);
         trackerRenderers.renderSearchHistory(message.viewState.searchHistory, vsCodePostMessage);
+        trackerRenderers.renderSearchCompletions(message.viewState.searchCompletions);
         trackerRenderers.setPage(message.viewState.activePage);
         htmlHelpers.showHide(trackerSelectors.StatusBar, !!message.viewState.blockChainInfo);
         const openingIndicator: any = document.querySelector(trackerSelectors.OpeningIndicator);
@@ -31,6 +32,7 @@ function handleMessage(message: any) {
         if (message.isSearch) {
             const searchInput = document.querySelector(trackerSelectors.SearchInput) as HTMLInputElement;
             searchInput.value = '';
+            searchInput.focus();
         }
     } else if (message.status) {
         const loadingIndicator: any = document.querySelector(trackerSelectors.LoadingIndicator);
@@ -68,11 +70,23 @@ function initializePanel() {
     searchButton.addEventListener('click', _ => {
         vsCodePostMessage({ e: trackerEvents.Search, c: searchInput.value });
     });
+    searchInput.addEventListener('change', _ => {
+        const completionList = document.querySelector(trackerSelectors.SearchCompletions) as HTMLDataListElement;
+        for (let i = 0; i < completionList.options.length; i++) {
+            const option = completionList.options[i];
+            if (option.value === searchInput.value) {
+                searchInput.blur(); // hide autocomplete dropdown
+                vsCodePostMessage({ e: trackerEvents.Search, c: searchInput.value });
+                break;
+            }
+        }
+    });
     searchInput.addEventListener('keyup', e => {
         if (e.keyCode === 13) { // enter
             vsCodePostMessage({ e: trackerEvents.Search, c: searchInput.value });
         }
     });
+    searchInput.focus();
 }
 
 window.onload = initializePanel;

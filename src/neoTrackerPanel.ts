@@ -5,7 +5,9 @@ import * as vscode from 'vscode';
 import { wallet } from '@cityofzion/neon-core';
 
 import { INeoRpcConnection, INeoSubscription, INeoStatusReceiver, BlockchainInfo, Blocks } from './neoRpcConnection';
+import { NeoExpressConfig } from './neoExpressConfig';
 import { trackerEvents } from './panels/trackerEvents';
+import { WalletExplorer } from './walletExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -33,6 +35,7 @@ class ViewState {
     public currentAddressUnclaimed: any = undefined;
     public hideEmptyBlocks: boolean = false;
     public searchHistory: string[] = [];
+    public searchCompletions: any[] = [];
 }
 
 export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
@@ -42,6 +45,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     
     private readonly historyId: string;
     private readonly state: vscode.Memento;
+    private readonly walletExplorer: WalletExplorer;
+    private readonly neoExpressConfig?: NeoExpressConfig;
 
     private onIncomingMessage?: () => void;
     private rpcConnection: INeoRpcConnection;
@@ -53,9 +58,18 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         rpcConnection: INeoRpcConnection,
         historyId: string,
         state: vscode.Memento,
-        disposables: vscode.Disposable[]) {
+        walletExplorer: WalletExplorer,
+        disposables: vscode.Disposable[],
+        neoExpressConfig?: NeoExpressConfig) {
 
-        const panel = new NeoTrackerPanel(extensionPath, rpcConnection, historyId, state, disposables);
+        const panel = new NeoTrackerPanel(
+            extensionPath, 
+            rpcConnection, 
+            historyId, 
+            state, 
+            walletExplorer, 
+            disposables, 
+            neoExpressConfig);
         await panel.search(query);
     }
 
@@ -64,7 +78,9 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         rpcConnection: INeoRpcConnection,
         historyId: string,
         state: vscode.Memento,
-        disposables: vscode.Disposable[]) {
+        walletExplorer: WalletExplorer,
+        disposables: vscode.Disposable[],
+        neoExpressConfig?: NeoExpressConfig) {
 
         this.rpcConnection = rpcConnection;
         this.rpcConnection.subscribe(this);
@@ -79,6 +95,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         
         this.historyId = historyId;
         this.state = state;
+        this.walletExplorer = walletExplorer;
+        this.neoExpressConfig = neoExpressConfig;
 
         this.panel = vscode.window.createWebviewPanel(
             'newExpressTracker',
@@ -136,8 +154,32 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         await this.state.update('searchHistory:' + this.historyId, []);
     }
 
-    private refreshSearchHistory() {
+    private refreshViewState() {
         this.viewState.searchHistory = this.state.get<string[]>('searchHistory:' + this.historyId, []);
+
+        const newSearchCompletions = [];
+
+        for (let i = 0; i < this.viewState.searchHistory.length; i++) {
+            const item = this.viewState.searchHistory[i];
+            newSearchCompletions.push({ label: item, query: item });
+        }
+
+        const allAccounts = this.walletExplorer.allAccounts;
+        for (let i = 0; i < allAccounts.length; i++) {
+            const account = allAccounts[i];
+            newSearchCompletions.push({ label: account.description, query: account.address });
+        }
+
+        if (this.neoExpressConfig) {
+            this.neoExpressConfig.refresh();
+            for (let i = 0; i < this.neoExpressConfig.wallets.length; i++) {
+                const wallet = this.neoExpressConfig.wallets[i];
+                newSearchCompletions.push({ label: wallet.description, query: wallet.address });
+            }
+        }
+
+        this.viewState.searchCompletions = 
+            newSearchCompletions.sort((a: any, b: any) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1);
     }
 
     private async updateBlockList(force?: boolean) {
@@ -156,6 +198,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
 
     private async search(query: string) {
         let resultFound = false;
+        query = this.viewState.searchCompletions.find(_ => _.label === query)?.query || query;
         const input = query.trim();
         const inputIsAddress = wallet.isAddress(input);
         const inputIsHash = !!input.match(/^(0x)?[0-9a-f]{64}$/i);
@@ -195,7 +238,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
             await this.updateBlockList(true);
             this.viewState.activePage = ActivePage.Blocks;
         }
-        this.refreshSearchHistory();
+        this.refreshViewState();
         this.panel.webview.postMessage({ viewState: this.viewState, isSearch: true });
     }
 
@@ -277,7 +320,7 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
                 await this.search(message.c);
             }
             if (message.e !== trackerEvents.Search) {
-                this.refreshSearchHistory();
+                this.refreshViewState();
                 this.panel.webview.postMessage({ viewState: this.viewState, isSearch: false });
             }
         } finally {

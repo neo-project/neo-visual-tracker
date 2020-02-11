@@ -11,7 +11,7 @@ import { NeoExpressConfig } from './neoExpressConfig';
 import { NeoExpressHelper } from './neoExpressHelper';
 import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
-import { RpcServerExplorer } from './rpcServerExplorer';
+import { RpcServerExplorer, RpcServerTreeItemIdentifier } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
 import { TransferPanel } from './transferPanel';
 import { WalletExplorer } from './walletExplorer';
@@ -117,6 +117,35 @@ export function activate(context: vscode.ExtensionContext) {
         throw new Error('Could not select an RPC URI from node');
     };
 
+    const selectBlockchain = async (title: string, operationContext: string, state: vscode.Memento) => {
+        let blockchains = rpcServerExplorer.getChildren();
+        if (blockchains.length === 0) { // Control may still be initializing
+            await rpcServerExplorer.refresh();
+            blockchains = rpcServerExplorer.getChildren();
+        }
+
+        if (blockchains.length === 1) {
+            return blockchains[0];
+        } else if (blockchains.length > 1) {
+            let lastUsedBlockchain = state.get<string | undefined>('LastBlockchain:' + operationContext, undefined);
+            const quickPick = vscode.window.createQuickPick();
+            quickPick.title = title;
+            quickPick.placeholder = 'Select a blockchain (Press \'Enter\' to confirm or \'Escape\' to cancel)';
+            quickPick.items = blockchains.filter(_ => !!_.label).map((_: RpcServerTreeItemIdentifier) => { return { label: _.label as string, server: _ }; });
+            quickPick.activeItems = quickPick.items.filter((_: any) => _.label === lastUsedBlockchain);
+            const selectedItem: any = await new Promise(resolve => {
+                quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]));
+                quickPick.show();
+            });
+            if (selectedItem) {
+                state.update('LastBlockchain:' + operationContext, selectedItem.label);
+            }
+            return selectedItem.server;
+        }
+        console.error('Could not select a blockchain; contenxt:', operationContext);
+        throw new Error('Could not select a blockchain');
+    };
+
     const getHistoryId = (server: any) => {
         let result = server.label;
         while (server.parent) {
@@ -135,7 +164,9 @@ export function activate(context: vscode.ExtensionContext) {
                     rpcConnectionPool.getConnection(rpcUri),
                     getHistoryId(server),
                     context.workspaceState,
-                    context.subscriptions);
+                    walletExplorer,
+                    context.subscriptions,
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
             }
         } catch (e) {
             console.error('Error opening Neo tracker panel ', e);
@@ -298,8 +329,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', async (server) => {
+    const deployContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.deployContract', async (commandContext) => {
         try {
+            let server: RpcServerTreeItemIdentifier = commandContext;
+            let contractPathHint: string = '';
+            if (commandContext.fsPath) {
+                contractPathHint = commandContext.fsPath;
+                server = await selectBlockchain('Deploy contract', 'Deploy:' + contractPathHint, context.globalState);
+            }
             const rpcUri = await selectUri('Deploy contract', server, context.globalState);
             if (rpcUri) {
                 const panel = new DeployPanel(
@@ -311,7 +348,8 @@ export function activate(context: vscode.ExtensionContext) {
                     walletExplorer,
                     contractDetector,
                     context.subscriptions,
-                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined,
+                    contractPathHint);
             }
         } catch (e) {
             console.error('Error opening contract deployment panel ', e);
