@@ -50,13 +50,15 @@ export class DeployPanel {
         walletExplorer: WalletExplorer,
         contractDetector: ContractDetector,
         disposables: vscode.Disposable[],
-        neoExpressConfig?: NeoExpressConfig) {
+        neoExpressConfig?: NeoExpressConfig,
+        contractPathHint?: string) {
 
         this.contractDetector = contractDetector;
         this.rpcUri = rpcUri;
         this.walletExplorer = walletExplorer;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
+        this.viewState.contractPath = contractPathHint;
 
         this.startSearch = async (q: string) => {
             await NeoTrackerPanel.newSearch(

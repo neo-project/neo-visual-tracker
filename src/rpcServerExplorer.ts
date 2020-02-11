@@ -52,7 +52,7 @@ const parseNeoServersJsonFile = function(jsonFile: string) {
     return undefined;
 };
 
-class RpcServerTreeItemIdentifier {
+export class RpcServerTreeItemIdentifier {
 
     public readonly children: RpcServerTreeItemIdentifier[];
 
