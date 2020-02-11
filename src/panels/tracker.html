@@ -28,8 +28,12 @@
         <div class="formarea">
             <input 
                 type="text" 
+                autocomplete="off"
+                list="searchcompletions"
                 id="searchinput" 
-                placeholder="Enter an address, transaction ID, block index or block hash" />
+                placeholder="Enter a wallet name, address, transaction ID, block index or block hash" />
+            <datalist id="searchcompletions">
+            </datalist>
             <button id="searchbutton">Search</button>
         </div>
         <div class="historySection">

@@ -59,7 +59,11 @@
             {
                 "command": "neo-visual-devtracker.openTracker",
                 "title": "Open Neo Visual DevTracker",
-                "category": "Neo Visual DevTracker"
+                "category": "Neo Visual DevTracker",
+                "icon": {
+                    "light": "resources/light/open.svg",
+                    "dark": "resources/dark/open.svg"
+                }
             },
             {
                 "command": "neo-visual-devtracker.refreshObjectExplorerNode",
@@ -153,6 +157,10 @@
                 {
                     "command": "neo-visual-devtracker.createWalletFile",
                     "when": "isFileSystemResource"
+                },
+                {
+                    "command": "neo-visual-devtracker.deployContract",
+                    "when": "isFileSystemResource && resourceExtname == .avm"
                 }
             ],
             "commandPalette": [
@@ -268,6 +276,21 @@
                 {
                     "command": "neo-visual-devtracker.restoreCheckpoint",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.openTracker",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode",
+                    "group": "inline"
+                },
+                {
+                    "command": "neo-visual-devtracker.openTracker",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti",
+                    "group": "inline"
+                },
+                {
+                    "command": "neo-visual-devtracker.openTracker",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == url",
+                    "group": "inline"
                 },
                 {
                     "command": "neo-visual-devtracker.openTracker",
