@@ -57,6 +57,7 @@ const trackerSelectors = {
     LoadingMessage: '#loading-indicator .message',
     OpeningIndicator: '#opening-indicator',
     SearchInput: '#searchinput',
+    SearchCompletions: '#searchcompletions',
     SearchButton: '#searchbutton',
     HistorySection: '#searcharea .historySection',
     HistoryItems: '#searcharea .historyItems',
