@@ -41,7 +41,7 @@ export class CheckpointDetector {
     }
 
     public async refresh() {
-        const checkpointFiles = (await vscode.workspace.findFiles(this.searchPattern)).map(uri => uri.path);
+        const checkpointFiles = (await vscode.workspace.findFiles(this.searchPattern)).map(uri => uri.fsPath);
         const checkpointDirs = checkpointFiles.map(c => path.parse(c).dir + path.sep);
         const commonPrefixLength = CheckpointDetector.commonPrefix(checkpointDirs).length;
         this.checkpoints = checkpointFiles.map(c => new Checkpoint(c.substring(commonPrefixLength), c));
