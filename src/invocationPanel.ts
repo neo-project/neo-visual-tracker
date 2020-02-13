@@ -188,8 +188,14 @@ export class InvocationPanel {
             this.panel.webview.postMessage({ viewState: this.viewState });
         } else if (message.e === invokeEvents.Debug) {
             this.viewState.invocationError = undefined;
-            if (!(await this.startDebugging(message.c))) {
+            if (!(await this.startDebugging(message.c, false))) {
                 this.viewState.invocationError = this.viewState.invocationError || 'There was an error launching the debugger.';
+                this.panel.webview.postMessage({ viewState: this.viewState });
+            }
+        } else if (message.e === invokeEvents.AddDebugConfig) {
+            this.viewState.invocationError = undefined;
+            if (!(await this.startDebugging(message.c, true))) {
+                this.viewState.invocationError = this.viewState.invocationError || 'There was an error creating the debug configuration.';
                 this.panel.webview.postMessage({ viewState: this.viewState });
             }
         } else if (message.e === invokeEvents.Search) {
@@ -299,7 +305,7 @@ export class InvocationPanel {
         }
     }
 
-    private async startDebugging(methodName: string) {
+    private async startDebugging(methodName: string, addToLaunchJson: boolean) {
         try {
             for (let i = 0; i < this.viewState.contracts.length; i++) {
                 const contractHash = this.viewState.contracts[i].hash;
@@ -346,7 +352,11 @@ export class InvocationPanel {
                                 if (method.selectedCheckpoint) {
                                     debugConfiguration['checkpoint'] = method.selectedCheckpoint;
                                 }
-                                return await vscode.debug.startDebugging(undefined, debugConfiguration);
+                                if (addToLaunchJson) {
+                                    return await this.addToLaunchJson(debugConfiguration);
+                                } else {
+                                    return await vscode.debug.startDebugging(undefined, debugConfiguration);
+                                }
                             } else {
                                 this.viewState.invocationError = 'Could not find an AVM file for this contract in the current workspace.';
                                 return false;
@@ -362,6 +372,48 @@ export class InvocationPanel {
 
         this.viewState.invocationError = 'Could not find NEO Express configuration for this contract.';
         return false;
+    }
+
+    private async addToLaunchJson(debugConfiguration: vscode.DebugConfiguration) {
+        if (!vscode.workspace.workspaceFolders || !vscode.workspace.workspaceFolders.length) {
+            this.viewState.invocationError = 'The current workspace does not contain any folders.';
+            return false;
+        }
+
+        let workspaceFolder = vscode.workspace.workspaceFolders[0].uri;
+        if (vscode.workspace.workspaceFolders.length > 1) {
+            const selectedWorkspace = await vscode.window.showQuickPick(
+                vscode.workspace.workspaceFolders.map(_ => _.uri.toString()),
+                { placeHolder: 'Select a workspace folder' });
+            if (!selectedWorkspace) {
+                this.viewState.invocationError = 'A workspace folder must be selected.';
+                return false;
+            }
+            workspaceFolder = vscode.Uri.parse(selectedWorkspace);
+        }
+        const config = vscode.workspace.getConfiguration('launch', workspaceFolder);
+        const debugConfigurations = config.configurations || [];
+
+        const desiredName = debugConfiguration.name;
+        let deDuplicationIndex = 0;
+        while (debugConfigurations.find((_: vscode.DebugConfiguration) => _.name === debugConfiguration.name)) {
+            deDuplicationIndex++;
+            debugConfiguration.name = desiredName + '-' + deDuplicationIndex;
+        }
+
+        const workspaceFolderString = workspaceFolder.fsPath.toString();
+        if (debugConfiguration.program && debugConfiguration.program.startsWith(workspaceFolderString)) {
+            debugConfiguration.program = '${workspaceFolder}' + debugConfiguration.program.substr(workspaceFolderString.length);
+        }
+        if (debugConfiguration.checkpoint && debugConfiguration.checkpoint.startsWith(workspaceFolderString)) {
+            debugConfiguration.checkpoint = '${workspaceFolder}' + debugConfiguration.checkpoint.substr(workspaceFolderString.length);
+        }
+
+        debugConfigurations.push(debugConfiguration);
+        await config.update('configurations', debugConfigurations, vscode.ConfigurationTarget.WorkspaceFolder);
+        await vscode.window.showTextDocument(
+            await vscode.workspace.openTextDocument(path.join(workspaceFolderString, '.vscode', 'launch.json')));
+        return true;
     }
 
     private static extractArguments(parameters: any[]) {

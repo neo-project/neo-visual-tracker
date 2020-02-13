@@ -231,6 +231,10 @@ const invokeRenderers = {
                     if (launchDebuggerButton) {
                         htmlHelpers.setOnClickEvent(launchDebuggerButton, invokeEvents.Debug, methodData.name, postMessage);
                     }
+                    const addDebugConfigButton = thisMethodDetail.querySelector(invokeSelectors.AddDebugConfigButton);
+                    if (addDebugConfigButton) {
+                        htmlHelpers.setOnClickEvent(addDebugConfigButton, invokeEvents.AddDebugConfig, methodData.name, postMessage);
+                    }
                     const invokeOffChainButton = thisMethodDetail.querySelector(invokeSelectors.InvokeOffChainButton);
                     if (invokeOffChainButton) {
                         htmlHelpers.setOnClickEvent(invokeOffChainButton, invokeEvents.InvokeOffChain, methodData.name, postMessage);
