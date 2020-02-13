@@ -51,7 +51,7 @@ const invokeRenderers = {
                 const checkpoint = checkpoints[i];
                 const item = document.createElement('option');
                 item.value = checkpoint.fullpath;
-                item.innerText = checkpoint.name;
+                item.innerText = checkpoint.label;
                 if (selectedCheckpoint === checkpoint.fullpath) {
                     item.selected = true;
                 }
