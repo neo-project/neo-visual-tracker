@@ -159,7 +159,7 @@ class WalletExplorerWallet {
             const parsedWallet = new wallet.Wallet(contents);
             const passphrase = await unlockWalletAndReturnPassphrase(this.jsonFile, parsedWallet);
             if (passphrase === WrongPassword) {
-                vscode.window.showErrorMessage('The passphrase supplied was incorrect.', { modal: true });
+                vscode.window.showErrorMessage('The passphrase supplied was incorrect.');
             } else {
                 const accountName = await vscode.window.showInputBox({
                     prompt: 'Enter a name for the new account',
@@ -172,7 +172,7 @@ class WalletExplorerWallet {
                     if (await parsedWallet.encryptAll(passphrase)) {
                         fs.writeFileSync(this.jsonFile, JSON.stringify(parsedWallet.export(), undefined, 4));
                     } else {
-                        vscode.window.showErrorMessage('The wallet file could not be encrypted using the supplied passphrase, the account was not added.', { modal: true });
+                        vscode.window.showErrorMessage('The wallet file could not be encrypted using the supplied passphrase, the account was not added.');
                     }
                 }
             }
@@ -283,7 +283,7 @@ export class WalletExplorer implements vscode.CodeLensProvider {
         account.isDefault = true;
         newWallet.addAccount(account);
         if (!(await newWallet.encryptAll(passphrase))) {
-            vscode.window.showErrorMessage('A new wallet file could not be encrypted using the supplied passphrase.', { modal: true });
+            vscode.window.showErrorMessage('A new wallet file could not be encrypted using the supplied passphrase.');
             return;
         }
 
@@ -319,6 +319,6 @@ export class WalletExplorer implements vscode.CodeLensProvider {
 
         const textDocument = await vscode.workspace.openTextDocument({ language: 'json', content: content });
         vscode.window.showTextDocument(textDocument);
-        vscode.window.showInformationMessage(NewWalletFileInstructions, { modal: true });
+        vscode.window.showInformationMessage(NewWalletFileInstructions);
     }
 }
