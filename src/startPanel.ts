@@ -122,7 +122,7 @@ export class StartPanel {
 
         this.viewState.multiNode = this.neoExpressConfig.nodeCount > 1;
 
-        this.viewState.checkpoints = this.checkpointDetector.checkpoints;
+        this.viewState.checkpoints = this.checkpointDetector.checkpoints.filter(_ => _.magic === this.neoExpressConfig.magic);
         if (!this.viewState.checkpoints.find(_ => _.fullpath === this.viewState.selectedCheckpoint)) {
             this.viewState.selectedCheckpoint = undefined;
         }

@@ -37,7 +37,7 @@ function populateCheckpointDropdown(checkpoints: any[], selectedFullPath?: strin
     for (let i = 0; i < checkpoints.length; i++) {
         const option = document.createElement('option') as HTMLOptionElement;
         option.value = checkpoints[i].fullpath;
-        option.appendChild(htmlHelpers.text(checkpoints[i].name));
+        option.appendChild(htmlHelpers.text(checkpoints[i].label));
         option.selected = (option.value === selectedFullPath);
         checkpointDropdown.appendChild(option);
     }
