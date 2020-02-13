@@ -176,6 +176,8 @@ export function activate(context: vscode.ExtensionContext) {
     const refreshServersCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshObjectExplorerNode', () => {
         rpcServerExplorer.refresh();
         walletExplorer.refresh();
+        checkpointDetector.refresh();
+        contractDetector.refresh();
     });
 
     const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', async (server) => {
@@ -254,6 +256,37 @@ export function activate(context: vscode.ExtensionContext) {
                     context.subscriptions);
             } catch (e) {
                 console.error('Error opening new checkpoint panel ', e);
+            }
+        });
+    });
+
+    const restoreCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.restoreCheckpoint', async (server) => {
+        await requireNeoExpress(async () => {
+            const neoExpressConfig = new NeoExpressConfig(server.jsonFile);
+            const checkpoints = checkpointDetector.checkpoints.filter(_ => _.magic === neoExpressConfig.magic);
+            if (checkpoints.length) {
+                const checkpoint = await vscode.window.showQuickPick(checkpoints);
+                if (checkpoint) {
+                    const result = await NeoExpressHelper.restoreCheckpoint(
+                        server.jsonFile, 
+                        checkpoint.fullpath, 
+                        checkpoint.label);
+                    if (result) {
+                        if (result.isError) {
+                            await vscode.window.showErrorMessage(
+                                'There was an unexpected error restoring the checkpoint:\r\n\r\n' + result.output,
+                                { modal: true });
+                        } else {
+                            await vscode.window.showInformationMessage(
+                                'Checkpoint restored',
+                                { modal: true });
+                        }
+                    } 
+                }
+            } else {
+                vscode.window.showErrorMessage(
+                    'No checkpoints for this Neo Express instance were found in the current workspace', 
+                    { modal: true });
             }
         });
     });
@@ -405,6 +438,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(stopServerCommand);
     context.subscriptions.push(createWalletCommand);
     context.subscriptions.push(createCheckpointCommand);
+    context.subscriptions.push(restoreCheckpointCommand);
     context.subscriptions.push(transferCommand);
     context.subscriptions.push(claimCommand);
     context.subscriptions.push(deployContractCommand);

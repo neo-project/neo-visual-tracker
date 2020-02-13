@@ -98,6 +98,11 @@
                 "category": "Neo Express"
             },
             {
+                "command": "neo-visual-devtracker.restoreCheckpoint",
+                "title": "Restore checkpoint",
+                "category": "Neo Express"
+            },
+            {
                 "command": "neo-visual-devtracker.createWallet",
                 "title": "Create Neo Express wallet",
                 "category": "Neo Express"
@@ -177,6 +182,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createCheckpoint",
+                    "when": "false"
+                },
+                {
+                    "command": "neo-visual-devtracker.restoreCheckpoint",
                     "when": "false"
                 },
                 {
@@ -262,6 +271,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.createCheckpoint",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.restoreCheckpoint",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
                 },
                 {
@@ -352,6 +365,7 @@
         "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
+        "@types/adm-zip": "^0.4.32",
         "@types/glob": "^7.1.1",
         "@types/gulp": "^4.0.6",
         "@types/memoizee": "^0.4.3",
@@ -376,6 +390,7 @@
     "dependencies": {
         "@cityofzion/neon-js": "^4.7.0",
         "@neo-one/node-core": "^1.2.2",
+        "adm-zip": "^0.4.14",
         "bignumber.js": "^9.0.0",
         "bitset": "^5.0.5",
         "bs58": "^4.0.1",
