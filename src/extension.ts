@@ -13,6 +13,7 @@ import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer, RpcServerTreeItemIdentifier } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
+import { StartPanel } from './startPanel';
 import { TransferPanel } from './transferPanel';
 import { WalletExplorer } from './walletExplorer';
 
@@ -42,8 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
                 await action();
             } else {
                 await vscode.window.showErrorMessage(
-                    'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.\n',
-                    { modal: true });
+                    'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.');
             }
         }
     });
@@ -53,8 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
             await then();
         } else if (postInstallAction) {
             await vscode.window.showErrorMessage(
-                'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.\n',
-                { modal: true });
+                'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.');
         } else {
             const moreInfo = 'More Information';
             const install = 'Install';
@@ -193,6 +192,21 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
 
+    const startServerAdvancedCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServerAdvanced', async (server) => {
+        await requireNeoExpress(() => {
+            try {            
+                const panel = new StartPanel(
+                    context.extensionPath,
+                    new NeoExpressConfig(server.jsonFile),
+                    neoExpressInstanceManager,
+                    checkpointDetector,
+                    context.subscriptions);
+            } catch (e) {
+                console.error('Error opening advanced start panel ', e);
+            }
+        });
+    });
+
     const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', async (server) => {
         await requireNeoExpress(() => {
             if (server.index !== undefined) {
@@ -229,12 +243,10 @@ export function activate(context: vscode.ExtensionContext) {
                     const result = await NeoExpressHelper.createWallet(server.jsonFile, walletName, allowOverwrite);
                     if (result.isError) {
                         await vscode.window.showErrorMessage(
-                            'There was an unexpected error creating the wallet:\r\n\r\n' + result.output,
-                            { modal: true });
+                            'There was an unexpected error creating the wallet:\r\n\r\n' + result.output);
                     } else {
                         await vscode.window.showInformationMessage(
-                            'Wallet created:\r\n' + result.output.replace(/[\r\n]/g, ' ').replace(/( )+/g, ' '),
-                            { modal: true });
+                            'Wallet created:\r\n' + result.output.replace(/[\r\n]/g, ' ').replace(/( )+/g, ' '));
                     }
                 }
             } catch (e) {
@@ -273,20 +285,14 @@ export function activate(context: vscode.ExtensionContext) {
                         checkpoint.label);
                     if (result) {
                         if (result.isError) {
-                            await vscode.window.showErrorMessage(
-                                'There was an unexpected error restoring the checkpoint:\r\n\r\n' + result.output,
-                                { modal: true });
+                            await vscode.window.showErrorMessage('There was an unexpected error restoring the checkpoint:\r\n\r\n' + result.output);
                         } else {
-                            await vscode.window.showInformationMessage(
-                                'Checkpoint restored',
-                                { modal: true });
+                            await vscode.window.showInformationMessage('Checkpoint restored');
                         }
                     } 
                 }
             } else {
-                vscode.window.showErrorMessage(
-                    'No checkpoints for this Neo Express instance were found in the current workspace', 
-                    { modal: true });
+                vscode.window.showErrorMessage('No checkpoints for this Neo Express instance were found in the current workspace');
             }
         });
     });
@@ -435,6 +441,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(openTrackerCommand);
     context.subscriptions.push(refreshServersCommand);
     context.subscriptions.push(startServerCommand);
+    context.subscriptions.push(startServerAdvancedCommand);
     context.subscriptions.push(stopServerCommand);
     context.subscriptions.push(createWalletCommand);
     context.subscriptions.push(createCheckpointCommand);

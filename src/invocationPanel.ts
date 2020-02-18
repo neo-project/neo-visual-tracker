@@ -228,10 +228,8 @@ export class InvocationPanel {
                             if (method.name === 'Main') {
                                 if (method.parameters.length === 0) {
                                     script = sb.emitAppCall(contractHash).str;
-                                    script = script.substr(2); // remove the unnecessary PUSH0 instruction (that leaves a 0 on the call stack after execution)
                                 } else if (method.parameters.length === 1) {
                                     script = sb.emitAppCall(contractHash, method.parameters[0].value).str;
-                                    script = script.substr(2); // remove the unnecessary PUSH0 instruction (that leaves a 0 on the call stack after execution)
                                 } else {
                                     const args = InvocationPanel.parseArrayArgument(method.parameters[1].value);
                                     script = sb.emitAppCall(
