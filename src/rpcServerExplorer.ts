@@ -344,14 +344,14 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
     public async customizeServerList() {
         if (this.firstServerListFile) {
             vscode.window.showTextDocument(vscode.Uri.file(this.firstServerListFile));
-            vscode.window.showInformationMessage(TemplateInstructionsSecondRun, { modal: true });
+            vscode.window.showInformationMessage(TemplateInstructionsSecondRun);
         } else {
             const textDocument = await vscode.workspace.openTextDocument({
                 language: 'json',
                 content: TemplateServerList,
             });
             vscode.window.showTextDocument(textDocument);
-            vscode.window.showInformationMessage(TemplateInstructionsFirstRun, { modal: true });
+            vscode.window.showInformationMessage(TemplateInstructionsFirstRun);
         }
     }
 

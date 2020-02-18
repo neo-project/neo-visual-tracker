@@ -43,8 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
                 await action();
             } else {
                 await vscode.window.showErrorMessage(
-                    'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.\n',
-                    { modal: true });
+                    'Neo Express installation error.\n\nNeo Express did not install successfully. Check the terminal output for more information.');
             }
         }
     });
@@ -54,8 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
             await then();
         } else if (postInstallAction) {
             await vscode.window.showErrorMessage(
-                'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.\n',
-                { modal: true });
+                'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.');
         } else {
             const moreInfo = 'More Information';
             const install = 'Install';
@@ -245,12 +243,10 @@ export function activate(context: vscode.ExtensionContext) {
                     const result = await NeoExpressHelper.createWallet(server.jsonFile, walletName, allowOverwrite);
                     if (result.isError) {
                         await vscode.window.showErrorMessage(
-                            'There was an unexpected error creating the wallet:\r\n\r\n' + result.output,
-                            { modal: true });
+                            'There was an unexpected error creating the wallet:\r\n\r\n' + result.output);
                     } else {
                         await vscode.window.showInformationMessage(
-                            'Wallet created:\r\n' + result.output.replace(/[\r\n]/g, ' ').replace(/( )+/g, ' '),
-                            { modal: true });
+                            'Wallet created:\r\n' + result.output.replace(/[\r\n]/g, ' ').replace(/( )+/g, ' '));
                     }
                 }
             } catch (e) {
@@ -289,20 +285,14 @@ export function activate(context: vscode.ExtensionContext) {
                         checkpoint.label);
                     if (result) {
                         if (result.isError) {
-                            await vscode.window.showErrorMessage(
-                                'There was an unexpected error restoring the checkpoint:\r\n\r\n' + result.output,
-                                { modal: true });
+                            await vscode.window.showErrorMessage('There was an unexpected error restoring the checkpoint:\r\n\r\n' + result.output);
                         } else {
-                            await vscode.window.showInformationMessage(
-                                'Checkpoint restored',
-                                { modal: true });
+                            await vscode.window.showInformationMessage('Checkpoint restored');
                         }
                     } 
                 }
             } else {
-                vscode.window.showErrorMessage(
-                    'No checkpoints for this Neo Express instance were found in the current workspace', 
-                    { modal: true });
+                vscode.window.showErrorMessage('No checkpoints for this Neo Express instance were found in the current workspace');
             }
         });
     });
