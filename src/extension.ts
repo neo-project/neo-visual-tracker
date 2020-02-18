@@ -13,6 +13,7 @@ import { NeoExpressInstanceManager } from './neoExpressInstanceManager';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer, RpcServerTreeItemIdentifier } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
+import { StartPanel } from './startPanel';
 import { TransferPanel } from './transferPanel';
 import { WalletExplorer } from './walletExplorer';
 
@@ -187,6 +188,21 @@ export function activate(context: vscode.ExtensionContext) {
                 for (let i = 0; i < server.children.length; i++) {
                     neoExpressInstanceManager.start(server.jsonFile, server.children[i].index, server.label);
                 }
+            }
+        });
+    });
+
+    const startServerAdvancedCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServerAdvanced', async (server) => {
+        await requireNeoExpress(() => {
+            try {            
+                const panel = new StartPanel(
+                    context.extensionPath,
+                    new NeoExpressConfig(server.jsonFile),
+                    neoExpressInstanceManager,
+                    checkpointDetector,
+                    context.subscriptions);
+            } catch (e) {
+                console.error('Error opening advanced start panel ', e);
             }
         });
     });
@@ -425,6 +441,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(openTrackerCommand);
     context.subscriptions.push(refreshServersCommand);
     context.subscriptions.push(startServerCommand);
+    context.subscriptions.push(startServerAdvancedCommand);
     context.subscriptions.push(stopServerCommand);
     context.subscriptions.push(createWalletCommand);
     context.subscriptions.push(createCheckpointCommand);
