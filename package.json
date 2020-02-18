@@ -76,12 +76,17 @@
             },
             {
                 "command": "neo-visual-devtracker.startServer",
-                "title": "Start Neo Express",
+                "title": "Start Neo Express (using default options)",
                 "category": "Neo Express",
                 "icon": {
                     "light": "resources/light/play.svg",
                     "dark": "resources/dark/play.svg"
                 }
+            },
+            {
+                "command": "neo-visual-devtracker.startServerAdvanced",
+                "title": "Start Neo Express...",
+                "category": "Neo Express"
             },
             {
                 "command": "neo-visual-devtracker.stopServer",
@@ -173,6 +178,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "neo-visual-devtracker.startServerAdvanced",
+                    "when": "false"
+                },
+                {
                     "command": "neo-visual-devtracker.stopServer",
                     "when": "false"
                 },
@@ -241,6 +250,14 @@
                 },
                 {
                     "command": "neo-visual-devtracker.startServer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
+                },
+                {
+                    "command": "neo-visual-devtracker.startServerAdvanced",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.startServerAdvanced",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
