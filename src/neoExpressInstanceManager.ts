@@ -41,7 +41,6 @@ export class NeoExpressInstanceManager {
         }
         
         if (process.platform === 'win32') {
-            // On Windows vscode fails to launch a terminal using neo-express as the shell
             terminal = vscode.window.createTerminal(
                 'NEO: ' + label + ':' + nodeIndex,
                 'cmd.exe',
@@ -49,8 +48,8 @@ export class NeoExpressInstanceManager {
         } else {
             terminal = vscode.window.createTerminal(
                 'NEO: ' + label + ':' + nodeIndex,
-                'neo-express',
-                ['checkpoint', 'run', '-s', secondsPerBlock + '', '-i', jsonFile, fullPathToCheckpoint]);
+                'sh',
+                ['-c', 'neo-express', 'checkpoint', 'run', '-s', secondsPerBlock + '', '-i', jsonFile, fullPathToCheckpoint]);
         }
 
         this.terminals.set(key.asString(), terminal);
