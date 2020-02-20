@@ -1,3 +1,4 @@
+import * as bignumber from 'bignumber.js';
 import * as fs from 'fs';
 import * as neon from '@cityofzion/neon-js';
 import * as path from 'path';
@@ -6,6 +7,7 @@ import * as vscode from 'vscode';
 import { claimEvents } from './panels/claimEvents';
 
 import { INeoRpcConnection } from './neoRpcConnection';
+import { IWallet } from './iWallet';
 import { NeoExpressConfig } from './neoExpressConfig';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { WalletExplorer } from './walletExplorer';
@@ -15,6 +17,9 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 
 class ViewState {
     claimable: number = 0;
+    unavailable: number = 0;
+    doSelfTransfer: boolean = false;
+    doSelfTransferEnabled: boolean = true;
     getClaimableError: boolean = false;
     isValid: boolean = false;
     result: string = '';
@@ -101,6 +106,9 @@ export class ClaimPanel {
         try {
             const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
             if (await walletConfig.unlock()) {
+                if (this.viewState.doSelfTransfer) {
+                    await this.doSelfTransfer(walletConfig);
+                }
                 const api = new neon.api.neoCli.instance(this.rpcUri);
                 const config: any = {
                     api: api,
@@ -127,6 +135,74 @@ export class ClaimPanel {
         } catch (e) {
             this.viewState.showError = true;
             this.viewState.result = 'There was an error when trying to claim GAS: ' + e;
+        }
+    }
+
+    private async doSelfTransfer(walletConfig: IWallet) {
+        if (this.viewState.walletAddress) {
+            const walletAddress = this.viewState.walletAddress;
+            const getUnspentsResult = await this.rpcConnection.getUnspents(walletAddress, this);
+            if (getUnspentsResult.assets && getUnspentsResult.assets['NEO']) {
+                const neoUnspents = getUnspentsResult.assets['NEO'].unspent;
+                if (neoUnspents && neoUnspents.length) {
+                    let sum = new bignumber.BigNumber(0);
+                    for (let i = 0; i < neoUnspents.length; i++) {
+                        sum = sum.plus(neoUnspents[i].value as bignumber.BigNumber);
+                    }
+                    const totalNeo = sum.toNumber();
+                    const api = new neon.api.neoCli.instance(this.rpcUri);
+                    const config: any = {
+                        api: api,
+                        account: walletConfig.account,
+                        signingFunction: walletConfig.signingFunction,
+                        intents: neon.api.makeIntent({ 'NEO': totalNeo }, walletAddress),
+                    };
+                    if (walletConfig.isMultiSig) {
+                        // The neon.default.sendAsset function expects the config.account property to be present and 
+                        // a regular (non-multisig) account object (so we arbitrarily provide the fist account in
+                        // the multisig group); however it also uses config.account.address when looking up the available
+                        // balance. So we manually lookup the available balance (using the multisig address) and then
+                        // pass it in (thus avoiding the balance lookup within sendAsset).
+                        config.balance = await api.getBalance(walletAddress);
+                    }
+                    const result = await neon.default.sendAsset(config);
+                    if (result.response && result.response.txid) {
+                        return new Promise((resolve, reject) => {
+                            const initialClaimable = this.viewState.claimable;
+                            let attempts = 0;
+                            const resolveWhenClaimableIncreases = async () => {
+                                attempts++;
+                                if (attempts > 15) {
+                                    console.error('ClaimPanel timed out waiting for self-transfer to confirm; continuing with claim');
+                                    resolve();
+                                } else {
+                                    try {
+                                        const unclaimed = await this.rpcConnection.getUnclaimed(walletAddress, this);
+                                        if (!unclaimed.getUnclaimedSupport) {
+                                            reject('No longer able to determine unclaimed GAS');
+                                        } else if (unclaimed.available > initialClaimable) {
+                                            resolve();
+                                        } else {
+                                            setTimeout(resolveWhenClaimableIncreases, 2000);
+                                        }
+                                    } catch (e) {
+                                        reject('Error determining unclaimed GAS');
+                                    }
+                                }
+                            };
+                            resolveWhenClaimableIncreases();
+                        });
+                    } else {
+                        console.error('ClaimPanel self-transfer failed', result, getUnspentsResult, this.viewState);    
+                    }
+                } else {
+                    console.error('ClaimPanel skipping self-transfer (no unspent NEO)', getUnspentsResult, this.viewState);
+                }
+            } else {
+                console.error('ClaimPanel skipping self-transfer (no unspents)', getUnspentsResult, this.viewState);
+            } 
+        } else {
+            console.error('ClaimPanel skipping self-transfer (no wallet sleected)', this.viewState);
         }
     }
 
@@ -179,14 +255,30 @@ export class ClaimPanel {
         this.viewState.claimable = 0;
         const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
         const walletAddress = walletConfig ? walletConfig.address : undefined;
+        this.viewState.doSelfTransferEnabled = false;
         if (walletAddress) {
+            this.viewState.doSelfTransferEnabled = true;
             try {
-                const claimable = await this.rpcConnection.getClaimable(walletAddress, this);
-                this.viewState.claimable = claimable.unclaimed || 0;
-                this.viewState.getClaimableError = !claimable.getClaimableSupport;
+                const unclaimed = await this.rpcConnection.getUnclaimed(walletAddress, this);
+                this.viewState.claimable = unclaimed.available || 0;
+                this.viewState.unavailable = unclaimed.unavailable || 0;
+                this.viewState.getClaimableError = !unclaimed.getUnclaimedSupport;
+                if (this.viewState.getClaimableError) {
+                    this.viewState.doSelfTransfer = false;
+                    this.viewState.doSelfTransferEnabled = false;
+                } else {
+                    if ((this.viewState.claimable === 0) && (this.viewState.unavailable > 0)) {
+                        this.viewState.doSelfTransfer = true;
+                        this.viewState.doSelfTransferEnabled = false;
+                    } else if (this.viewState.unavailable === 0) {
+                        this.viewState.doSelfTransfer = false;
+                        this.viewState.doSelfTransferEnabled = false;
+                    }
+                }
             } catch (e) {
                 console.error('ClaimPanel could not query claimable GAS', walletAddress, this.rpcUri, e);
                 this.viewState.claimable = 0;
+                this.viewState.unavailable = 0;
                 this.viewState.getClaimableError = true;
             }
         }
@@ -199,7 +291,7 @@ export class ClaimPanel {
 
         this.viewState.isValid =
             !!this.viewState.walletAddress &&
-            ((this.viewState.claimable > 0) || this.viewState.getClaimableError);
+            ((this.viewState.claimable > 0) || (this.viewState.unavailable > 0) || this.viewState.getClaimableError);
 
         this.initialized = true;
     }
