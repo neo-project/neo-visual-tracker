@@ -291,7 +291,8 @@ export class ClaimPanel {
 
         this.viewState.isValid =
             !!this.viewState.walletAddress &&
-            ((this.viewState.claimable > 0) || (this.viewState.unavailable > 0) || this.viewState.getClaimableError);
+            !this.viewState.getClaimableError && 
+            ((this.viewState.claimable > 0) || (this.viewState.unavailable > 0));
 
         this.initialized = true;
     }
