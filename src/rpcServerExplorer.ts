@@ -56,7 +56,7 @@ export class RpcServerTreeItemIdentifier {
 
     public readonly children: RpcServerTreeItemIdentifier[];
 
-    public static fromUriFetcher(extensionPath: string, label: string, uriFetch: Promise<string[]>, onUpdate: Function) {
+    public static fromUriFetcher(state: vscode.Memento, extensionPath: string, label: string, uriFetch: Promise<string[]>, onUpdate: Function) {
         const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label, undefined, undefined, 'url');
         result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
         uriFetch.then(uris => {
@@ -78,7 +78,7 @@ export class RpcServerTreeItemIdentifier {
         return result;
     }
 
-    public static fromNeoExpressJsonFile(extensionPath: string, allRootPaths: string[], jsonFile: string) {
+    public static fromNeoExpressJsonFile(state: vscode.Memento, extensionPath: string, allRootPaths: string[], jsonFile: string) {
         try {
             let label = jsonFile;
             for (let i = 0; i < allRootPaths.length; i++) {
@@ -112,6 +112,7 @@ export class RpcServerTreeItemIdentifier {
     }
 
     public static fromUri(
+        //isDefault: boolean,
         rpcUri: string, 
         label: string, 
         parent?: RpcServerTreeItemIdentifier,
@@ -121,7 +122,7 @@ export class RpcServerTreeItemIdentifier {
         return new RpcServerTreeItemIdentifier(jsonFile, rpcUri, parent, label, undefined, index);
     }
 
-    public static forCustomBlockchain(extensionPath: string, label: string) {
+    public static forCustomBlockchain(state: vscode.Memento, extensionPath: string, label: string) {
         const result = new RpcServerTreeItemIdentifier(undefined, undefined, undefined, label, undefined, undefined, 'url');
         result.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'custom-blockchain.svg'));
         return result;
@@ -202,7 +203,11 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
     private firstServerListFile?: string = undefined;
 
-	constructor(private readonly extensionPath: string, private readonly connectionPool: RpcConnectionPool) { 
+	constructor(
+        private readonly state: vscode.Memento,
+        private readonly extensionPath: string, 
+        private readonly connectionPool: RpcConnectionPool) { 
+
         this.onDidChangeTreeDataEmitter = new vscode.EventEmitter<any>();
         this.onDidChangeTreeData = this.onDidChangeTreeDataEmitter.event;
         this.rootItems = [];
@@ -221,6 +226,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
 	public async refresh() {
         const onUpdate = () => this.onDidChangeTreeDataEmitter.fire();
+        const state = this.state;
         const extensionPath = this.extensionPath;
         const allJsonFiles = await vscode.workspace.findFiles('**/*.json');
         const newRootItems = [];
@@ -232,6 +238,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
 
         for (let i = 0; i < allJsonFiles.length; i++) {
             const neoExpressServerFromJson = RpcServerTreeItemIdentifier.fromNeoExpressJsonFile(
+                this.state,
                 this.extensionPath,
                 allRootPaths,
                 allJsonFiles[i].fsPath);
@@ -241,6 +248,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
         }
 
         const mainNetNode = RpcServerTreeItemIdentifier.fromUriFetcher(
+            this.state,
             this.extensionPath, 
             'Main Net', 
             RpcServerExplorer.getAllRpcServers(MainNetServerListUrl), 
@@ -248,6 +256,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
         newRootItems.push(mainNetNode);
 
         const testNetNode = RpcServerTreeItemIdentifier.fromUriFetcher(
+            this.state,
             this.extensionPath, 
             'Test Net', 
             RpcServerExplorer.getAllRpcServers(TestNetServerListUrl), 
@@ -267,7 +276,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
                 if (genesisBlockHash.length > 8) {
                     label += ' - ...' + genesisBlockHash.substr(-8);
                 }
-                node = RpcServerTreeItemIdentifier.forCustomBlockchain(extensionPath, label);
+                node = RpcServerTreeItemIdentifier.forCustomBlockchain(state, extensionPath, label);
                 otherBlockChains.set(genesisBlockHash, node);
             }
             const urlNode = RpcServerTreeItemIdentifier.fromUri(customUrl.toString(), customUrl.authority, node);
@@ -296,7 +305,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
                         if (!node) {
                             otherBlockChains.set(
                                 genesisBlockHash,
-                                RpcServerTreeItemIdentifier.forCustomBlockchain(this.extensionPath, blockchainName));
+                                RpcServerTreeItemIdentifier.forCustomBlockchain(this.state, this.extensionPath, blockchainName));
                         } else {
                             node.label = blockchainName;
                         }
