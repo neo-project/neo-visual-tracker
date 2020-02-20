@@ -66,6 +66,7 @@ export class TransferPanel {
                 walletExplorer, 
                 disposables, 
                 neoExpressConfig);
+            this.dispose(); // close the dialog after navigating to the tracker
         };
 
         this.panel = vscode.window.createWebviewPanel(
