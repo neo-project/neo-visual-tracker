@@ -53,6 +53,7 @@ function populateWalletDropdown() {
 function render() {
     const claimButton = document.querySelector(claimSelectors.ClaimButton) as HTMLButtonElement;
     const walletDropdown = document.querySelector(claimSelectors.WalletDropdown) as HTMLSelectElement;
+    const doTransferCheckbox = document.querySelector(claimSelectors.DoSelfTransferCheckbox) as HTMLInputElement;
     populateWalletDropdown();
     if (viewState.showSuccess) {
         const resultPlaceholder = document.querySelector(claimSelectors.SearchLinkPlaceholder) as HTMLElement;
@@ -66,14 +67,18 @@ function render() {
     }
     htmlHelpers.setPlaceholder(claimSelectors.DisplayWallet, htmlHelpers.text(viewState.walletDescription || '(unknown)'));
     htmlHelpers.setPlaceholder(claimSelectors.DisplayClaimable, htmlHelpers.text(htmlHelpers.number(viewState.claimable || 0)));
+    htmlHelpers.setPlaceholder(claimSelectors.DisplayUnavailable, htmlHelpers.text(viewState.getClaimableError ? '' : htmlHelpers.number(viewState.unavailable || 0)));
     htmlHelpers.setPlaceholder(claimSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(claimSelectors.ErrorClaimableRetrievalFailure, viewState.getClaimableError);
-    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletAddress && !viewState.showError && !(viewState.getClaimableError || (viewState.claimable > 0)));
-    htmlHelpers.showHide(claimSelectors.ClaimableInfo, viewState.claimable > 0);
+    htmlHelpers.showHide(claimSelectors.ErrorWalletHasNoClaimableGas, viewState.walletAddress && !viewState.showError && !(viewState.getClaimableError || (viewState.claimable > 0) || (viewState.unavailable > 0)));
+    htmlHelpers.showHide(claimSelectors.ClaimableInfo, !!viewState.walletAddress && !viewState.getClaimableError);
+    htmlHelpers.showHide(claimSelectors.UnavailableInfo, !!viewState.walletAddress && !viewState.getClaimableError);
     htmlHelpers.showHide(claimSelectors.ErrorMessage, viewState.showError);
     htmlHelpers.showHide(claimSelectors.ViewResults, viewState.showSuccess);
     htmlHelpers.showHide(claimSelectors.ViewDataEntry, !viewState.showSuccess);
     htmlHelpers.showHide(claimSelectors.ErrorMessage, !!viewState.showError);
+    doTransferCheckbox.checked = viewState.doSelfTransfer;
+    doTransferCheckbox.disabled = !viewState.doSelfTransferEnabled;
     claimButton.disabled = !viewState.isValid;
     walletDropdown.disabled = false;
 }
@@ -94,6 +99,7 @@ function initializePanel() {
     const closeButton = document.querySelector(claimSelectors.CloseButton) as HTMLButtonElement;
     const refreshLink = document.querySelector(claimSelectors.RefreshClaimableLink) as HTMLAnchorElement;
     const walletDropdown = document.querySelector(claimSelectors.WalletDropdown) as HTMLSelectElement;
+    const doTransferCheckbox = document.querySelector(claimSelectors.DoSelfTransferCheckbox) as HTMLInputElement;
     claimButton.addEventListener('click', _ => {
         enterLoadingState();
         vscode.postMessage({ e: claimEvents.Claim });
@@ -116,6 +122,12 @@ function initializePanel() {
             enterLoadingState();
             vsCodePostMessage({ e: claimEvents.Update, c: viewState });
         }
+        console.log('->', viewState);
+    });
+    doTransferCheckbox.addEventListener('change', _ => {
+        viewState.doSelfTransfer = doTransferCheckbox.checked;
+        enterLoadingState();
+        vsCodePostMessage({ e: claimEvents.Update, c: viewState });
         console.log('->', viewState);
     });
     window.addEventListener('message', msg => handleMessage(msg.data));

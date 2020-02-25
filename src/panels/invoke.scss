@@ -13,18 +13,16 @@ body {
     display: inline-block;
 }
 
-.half {
-    width: 50%;
-    display: inline-block;
+.actions {
     text-align: center;
-    padding-bottom: 20px;
     margin: 0;
     table {
         width: 98%;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
     }
     button {
-        width: 98%;
+        margin-right: 10px;
+        width: 30%;
     }
 }
 
@@ -83,19 +81,6 @@ h4 {
             .chevronCollpased {
                 display: none;
             }
-        }
-    }
-    .instructions {
-        background-color: var(--vscode-sideBar-background);
-        color: var(--vscode-sideBar-foreground);
-        border: 1px solid var(--vscode-sideBar-border);
-        box-shadow: 1px 1px 1px var(--vscode-widget-shadow);
-        margin: 12px 10px 10px 10px;
-        padding: 10px;
-        opacity: 0.75;
-        clear: both;
-        div:not(:first-child) {
-            margin-left: 20px;
         }
     }
 }
@@ -169,7 +154,17 @@ table {
     background-color: var(--vscode-sideBar-background);
     border: 1px solid var(--vscode-sideBarSectionHeader-background);
     margin: 10px;
-    padding: 10px;
+    padding: 0px 0px 10px 0px;
+    h5 {
+        text-align: left;
+        margin: 0px 0px 10px 0px;
+        padding: 5px;
+        background-color: var(--vscode-sideBarSectionHeader-background);
+    }
+    .description {
+        text-align: left;
+        padding: 0px 0px 10px 10px;
+    }
 }
 
 ul {
@@ -215,4 +210,38 @@ ul {
             word-break: break-all;
         }
     }
+}
+
+#tipPane {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 30%;
+    margin: 0px;
+    overflow: auto;
+    overflow-wrap: break-word;
+    border: 1px solid var(--vscode-sideBarSectionHeader-background);
+    padding-top: 8px;
+    * > .indent {
+        padding-left: 8px;
+        margin: 5px;
+    }
+    div.strong {
+        margin-top: 15px;
+        font-size: 1.05em;
+    }
+    .example {
+        font-family: monospace;
+    }
+}
+
+#mainPane {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    width: 70%;
+    margin: 0px;
+    overflow: auto;
 }

@@ -44,9 +44,7 @@
                 <div class="select"><select id="walletDropdown"></select></div>
             </div>
             <div class="error" id="errorClaimableRetrievalFailure">
-                There was an error when checking claimable GAS for 
-                <span class="display-wallet emphasis"></span>.
-                Is Neo Express running?
+                There was an error when checking claimable GAS for this account.
             </div>
             <div class="error" id="errorWalletHasNoClaimableGas">
                 The
@@ -55,7 +53,14 @@
             </div>
             <div id="claimableInfo">
                 The <span class="display-wallet emphasis"></span> account
-                can claim <span class="display-claimable"></span> GAS.
+                can immediately claim <span class="display-claimable"></span> GAS.
+            </div>
+            <div id="unavailableInfo">
+                <label>
+                    <input type="checkbox" id="doSelfTransfer" />
+                    Claim <span class="display-unavailable"></span> additional GAS by first self-transferring all
+                    NEO (slower).
+                </label>
             </div>
             
             <div id="error-message" class="result-text error m-t">

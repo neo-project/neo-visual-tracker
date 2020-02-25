@@ -38,6 +38,41 @@ class ViewState {
     public searchCompletions: any[] = [];
 }
 
+class PanelCache {
+
+    private readonly cache: Map<string, NeoTrackerPanel[]> = new Map<string, NeoTrackerPanel[]>();
+
+    public add(panel: NeoTrackerPanel, rpcConnection: INeoRpcConnection, neoExpressConfig?: NeoExpressConfig) {
+        const key = PanelCache.makeKey(rpcConnection, neoExpressConfig);
+        let panels = this.cache.get(key);
+        if (!panels) {
+            panels = [];
+            this.cache.set(key, panels);
+        }
+        panels.push(panel);
+    }
+
+    public remove(panel: NeoTrackerPanel, rpcConnection: INeoRpcConnection, neoExpressConfig?: NeoExpressConfig) {
+        const key = PanelCache.makeKey(rpcConnection, neoExpressConfig);
+        const panels = this.cache.get(key);
+        if (panels) {
+            this.cache.set(key, panels.filter(p => p !== panel));
+        }
+    }
+
+    public get(rpcConnection: INeoRpcConnection, neoExpressConfig?: NeoExpressConfig): NeoTrackerPanel | undefined {
+        const key = PanelCache.makeKey(rpcConnection, neoExpressConfig);
+        const panels = this.cache.get(key);
+        if (panels && panels.length) {
+            return panels[0];
+        }
+    }
+
+    private static makeKey(rpcConnection: INeoRpcConnection, neoExpressConfig?: NeoExpressConfig): string {
+        return rpcConnection.rpcUrl + ':' + (neoExpressConfig ? neoExpressConfig.neoExpressJsonFullPath : 'non-neo-express');
+    }
+}
+
 export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     public readonly panel: vscode.WebviewPanel;
     public readonly ready: Promise<void>;
@@ -52,6 +87,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     private rpcConnection: INeoRpcConnection;
     private isPageLoading: boolean;
 
+    private static panelCache = new PanelCache();
+
     public static async newSearch(
         query: string,
         extensionPath: string,
@@ -62,14 +99,18 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         disposables: vscode.Disposable[],
         neoExpressConfig?: NeoExpressConfig) {
 
-        const panel = new NeoTrackerPanel(
-            extensionPath, 
-            rpcConnection, 
-            historyId, 
-            state, 
-            walletExplorer, 
-            disposables, 
-            neoExpressConfig);
+        let panel = this.panelCache.get(rpcConnection, neoExpressConfig);
+        if (!panel) {
+            panel = new NeoTrackerPanel(
+                extensionPath, 
+                rpcConnection, 
+                historyId, 
+                state, 
+                walletExplorer, 
+                disposables, 
+                neoExpressConfig);
+        }
+        panel.focus();
         await panel.search(query);
     }
 
@@ -118,6 +159,8 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
         this.panel.webview.html = htmlFileContents
             .replace(JavascriptHrefPlaceholder, javascriptHref)
             .replace(CssHrefPlaceholder, cssHref);
+
+        NeoTrackerPanel.panelCache.add(this, this.rpcConnection, this.neoExpressConfig);
     }
 
     public async onNewBlock(blockchainInfo: BlockchainInfo) {
@@ -132,6 +175,10 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
 
     public updateStatus(status?: string) : void {
         this.panel.webview.postMessage({ status: { message: status, isLoading: this.isPageLoading } });
+    }
+
+    public focus() {
+        this.panel.reveal();
     }
 
     private async augmentSearchHistory(query: string) {
@@ -193,7 +240,9 @@ export class NeoTrackerPanel implements INeoSubscription, INeoStatusReceiver {
     }
 
     private onClose() {
+        NeoTrackerPanel.panelCache.remove(this, this.rpcConnection, this.neoExpressConfig);
         this.rpcConnection.unsubscribe(this);
+        this.dispose();
     }
 
     private async search(query: string) {
