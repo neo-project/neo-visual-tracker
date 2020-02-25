@@ -194,16 +194,14 @@ const invokeRenderers = {
 
         const placeholder = contractDetailElement.querySelector(invokeSelectors.MethodsPlaceholder);
         const methodTemplate = document.querySelector(invokeSelectors.MethodTemplate);
-        const instructionsTemplate = document.querySelector(invokeSelectors.InvokeInstructionsTemplate);
-        if (placeholder && methodTemplate && instructionsTemplate) {
+        if (placeholder && methodTemplate) {
             for (let i = 0; i < methods.length; i++) {
                 const methodData = methods[i];
                 const methodId = contractHash + '.' + methodData.name;
                 const thisMethod = document.createElement('div');
                 thisMethod.innerHTML = methodTemplate.innerHTML;
                 const thisMethodDetail = thisMethod.querySelector(invokeSelectors.MethodDetail);
-                const instructionsPlaceholder = thisMethod.querySelector(invokeSelectors.InstructionsPlaceholder);
-                if (thisMethodDetail && instructionsPlaceholder) {
+                if (thisMethodDetail) {
                     htmlHelpers.setInnerPlaceholder(thisMethod, invokeSelectors.MethodName, htmlHelpers.text(methodData.name));
                     (thisMethodDetail as any).style.display = selectedMethod === methodId ? 'block' : 'none';
                     if (selectedMethod === methodId) {
@@ -253,7 +251,6 @@ const invokeRenderers = {
                         checkpoints, 
                         methodData.selectedCheckpoint, 
                         (c: string) => { methods[i].selectedCheckpoint = c; updateViewState(); });
-                    instructionsPlaceholder.innerHTML = instructionsTemplate.innerHTML;
                     placeholder.appendChild(thisMethod);
                 }
             }

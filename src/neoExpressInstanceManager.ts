@@ -1,3 +1,4 @@
+import * as shellEscape from 'shell-escape';
 import * as vscode from "vscode";
 
 const findProcess = require('find-process');
@@ -49,7 +50,7 @@ export class NeoExpressInstanceManager {
             terminal = vscode.window.createTerminal(
                 'NEO: ' + label + ':' + nodeIndex,
                 'sh',
-                ['-c', 'neo-express', 'checkpoint', 'run', '-s', secondsPerBlock + '', '-i', jsonFile, fullPathToCheckpoint]);
+                ['-c', shellEscape.default(['neo-express', 'checkpoint', 'run', '-s', secondsPerBlock + '', '-i', jsonFile, fullPathToCheckpoint])]);
         }
 
         this.terminals.set(key.asString(), terminal);
@@ -80,7 +81,6 @@ export class NeoExpressInstanceManager {
         let terminal = this.terminals.get(key.asString());
         if (!terminal) {
             if (process.platform === 'win32') {
-                // On Windows vscode fails to launch a terminal using neo-express as the shell
                 terminal = vscode.window.createTerminal(
                     'NEO: ' + label + ':' + index,
                     'cmd.exe',
@@ -88,8 +88,8 @@ export class NeoExpressInstanceManager {
             } else {
                 terminal = vscode.window.createTerminal(
                     'NEO: ' + label + ':' + index,
-                    'neo-express',
-                    ['run', '-s', secondsPerBlock + '', '-i', jsonFile, '' + index]);
+                    'sh',
+                    ['-c', shellEscape.default(['neo-express', 'run', '-s', secondsPerBlock + '', '-i', jsonFile, '' + index])]);
             }
 
             this.terminals.set(key.asString(), terminal);
