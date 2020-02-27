@@ -116,33 +116,40 @@ export function activate(context: vscode.ExtensionContext) {
         throw new Error('Could not select an RPC URI from node');
     };
 
-    const selectBlockchain = async (title: string, operationContext: string, state: vscode.Memento) => {
+    const selectBlockchain = async (title: string, state: vscode.Memento, filter: (string | undefined)[] = []) => {
+        const stateKey = 'LastBlockchain:' + filter.join('|');
         let blockchains = rpcServerExplorer.getChildren();
         if (blockchains.length === 0) { // Control may still be initializing
             await rpcServerExplorer.refresh();
             blockchains = rpcServerExplorer.getChildren();
         }
 
+        if (filter.length) {
+            blockchains = blockchains.filter(_ => filter.indexOf(_.asTreeItem().contextValue) !== -1);
+        }
+
         if (blockchains.length === 1) {
             return blockchains[0];
         } else if (blockchains.length > 1) {
-            let lastUsedBlockchain = state.get<string | undefined>('LastBlockchain:' + operationContext, undefined);
+            let lastUsedBlockchain = state.get<string | undefined>(stateKey, undefined);
             const quickPick = vscode.window.createQuickPick();
             quickPick.title = title;
             quickPick.placeholder = 'Select a blockchain (Press \'Enter\' to confirm or \'Escape\' to cancel)';
             quickPick.items = blockchains.filter(_ => !!_.label).map((_: RpcServerTreeItemIdentifier) => { return { label: _.label as string, server: _ }; });
             quickPick.activeItems = quickPick.items.filter((_: any) => _.label === lastUsedBlockchain);
             const selectedItem: any = await new Promise(resolve => {
-                quickPick.onDidAccept(() => resolve(quickPick.activeItems[0]));
+                quickPick.onDidAccept(() => {
+                    resolve(quickPick.activeItems[0]);
+                    quickPick.hide();
+                });
                 quickPick.show();
             });
             if (selectedItem) {
-                state.update('LastBlockchain:' + operationContext, selectedItem.label);
+                state.update(stateKey, selectedItem.label);
             }
             return selectedItem.server;
         }
-        console.error('Could not select a blockchain; contenxt:', operationContext);
-        throw new Error('Could not select a blockchain');
+        console.error('Could not select a blockchain; context:', stateKey);
     };
 
     const getHistoryId = (server: any) => {
@@ -156,6 +163,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const openTrackerCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTracker', async (server) => {
         try {
+            server = server || await selectBlockchain('Open Neo Visual DevTracker', context.globalState);
+            if (!server) {
+                return;
+            }
             const rpcUri = await selectUri('Open Neo Visual DevTracker', server, context.globalState);
             if (rpcUri) {
                 const panel = new NeoTrackerPanel(
@@ -180,7 +191,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', async (server) => {
-        await requireNeoExpress(() => {
+        await requireNeoExpress(async () => {
+            server = server || await selectBlockchain('Start Neo Express (using default options)', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
+            if (!server) {
+                return;
+            }
             if (server.index !== undefined) {
                 const label = server.parent ? server.parent.label : server.label;
                 neoExpressInstanceManager.start(server.jsonFile, server.index, label);
@@ -193,8 +208,12 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const startServerAdvancedCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServerAdvanced', async (server) => {
-        await requireNeoExpress(() => {
-            try {            
+        await requireNeoExpress(async () => {
+            server = server || await selectBlockchain('Start Neo Express...', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
+            if (!server) {
+                return;
+            }
+            try {        
                 const panel = new StartPanel(
                     context.extensionPath,
                     new NeoExpressConfig(server.jsonFile),
@@ -208,7 +227,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', async (server) => {
-        await requireNeoExpress(() => {
+        await requireNeoExpress(async () => {
+            server = server || await selectBlockchain('Stop Neo Express', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
+            if (!server) {
+                return;
+            }
             if (server.index !== undefined) {
                 neoExpressInstanceManager.stop(server.jsonFile, server.index);
             } else if (server.children && server.children.length) {
@@ -221,6 +244,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', async (server) => {
         await requireNeoExpress(async () => {
+            server = server || await selectBlockchain('Create Neo Express wallet', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
+            if (!server) {
+                return;
+            }
             try {
                 const walletName = await vscode.window.showInputBox({ 
                     ignoreFocusOut: true, 
@@ -256,7 +283,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
     
     const createCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.createCheckpoint', async (server) => {
-        await requireNeoExpress(() => {
+        await requireNeoExpress(async () => {
+            server = server || await selectBlockchain('Create checkpoint', context.globalState, [ 'expressNode' ]);
+            if (!server) {
+                return;
+            }
             try {
                 const defaultPath = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length ? 
                     vscode.workspace.workspaceFolders[0].uri.fsPath : 
@@ -274,6 +305,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const restoreCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.restoreCheckpoint', async (server) => {
         await requireNeoExpress(async () => {
+            server = server || await selectBlockchain('Restore checkpoint', context.globalState, [ 'expressNode' ]);
+            if (!server) {
+                return;
+            }
             const neoExpressConfig = new NeoExpressConfig(server.jsonFile);
             const checkpoints = checkpointDetector.checkpoints.filter(_ => _.magic === neoExpressConfig.magic);
             if (checkpoints.length) {
@@ -299,6 +334,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const transferCommand = vscode.commands.registerCommand('neo-visual-devtracker.transferAssets', async (server) => {
         try {
+            server = server || await selectBlockchain('Transfer assets', context.globalState);
+            if (!server) {
+                return;
+            }
             const rpcUri = await selectUri('Transfer assets', server, context.globalState);
             if (rpcUri) {
                 const panel = new TransferPanel(
@@ -318,6 +357,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const claimCommand = vscode.commands.registerCommand('neo-visual-devtracker.claim', async (server) => {
         try {
+            server = server || await selectBlockchain('Claim GAS', context.globalState);
+            if (!server) {
+                return;
+            }
             const rpcUri = await selectUri('Claim GAS', server, context.globalState);
             if (rpcUri) {
                 const panel = new ClaimPanel(
@@ -339,23 +382,27 @@ export function activate(context: vscode.ExtensionContext) {
         try {
             let server: RpcServerTreeItemIdentifier = commandContext;
             let contractPathHint: string = '';
-            if (commandContext.fsPath) {
+            if (!commandContext) {
+                server = await selectBlockchain('Deploy contract', context.globalState);
+            } else if (commandContext.fsPath) {
                 contractPathHint = commandContext.fsPath;
-                server = await selectBlockchain('Deploy contract', 'Deploy:' + contractPathHint, context.globalState);
+                server = await selectBlockchain('Deploy contract', context.globalState);
             }
-            const rpcUri = await selectUri('Deploy contract', server, context.globalState);
-            if (rpcUri) {
-                const panel = new DeployPanel(
-                    context.extensionPath,
-                    rpcUri,
-                    rpcConnectionPool.getConnection(rpcUri),
-                    getHistoryId(server),
-                    context.workspaceState,
-                    walletExplorer,
-                    contractDetector,
-                    context.subscriptions,
-                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined,
-                    contractPathHint);
+            if (server) {
+                const rpcUri = await selectUri('Deploy contract', server, context.globalState);
+                if (rpcUri) {
+                    const panel = new DeployPanel(
+                        context.extensionPath,
+                        rpcUri,
+                        rpcConnectionPool.getConnection(rpcUri),
+                        getHistoryId(server),
+                        context.workspaceState,
+                        walletExplorer,
+                        contractDetector,
+                        context.subscriptions,
+                        server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined,
+                        contractPathHint);
+                }
             }
         } catch (e) {
             console.error('Error opening contract deployment panel ', e);
@@ -364,6 +411,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const invokeContractCommand = vscode.commands.registerCommand('neo-visual-devtracker.invokeContract', async (server) => {
         try {
+            server = server || await selectBlockchain('Invoke contract', context.globalState);
+            if (!server) {
+                return;
+            }
             const rpcUri = await selectUri('Invoke contract', server, context.globalState);
             if (rpcUri) {
                 const panel = new InvocationPanel(
