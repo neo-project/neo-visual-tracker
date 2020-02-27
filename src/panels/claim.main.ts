@@ -20,8 +20,10 @@ function enterLoadingState() {
     htmlHelpers.showHide(claimSelectors.LoadingIndicator, true, 'inline');
     const claimButton = document.querySelector(claimSelectors.ClaimButton) as HTMLButtonElement;
     const walletDropdown = document.querySelector(claimSelectors.WalletDropdown) as HTMLSelectElement;
+    const mainForm = document.querySelector(claimSelectors.MainForm) as HTMLFormElement;
     claimButton.disabled = true;
     walletDropdown.disabled = true;
+    mainForm.disabled = true;
 }
 
 function exitLoadingState() {
@@ -54,17 +56,8 @@ function render() {
     const claimButton = document.querySelector(claimSelectors.ClaimButton) as HTMLButtonElement;
     const walletDropdown = document.querySelector(claimSelectors.WalletDropdown) as HTMLSelectElement;
     const doTransferCheckbox = document.querySelector(claimSelectors.DoSelfTransferCheckbox) as HTMLInputElement;
+    const mainForm = document.querySelector(claimSelectors.MainForm) as HTMLFormElement;
     populateWalletDropdown();
-    if (viewState.showSuccess) {
-        const resultPlaceholder = document.querySelector(claimSelectors.SearchLinkPlaceholder) as HTMLElement;
-        htmlHelpers.clearChildren(resultPlaceholder);
-        const searchLink = htmlHelpers.newEventLink(
-            viewState.result,
-            claimEvents.Search,
-            viewState.result,
-            vsCodePostMessage);
-        resultPlaceholder.appendChild(searchLink);
-    }
     htmlHelpers.setPlaceholder(claimSelectors.DisplayWallet, htmlHelpers.text(viewState.walletDescription || '(unknown)'));
     htmlHelpers.setPlaceholder(claimSelectors.DisplayClaimable, htmlHelpers.text(htmlHelpers.number(viewState.claimable || 0)));
     htmlHelpers.setPlaceholder(claimSelectors.DisplayUnavailable, htmlHelpers.text(viewState.getClaimableError ? '' : htmlHelpers.number(viewState.unavailable || 0)));
@@ -81,6 +74,21 @@ function render() {
     doTransferCheckbox.disabled = !viewState.doSelfTransferEnabled;
     claimButton.disabled = !viewState.isValid;
     walletDropdown.disabled = false;
+    mainForm.disabled = false;
+    if (viewState.showSuccess) {
+        const resultPlaceholder = document.querySelector(claimSelectors.SearchLinkPlaceholder) as HTMLElement;
+        const closeButton = document.querySelector(claimSelectors.CloseButton) as HTMLButtonElement;
+        htmlHelpers.clearChildren(resultPlaceholder);
+        const searchLink = htmlHelpers.newEventLink(
+            viewState.result,
+            claimEvents.Search,
+            viewState.result,
+            vsCodePostMessage);
+        resultPlaceholder.appendChild(searchLink);
+        closeButton.focus();
+    } else {
+        walletDropdown.focus();
+    }
 }
 
 function handleMessage(message: any) {
@@ -95,16 +103,16 @@ function handleMessage(message: any) {
 function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
-    const claimButton = document.querySelector(claimSelectors.ClaimButton) as HTMLButtonElement;
-    const closeButton = document.querySelector(claimSelectors.CloseButton) as HTMLButtonElement;
+    const mainForm = document.querySelector(claimSelectors.MainForm) as HTMLFormElement;
+    const resultForm = document.querySelector(claimSelectors.ResultForm) as HTMLFormElement;
     const refreshLink = document.querySelector(claimSelectors.RefreshClaimableLink) as HTMLAnchorElement;
     const walletDropdown = document.querySelector(claimSelectors.WalletDropdown) as HTMLSelectElement;
     const doTransferCheckbox = document.querySelector(claimSelectors.DoSelfTransferCheckbox) as HTMLInputElement;
-    claimButton.addEventListener('click', _ => {
+    mainForm.addEventListener('submit', _ => {
         enterLoadingState();
         vscode.postMessage({ e: claimEvents.Claim });
     });
-    closeButton.addEventListener('click', _ => {
+    resultForm.addEventListener('submit', _ => {
         enterLoadingState();
         vscode.postMessage({ e: claimEvents.Close });
     });

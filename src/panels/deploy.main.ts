@@ -21,11 +21,14 @@ let closeButton: HTMLButtonElement;
 let walletDropdown: HTMLSelectElement;
 let contractDropdown: HTMLSelectElement;
 let refreshLink: HTMLAnchorElement;
+let mainForm: HTMLFormElement;
+let resultForm: HTMLFormElement;
 
 function enterLoadingState() {
     htmlHelpers.showHide(deploySelectors.LoadingIndicator, true, 'inline');
     deployButton.disabled = true;
     walletDropdown.disabled = true;
+    mainForm.disabled = true;
 }
 
 function exitLoadingState() {
@@ -73,16 +76,6 @@ function render() {
         viewState.wallets.map((_: any) => _.address), 
         viewState.walletAddress,
         'Create a new NEP-6 wallet file...');
-    if (viewState.showSuccess) {
-        const resultPlaceholder = document.querySelector(deploySelectors.Result) as HTMLElement;
-        htmlHelpers.clearChildren(resultPlaceholder);
-        const searchLink = htmlHelpers.newEventLink(
-            viewState.result,
-            deployEvents.Search,
-            viewState.result,
-            vsCodePostMessage);
-        resultPlaceholder.appendChild(searchLink);
-    }
     htmlHelpers.showHide(deploySelectors.ContractDetail, !!viewState.contractPath);
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractHash, htmlHelpers.text(viewState.contractHash));
     htmlHelpers.setPlaceholder(deploySelectors.DisplayContractName, htmlHelpers.text(viewState.contractName));
@@ -96,6 +89,20 @@ function render() {
     deployButton.disabled = !viewState.isValid;
     walletDropdown.disabled = false;
     contractDropdown.disabled = false;
+    mainForm.disabled = false;
+    if (viewState.showSuccess) {
+        const resultPlaceholder = document.querySelector(deploySelectors.Result) as HTMLElement;
+        htmlHelpers.clearChildren(resultPlaceholder);
+        const searchLink = htmlHelpers.newEventLink(
+            viewState.result,
+            deployEvents.Search,
+            viewState.result,
+            vsCodePostMessage);
+        resultPlaceholder.appendChild(searchLink);
+        closeButton.focus();
+    } else {
+        contractDropdown.focus();
+    }
 }
 
 function handleMessage(message: any) {
@@ -115,13 +122,15 @@ function initializePanel() {
     walletDropdown = document.querySelector(deploySelectors.WalletDropdown) as HTMLSelectElement;
     contractDropdown = document.querySelector(deploySelectors.ContractDropdown) as HTMLSelectElement;
     refreshLink = document.querySelector(deploySelectors.RefreshLink) as HTMLAnchorElement;
+    mainForm = document.querySelector(deploySelectors.MainForm) as HTMLFormElement;
+    resultForm = document.querySelector(deploySelectors.ResultForm) as HTMLFormElement;
     
-    deployButton.addEventListener('click', _ => {
+    mainForm.addEventListener('submit', _ => {
         enterLoadingState();
         vsCodePostMessage({ e: deployEvents.Deploy });
     });
 
-    closeButton.addEventListener('click', _ => {
+    resultForm.addEventListener('submit', _ => {
         enterLoadingState();
         vsCodePostMessage({ e: deployEvents.Close });
     });

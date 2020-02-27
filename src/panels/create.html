@@ -14,82 +14,90 @@
 
         <div id="data-entry-view">
 
-            <h1>Create a new Neo Express instance</h1>
+            <form>
 
-            <h2>Configuration path</h2>
-            <div>
-                Select the path that the Neo Express configuration should be saved in:
-            </div>
-            <table id="path-selection">
-                <tr>
-                    <td>
-                        <input type="file" id="custom-path-picker" webkitdirectory />
-                        <span id="current-path"></span>
-                    </td>
-                    <td class="text-right">
-                        <button id="change-path">Browse</button>
-                    </td>
-                </tr>
-            </table>
-            <div>
-                Choose a name for the Neo Express configuration file:
-            </div>
-            <div>
-                <input type="text" id="filename" />
-            </div>
-            <div id="file-exists-warning" class="error">
+                <h1>Create a new Neo Express instance</h1>
+
+                <h2>Configuration path</h2>
                 <div>
-                    The selected configuration file <span class="combined-path emphasis"></span> already exists.
+                    Select the path that the Neo Express configuration should be saved in:
+                </div>
+                <table id="path-selection">
+                    <tr>
+                        <td>
+                            <input type="file" id="custom-path-picker" webkitdirectory />
+                            <span id="current-path"></span>
+                        </td>
+                        <td class="text-right">
+                            <button id="change-path" type="button">Browse</button>
+                        </td>
+                    </tr>
+                </table>
+                <div>
+                    Choose a name for the Neo Express configuration file:
                 </div>
                 <div>
-                    <label>
-                        <input type="checkbox" id="allow-overwrite" />
-                        Allow configuration file overwrite
-                    </label>
+                    <input type="text" id="filename" />
                 </div>
-            </div>
-            <div id="file-does-not-exist-notice">
+                <div id="file-exists-warning" class="error">
+                    <div>
+                        The selected configuration file <span class="combined-path emphasis"></span> already exists.
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="allow-overwrite" />
+                            Allow configuration file overwrite
+                        </label>
+                    </div>
+                </div>
+                <div id="file-does-not-exist-notice">
+                    <div>
+                        The configuration file <span class="combined-path emphasis"></span> will be created.
+                    </div>
+                </div>
+
+                <h2>Node count</h2>
                 <div>
-                    The configuration file <span class="combined-path emphasis"></span> will be created.
+                    Number of nodes in the new instance:
                 </div>
-            </div>
+                <table id="node-count-picker">
+                    <tr>
+                        <td id="node-count-1">1</td>
+                        <td id="node-count-4">4</td>
+                        <td id="node-count-7">7</td>
+                    </tr>
+                </table>
 
-            <h2>Node count</h2>
-            <div>
-                Number of nodes in the new instance:
-            </div>
-            <table id="node-count-picker">
-                <tr>
-                    <td id="node-count-1">1</td>
-                    <td id="node-count-4">4</td>
-                    <td id="node-count-7">7</td>
-                </tr>
-            </table>
+                <div id="error-message" class="result-text error">
+                </div>
 
-            <div id="error-message" class="result-text error">
-            </div>
+                <div class="text-center">
+                    <button id="create" class="action-btn" type="submit">Create instance</button>
+                </div>
 
-            <div class="text-center">
-                <button id="create" class="action-btn">Create instance</button>
-            </div>
+            </form>
 
         </div>
 
         <div id="results-view" class="results">
 
-            <h1>New instance created</h1>
+            <form>
 
-            <div>
-                The configuration file <span class="combined-path emphasis"></span> has been created:
-            </div>
+                <h1>New instance created</h1>
 
-            <div>
-                <pre class="result-text"></pre>
-            </div>
+                <div>
+                    The configuration file <span class="combined-path emphasis"></span> has been created:
+                </div>
 
-            <div class="text-center">
-                <button id="close" class="action-btn">OK</button>
-            </div>
+                <div>
+                    <pre class="result-text"></pre>
+                </div>
+
+                <div class="text-center">
+                    <button id="close" class="action-btn" type="submit">OK</button>
+                </div>
+
+            </form>
 
         </div>
         

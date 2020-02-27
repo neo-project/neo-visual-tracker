@@ -14,103 +14,111 @@
 
         <div id="data-entry-view">
 
-            <h1>Transfer assets</h1>
+            <form>
 
-            <a href="#" 
-                id="refreshBalancesLink" 
-                class="right"
-                title="Click to update source wallet list and  balances">Refresh</a>
+                <h1>Transfer assets</h1>
 
-            <!-- 'Loading' animation courtesy of loading.io; see: https://loading.io/license/#free-license -->
-            <svg class="loading right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34px" height="34px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
-                <rect x="17.5" y="0" width="15" height="40" fill="#85a2b6">
-                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="0;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
-                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="64;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
-                </rect>
-                <rect x="42.5" y="0" width="15" height="40" fill="#bbcedd">
-                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
-                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
-                </rect>
-                <rect x="67.5" y="0" width="15" height="40" fill="#dce4eb">
-                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
-                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
-                </rect>
-            </svg>
+                <a href="#" 
+                    id="refreshBalancesLink" 
+                    class="right"
+                    title="Click to update source wallet list and  balances">Refresh</a>
 
-            <h2>
-                Source wallet
-            </h2>
-            <div>
-                Select the account to transfer assets from:
-            </div>
-            <div>
-                <div class="select"><select id="sourceWalletDropdown"></select></div>
-            </div>
-            <div class="error" id="errorBalanceRetrievalFailure">
-                There was an error when attempting to retrieve current balances for 
-                <span class="display-source-wallet emphasis"></span>.
-                Is Neo Express running?
-            </div>
-            <div class="error" id="errorSourceWalletEmpty">
-                The
-                <span class="display-source-wallet emphasis"></span>
-                account does not contain any assets.
-            </div>
+                <!-- 'Loading' animation courtesy of loading.io; see: https://loading.io/license/#free-license -->
+                <svg class="loading right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34px" height="34px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                    <rect x="17.5" y="0" width="15" height="40" fill="#85a2b6">
+                        <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="0;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                        <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="64;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                    </rect>
+                    <rect x="42.5" y="0" width="15" height="40" fill="#bbcedd">
+                        <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                        <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                    </rect>
+                    <rect x="67.5" y="0" width="15" height="40" fill="#dce4eb">
+                        <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                        <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                    </rect>
+                </svg>
 
-            <h2>Transfer amount</h2>
-            <div id="sourceBalancesTable">
+                <h2>
+                    Source wallet
+                </h2>
                 <div>
-                    The <span class="display-source-wallet emphasis"></span> account
-                    contains the following assets:
+                    Select the account to transfer assets from:
                 </div>
-                <table class="table">
-                    <tbody id="sourceBalancesTableBody">
-                    </tbody>
-                </table>
-            </div>
-            <div>
-                Select an asset and enter the amount to transfer:
-            </div>
-            <div>
-                <span class="col-2">
-                    <input type="text" id="amount" placeholder="Amount" />
-                </span>
-                <span class="col-2">
-                    <div class="select"><select id="assetDropdown"></select></div>
-                </span>
-            </div>
-            
-            <h2>Destination wallet</h2>
-            <div>
-                Select the account to receive the assets:
-            </div>
-            <div>
-                <div class="select"><select id="destinationWalletDropdown"></select></div>
-            </div>
+                <div>
+                    <div class="select"><select id="sourceWalletDropdown"></select></div>
+                </div>
+                <div class="error" id="errorBalanceRetrievalFailure">
+                    There was an error when attempting to retrieve current balances for 
+                    <span class="display-source-wallet emphasis"></span>.
+                    Is Neo Express running?
+                </div>
+                <div class="error" id="errorSourceWalletEmpty">
+                    The
+                    <span class="display-source-wallet emphasis"></span>
+                    account does not contain any assets.
+                </div>
 
-            <div id="error-message" class="result-text error">
-            </div>
+                <h2>Transfer amount</h2>
+                <div id="sourceBalancesTable">
+                    <div>
+                        The <span class="display-source-wallet emphasis"></span> account
+                        contains the following assets:
+                    </div>
+                    <table class="table">
+                        <tbody id="sourceBalancesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    Select an asset and enter the amount to transfer:
+                </div>
+                <div>
+                    <span class="col-2">
+                        <input type="text" id="amount" placeholder="Amount" />
+                    </span>
+                    <span class="col-2">
+                        <div class="select"><select id="assetDropdown"></select></div>
+                    </span>
+                </div>
+                
+                <h2>Destination wallet</h2>
+                <div>
+                    Select the account to receive the assets:
+                </div>
+                <div>
+                    <div class="select"><select id="destinationWalletDropdown"></select></div>
+                </div>
 
-            <div class="text-center">
-                <button id="transfer" class="action-btn">Transfer</button>
-            </div>
+                <div id="error-message" class="result-text error">
+                </div>
+
+                <div class="text-center">
+                    <button id="transfer" class="action-btn" type="submit">Transfer</button>
+                </div>
+
+            </form>
 
         </div>
 
         <div id="results-view" class="results">
 
-            <h1>Assets transferred</h1>
+            <form>
 
-            <div>
-                The transfer was made in the following transaction:
-            </div>
+                <h1>Assets transferred</h1>
 
-            <div id="searchLink">
-            </div>
+                <div>
+                    The transfer was made in the following transaction:
+                </div>
 
-            <div class="text-center">
-                <button id="close" class="action-btn">OK</button>
-            </div>
+                <div id="searchLink">
+                </div>
+
+                <div class="text-center">
+                    <button id="close" class="action-btn" type="submit">OK</button>
+                </div>
+
+            </form>
 
         </div>
         

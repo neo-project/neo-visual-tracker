@@ -12,6 +12,8 @@ const createCheckpointSelectors = {
     ErrorMessage: '#error-message',
     FileDoesNotExistNotice: '#file-does-not-exist-notice',
     FileExistsWarning: '#file-exists-warning',
+    MainForm: '#data-entry-view form',
+    ResultForm: '#results-view form',
     ResultText: '.result-text',
     ViewDataEntry: '#data-entry-view',
     ViewResults: '#results-view',

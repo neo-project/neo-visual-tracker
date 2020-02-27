@@ -19,11 +19,13 @@ const CreateNewWallet = 'CREATE_NEW_WALLET';
 function toggleLoadingState(isLoading: boolean) {
     htmlHelpers.showHide(transferSelectors.LoadingIndicator, isLoading, 'inline');
     const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
+    const mainForm = document.querySelector(transferSelectors.MainForm) as HTMLFormElement;
     const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
     const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
     const destinationWalletDropdown = document.querySelector(transferSelectors.DestinationWalletDropdown) as HTMLSelectElement;
     const assetDropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
     transferButton.disabled = isLoading;
+    mainForm.disabled = isLoading;
     amountInput.disabled = isLoading;
     sourceWalletDropdown.disabled = isLoading;
     destinationWalletDropdown.disabled = isLoading;
@@ -81,19 +83,12 @@ function render() {
     const balancesTableBody = document.querySelector(transferSelectors.SourceBalancesTableBody) as HTMLTableSectionElement;
     const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
     const assetDropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
+    const closeButton = document.querySelector(transferSelectors.CloseButton) as HTMLButtonElement;
+    const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
+    const mainForm = document.querySelector(transferSelectors.MainForm) as HTMLFormElement;
     populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWalletAddress);
     populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWalletAddress);
     populateAssetDropdown(assetDropdown);
-    if (viewState.showSuccess) {
-        const resultPlaceholder = document.querySelector(transferSelectors.SearchLinkPlaceholder) as HTMLElement;
-        htmlHelpers.clearChildren(resultPlaceholder);
-        const searchLink = htmlHelpers.newEventLink(
-            viewState.result,
-            transferEvents.Search,
-            viewState.result,
-            vsCodePostMessage);
-        resultPlaceholder.appendChild(searchLink);
-    }
     htmlHelpers.setPlaceholder(transferSelectors.DisplaySourceWallet, htmlHelpers.text(viewState.sourceWalletDescription || '(unknown)'));
     htmlHelpers.setPlaceholder(transferSelectors.ErrorMessage, htmlHelpers.text(viewState.result));
     htmlHelpers.showHide(transferSelectors.ErrorBalanceRetrievalFailure, viewState.sourceWalletBalancesError);
@@ -121,6 +116,20 @@ function render() {
         balancesTableBody.appendChild(row);
     }
     transferButton.disabled = !viewState.isValid;
+    mainForm.disabled = !viewState.isValid;
+    if (viewState.showSuccess) {
+        const resultPlaceholder = document.querySelector(transferSelectors.SearchLinkPlaceholder) as HTMLElement;
+        htmlHelpers.clearChildren(resultPlaceholder);
+        const searchLink = htmlHelpers.newEventLink(
+            viewState.result,
+            transferEvents.Search,
+            viewState.result,
+            vsCodePostMessage);
+        resultPlaceholder.appendChild(searchLink);
+        closeButton.focus();
+    } else {
+        sourceWalletDropdown.focus();
+    }
 }
 
 function handleMessage(message: any) {
@@ -136,18 +145,18 @@ function initializePanel() {
     toggleLoadingState(true);
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
-    const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
-    const closeButton = document.querySelector(transferSelectors.CloseButton) as HTMLButtonElement;
     const refreshLink = document.querySelector(transferSelectors.RefreshBalancesLink) as HTMLAnchorElement;
     const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
     const destinationWalletDropdown = document.querySelector(transferSelectors.DestinationWalletDropdown) as HTMLSelectElement;
     const assetDropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
     const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
-    transferButton.addEventListener('click', _ => {
+    const mainForm = document.querySelector(transferSelectors.MainForm) as HTMLFormElement;
+    const resultForm = document.querySelector(transferSelectors.ResultForm) as HTMLFormElement;
+    mainForm.addEventListener('submit', _ => {
         toggleLoadingState(true);
         vscode.postMessage({ e: transferEvents.Transfer });
     });
-    closeButton.addEventListener('click', _ => {
+    resultForm.addEventListener('submit', _ => {
         vscode.postMessage({ e: transferEvents.Close });
     });
     refreshLink.addEventListener('click', _ => {

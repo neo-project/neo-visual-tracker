@@ -35,8 +35,8 @@ function initializePanel() {
     const customPathPicker = document.querySelector(createCheckpointSelectors.CustomPathPicker) as HTMLInputElement;
     const checkpointNameInput = document.querySelector(createCheckpointSelectors.CheckpointNameInput) as HTMLInputElement;
     const allowOverwrite = document.querySelector(createCheckpointSelectors.AllowOverwrite) as HTMLInputElement;
-    const createButton = document.querySelector(createCheckpointSelectors.CreateButton) as HTMLButtonElement;
-    const closeButton = document.querySelector(createCheckpointSelectors.CloseButton) as HTMLButtonElement;
+    const mainForm = document.querySelector(createCheckpointSelectors.MainForm) as HTMLFormElement;
+    const resultForm = document.querySelector(createCheckpointSelectors.ResultForm) as HTMLFormElement;
     browseButton.addEventListener('click', _ => customPathPicker.click());
     customPathPicker.addEventListener('change', _ => {
         const newPath = customPathPicker.files && customPathPicker.files.length ? (customPathPicker.files[0] as any).path : viewState.path;
@@ -56,8 +56,8 @@ function initializePanel() {
         viewState.allowOverwrite = allowOverwrite.checked;
         postViewState();
     });
-    createButton.addEventListener('click', _ => vsCodePostMessage({ e: createCheckpointEvents.Create }));
-    closeButton.addEventListener('click', _ => vsCodePostMessage({ e: createCheckpointEvents.Close }));
+    mainForm.addEventListener('submit', _ => vsCodePostMessage({ e: createCheckpointEvents.Create }));
+    resultForm.addEventListener('submit', _ => vsCodePostMessage({ e: createCheckpointEvents.Close }));
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: createCheckpointEvents.Init });
 }
