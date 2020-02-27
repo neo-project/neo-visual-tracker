@@ -100,7 +100,7 @@ button:disabled:hover {
 }
 
 button:focus {
-    outline: none;
+    border: 1px solid var(--vscode-focusBorder);
 }
 
 a {
