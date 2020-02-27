@@ -45,6 +45,7 @@ function populateCheckpointDropdown(checkpoints: any[], selectedFullPath?: strin
     }
 }
 
+let firstRender = true;
 function render() {
     populateCheckpointDropdown(viewState.checkpoints, viewState.selectedCheckpoint);
     secondsPerBlockInput.value = viewState.secondsPerBlock;
@@ -55,7 +56,10 @@ function render() {
     checkpointDropdown.disabled = false;
     startButton.disabled = false;
     mainForm.disabled = false;
-    checkpointDropdown.focus();
+    if (firstRender) {
+        checkpointDropdown.focus();
+        firstRender = false;
+    }
 }
 
 function handleMessage(message: any) {

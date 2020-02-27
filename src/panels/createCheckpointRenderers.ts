@@ -1,6 +1,8 @@
 import { htmlHelpers } from "./htmlHelpers";
 import { createCheckpointSelectors } from "./createCheckpointSelectors";
 
+let firstRender = true;
+
 const createCheckpointRenderers = {
 
     render: function(viewState: any) {
@@ -28,8 +30,9 @@ const createCheckpointRenderers = {
 
         if (viewState.showSuccess) {
             (document.querySelector(createCheckpointSelectors.CloseButton) as HTMLButtonElement).focus();
-        } else {
+        } else if (firstRender) {
             nameInput.focus();
+            firstRender = false;
         }
 
     },

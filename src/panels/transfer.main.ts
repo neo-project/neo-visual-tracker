@@ -78,14 +78,15 @@ function populateAssetDropdown(dropdown: HTMLSelectElement) {
     }
 }
 
+let firstRender = true;
 function render() {
     const transferButton = document.querySelector(transferSelectors.TransferButton) as HTMLButtonElement;
     const balancesTableBody = document.querySelector(transferSelectors.SourceBalancesTableBody) as HTMLTableSectionElement;
     const amountInput = document.querySelector(transferSelectors.AmountInput) as HTMLInputElement;
     const assetDropdown = document.querySelector(transferSelectors.AssetDropdown) as HTMLSelectElement;
     const closeButton = document.querySelector(transferSelectors.CloseButton) as HTMLButtonElement;
-    const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
     const mainForm = document.querySelector(transferSelectors.MainForm) as HTMLFormElement;
+    const sourceWalletDropdown = document.querySelector(transferSelectors.SourceWalletDropdown) as HTMLSelectElement;
     populateWalletDropdown(transferSelectors.SourceWalletDropdown, viewState.sourceWalletAddress);
     populateWalletDropdown(transferSelectors.DestinationWalletDropdown, viewState.destinationWalletAddress);
     populateAssetDropdown(assetDropdown);
@@ -127,8 +128,9 @@ function render() {
             vsCodePostMessage);
         resultPlaceholder.appendChild(searchLink);
         closeButton.focus();
-    } else {
+    } else if (firstRender) {
         sourceWalletDropdown.focus();
+        firstRender = false;
     }
 }
 

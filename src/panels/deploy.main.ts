@@ -64,6 +64,7 @@ function populateDropdown(
     }
 }
 
+let firstRender = true;
 function render() {
     populateDropdown(
         contractDropdown, 
@@ -100,8 +101,9 @@ function render() {
             vsCodePostMessage);
         resultPlaceholder.appendChild(searchLink);
         closeButton.focus();
-    } else {
+    } else if (firstRender) {
         contractDropdown.focus();
+        firstRender = false;
     }
 }
 
