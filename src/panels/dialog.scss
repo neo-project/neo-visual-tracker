@@ -38,7 +38,7 @@ input, .select {
     }
     select {
         &:focus {
-            outline: none;
+            border: 1px solid var(--vscode-focusBorder);
         }
         width: 100%;
         background-color: var(--vscode-input-background);
@@ -47,9 +47,8 @@ input, .select {
     }
 }
 
-/* Don't leave a visual box around links after they are clicked: */
 a:focus {
-    outline: none;
+    border: 1px solid var(--vscode-focusBorder);
 }
 
 /* Spacing for text in results dialog: */

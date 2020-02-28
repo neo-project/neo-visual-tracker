@@ -18,10 +18,12 @@ let refreshLink: HTMLAnchorElement;
 let checkpointDropdown: HTMLSelectElement;
 let secondsPerBlockInput: HTMLInputElement;
 let startButton: HTMLButtonElement;
+let mainForm: HTMLFormElement;
 
 function enterLoadingState() {
     htmlHelpers.showHide(startSelectors.LoadingIndicator, true, 'inline');
     startButton.disabled = true;
+    mainForm.disabled = true;
     checkpointDropdown.disabled = true;
 }
 
@@ -43,6 +45,7 @@ function populateCheckpointDropdown(checkpoints: any[], selectedFullPath?: strin
     }
 }
 
+let firstRender = true;
 function render() {
     populateCheckpointDropdown(viewState.checkpoints, viewState.selectedCheckpoint);
     secondsPerBlockInput.value = viewState.secondsPerBlock;
@@ -52,6 +55,11 @@ function render() {
     htmlHelpers.showHide(startSelectors.CheckpointSelection, !viewState.multiNode);
     checkpointDropdown.disabled = false;
     startButton.disabled = false;
+    mainForm.disabled = false;
+    if (firstRender) {
+        checkpointDropdown.focus();
+        firstRender = false;
+    }
 }
 
 function handleMessage(message: any) {
@@ -70,13 +78,14 @@ function initializePanel() {
     checkpointDropdown = document.querySelector(startSelectors.CheckpointDropdown) as HTMLSelectElement;
     secondsPerBlockInput = document.querySelector(startSelectors.SecondsPerBlockInput) as HTMLInputElement;
     startButton = document.querySelector(startSelectors.StartButton) as HTMLButtonElement;
-    
+    mainForm = document.querySelector(startSelectors.MainForm) as HTMLFormElement;
+
     refreshLink.addEventListener('click', _ => {
         enterLoadingState();
         vsCodePostMessage({ e: startEvents.Refresh });
     });
 
-    startButton.addEventListener('click', _ => {
+    mainForm.addEventListener('submit', _ => {
         enterLoadingState();
         vsCodePostMessage({ e: startEvents.Start });
     });

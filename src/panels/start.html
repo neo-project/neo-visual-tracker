@@ -12,55 +12,59 @@
 
     <div class="dialog">
 
-        <h1>Start Neo Express</h1>
+        <form>
 
-        <div id="checkpointSelection">
+            <h1>Start Neo Express</h1>
 
-            <a href="#" 
-                id="refreshLink" 
-                class="right"
-                title="Click to refresh the available checkpoints">Refresh</a>
+            <div id="checkpointSelection">
 
-            <!-- 'Loading' animation courtesy of loading.io; see: https://loading.io/license/#free-license -->
-            <svg class="loading right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34px" height="34px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
-                <rect x="17.5" y="0" width="15" height="40" fill="#85a2b6">
-                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="0;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
-                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="64;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
-                </rect>
-                <rect x="42.5" y="0" width="15" height="40" fill="#bbcedd">
-                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
-                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
-                </rect>
-                <rect x="67.5" y="0" width="15" height="40" fill="#dce4eb">
-                    <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
-                    <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
-                </rect>
-            </svg>
+                <a href="#" 
+                    id="refreshLink" 
+                    class="right"
+                    title="Click to refresh the available checkpoints">Refresh</a>
+
+                <!-- 'Loading' animation courtesy of loading.io; see: https://loading.io/license/#free-license -->
+                <svg class="loading right" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="34px" height="34px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                    <rect x="17.5" y="0" width="15" height="40" fill="#85a2b6">
+                        <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="0;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                        <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="64;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+                    </rect>
+                    <rect x="42.5" y="0" width="15" height="40" fill="#bbcedd">
+                        <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                        <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+                    </rect>
+                    <rect x="67.5" y="0" width="15" height="40" fill="#dce4eb">
+                        <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="3;12;12" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                        <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+                    </rect>
+                </svg>
+
+                <div>
+                    Select the checkpoint that you wish to start from:
+                </div>
+                <div>
+                    <div class="select"><select id="checkpointDropdown"></select></div>
+                </div>
+                <div class="error m-b" id="checkpointRestoreWarning">
+                    <strong>Warning:</strong> Changes to the blockchain will not be persisted.
+                </div>
+            </div>
 
             <div>
-                Select the checkpoint that you wish to start from:
+                Delay between block generation (in seconds): 
+                <input type="number" id="secondsPerBlockInput" min="1" max="3600" step="1" class="m-l" />
             </div>
-            <div>
-                <div class="select"><select id="checkpointDropdown"></select></div>
+
+            <div id="error-message" class="error m-t">
             </div>
-            <div class="error m-b" id="checkpointRestoreWarning">
-                <strong>Warning:</strong> Changes to the blockchain will not be persisted.
+
+            <div class="text-center">
+                <button id="start" class="action-btn" type="submit">
+                    Start 
+                </button>
             </div>
-        </div>
 
-        <div>
-            Delay between block generation (in seconds): 
-            <input type="number" id="secondsPerBlockInput" min="1" max="3600" step="1" class="m-l" />
-        </div>
-
-        <div id="error-message" class="error m-t">
-        </div>
-
-        <div class="text-center">
-            <button id="start" class="action-btn">
-                Start 
-            </button>
-        </div>
+        </form>
 
     <script src="[JAVASCRIPT_HREF]"></script>
 

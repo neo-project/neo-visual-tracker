@@ -43,8 +43,8 @@ function initializePanel() {
     const nodeCountOption1 = document.querySelector(createSelectors.NodeCountOption1) as HTMLElement;
     const nodeCountOption4 = document.querySelector(createSelectors.NodeCountOption4) as HTMLElement;
     const nodeCountOption7 = document.querySelector(createSelectors.NodeCountOption7) as HTMLElement;
-    const createButton = document.querySelector(createSelectors.CreateButton) as HTMLButtonElement;
-    const closeButton = document.querySelector(createSelectors.CloseButton) as HTMLButtonElement;
+    const mainForm = document.querySelector(createSelectors.MainForm) as HTMLFormElement;
+    const resultForm = document.querySelector(createSelectors.ResultForm) as HTMLFormElement;
     browseButton.addEventListener('click', _ => customPathPicker.click());
     customPathPicker.addEventListener('change', _ => {
         const newPath = customPathPicker.files && customPathPicker.files.length ? (customPathPicker.files[0] as any).path : viewState.path;
@@ -67,8 +67,8 @@ function initializePanel() {
     nodeCountOption1.addEventListener('click', _ => setNodeCount(1));
     nodeCountOption4.addEventListener('click', _ => setNodeCount(4));
     nodeCountOption7.addEventListener('click', _ => setNodeCount(7));
-    createButton.addEventListener('click', _ => vsCodePostMessage({ e: createEvents.Create }));
-    closeButton.addEventListener('click', _ => vsCodePostMessage({ e: createEvents.Close }));
+    mainForm.addEventListener('submit', _ => vsCodePostMessage({ e: createEvents.Create }));
+    resultForm.addEventListener('submit', _ => vsCodePostMessage({ e: createEvents.Close }));
     window.addEventListener('message', msg => handleMessage(msg.data));
     vscode.postMessage({ e: createEvents.Init });
 }

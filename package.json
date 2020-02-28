@@ -168,52 +168,6 @@
                     "when": "isFileSystemResource && resourceExtname == .avm"
                 }
             ],
-            "commandPalette": [
-                {
-                    "command": "neo-visual-devtracker.openTracker",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.startServer",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.startServerAdvanced",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.stopServer",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.createWallet",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.createCheckpoint",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.restoreCheckpoint",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.transferAssets",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.claim",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.deployContract",
-                    "when": "false"
-                },
-                {
-                    "command": "neo-visual-devtracker.invokeContract",
-                    "when": "false"
-                }
-            ],
             "view/title": [
                 {
                     "command": "neo-visual-devtracker.refreshObjectExplorerNode",

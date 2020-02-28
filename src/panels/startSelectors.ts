@@ -7,6 +7,7 @@ const startSelectors = {
     CheckpointSelection: '#checkpointSelection',
     ErrorMessage: '#error-message',
     LoadingIndicator: '.loading',
+    MainForm: 'form',
     RefreshLink: '#refreshLink',
     Result: '.result-text',
     SecondsPerBlockInput: '#secondsPerBlockInput',

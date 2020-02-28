@@ -7,7 +7,8 @@ const createRenderers = {
         
         htmlHelpers.setPlaceholder(createSelectors.CurrentPath, htmlHelpers.text(viewState.path));
 
-        (document.querySelector(createSelectors.FilenameInput) as HTMLInputElement).value = viewState.filename;
+        const filenameInput = document.querySelector(createSelectors.FilenameInput) as HTMLInputElement;
+        filenameInput.value = viewState.filename;
 
         htmlHelpers.setPlaceholder(createSelectors.CombinedPath, htmlHelpers.text(viewState.combinedPath));
         htmlHelpers.showHide(createSelectors.FileDoesNotExistNotice, !viewState.configFileExists);
@@ -15,8 +16,10 @@ const createRenderers = {
 
         const allowOverwrite = document.querySelector(createSelectors.AllowOverwrite) as HTMLInputElement;
         const createButton = document.querySelector(createSelectors.CreateButton) as HTMLButtonElement;
+        const mainForm = document.querySelector(createSelectors.MainForm) as HTMLFormElement;
         allowOverwrite.checked = viewState.allowOverwrite;
         createButton.disabled = !allowOverwrite.checked && viewState.configFileExists;
+        mainForm.disabled = !allowOverwrite.checked && viewState.configFileExists;
 
         const nodeCountPicker = document.querySelector(createSelectors.NodeCountPicker) as HTMLElement;
         htmlHelpers.removeAllClass(nodeCountPicker, 'selected');
@@ -27,6 +30,11 @@ const createRenderers = {
         htmlHelpers.showHide(createSelectors.ViewResults, viewState.showSuccess);
         htmlHelpers.showHide(createSelectors.ViewDataEntry, !viewState.showSuccess);
 
+        if (viewState.showSuccess) {
+            (document.querySelector(createSelectors.CloseButton) as HTMLButtonElement).focus();
+        } else {
+            filenameInput.focus();
+        }
     },
 
 };
