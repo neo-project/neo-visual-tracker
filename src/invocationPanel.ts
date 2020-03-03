@@ -415,10 +415,6 @@ export class InvocationPanel {
     }
 
     private static extractArguments(parameters: any[]) {
-        if (parameters.length === 0) {
-            return undefined;
-        }
-
         const result = [];
         for (let i = 0; i < parameters.length; i++) {
             const parameter = parameters[i];
@@ -435,7 +431,6 @@ export class InvocationPanel {
                 throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
             }
         }
-
         return result;
     }
 
