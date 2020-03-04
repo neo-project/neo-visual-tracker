@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src vscode-resource:; style-src vscode-resource:;">
+    <link rel="stylesheet" href="[CSS_HREF]">
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="col col-1">
+            Contract:
+        </div>
+        <div class="col col-2">
+            <select id="contractDropdown"></select>
+        </div>
+        <div class="col col-3">
+            &nbsp;
+        </div>
+    </div>
+
+    <div class="error" >
+        Could not retrieve storage for the selected contract.
+        Ensure that Neo Express is running.
+    </div>    
+
+    <table id="storageTable">
+        <thead>
+            <tr>
+                <th colspan="2">Key</th>
+                <th colspan="4">Value</th>
+                <th colspan="1" rowspan="2">Constant</th>
+            </tr>
+            <tr>
+                <th>(as string)</th>
+                <th>(as bytes)</th>
+                <th>(as bytes)</th>
+                <th>(as string)</th>
+                <th>(as number)</th>
+                <th>(as address)</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div class="no-storage" >
+        (No stored data found for this contract)
+    </div>    
+
+    <div class="status-bar">
+        <span id="rpcUrl" class="left"></span>
+        <span id="rpcDescription" class="right"></span>
+    </div>
+
+    <script src="[JAVASCRIPT_HREF]"></script>
+
+</body>
+
+</html>

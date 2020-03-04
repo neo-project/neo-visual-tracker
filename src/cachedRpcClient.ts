@@ -140,6 +140,13 @@ export class CachedRpcClient {
         return this.rpcClient.query({ method: 'express-get-populated-blocks' });
     }
 
+    public getContractStorage(contractHash: string): Promise<any> {
+        // Note that this method is not cached. Contract storage could potentially change at any
+        // new block.
+
+        return this.rpcClient.query({ method: 'express-get-contract-storage', params: [ contractHash ] });
+    }
+
     public getUnclaimed(address: string): Promise<any> {
         // Note that this method is not cached. The state of an address can change in-between calls.
         return this.rpcClient.getUnclaimed(address);

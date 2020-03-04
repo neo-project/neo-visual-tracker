@@ -66,6 +66,11 @@
                 }
             },
             {
+                "command": "neo-visual-devtracker.storageExplorer",
+                "title": "Open Storage Explorer",
+                "category": "Neo Visual DevTracker"
+            },
+            {
                 "command": "neo-visual-devtracker.refreshObjectExplorerNode",
                 "title": "Refresh Neo RPC Server list",
                 "category": "Neo Visual DevTracker",
@@ -274,6 +279,14 @@
                 {
                     "command": "neo-visual-devtracker.openTracker",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == url"
+                },
+                {
+                    "command": "neo-visual-devtracker.storageExplorer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode"
+                },
+                {
+                    "command": "neo-visual-devtracker.storageExplorer",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNodeMulti"
                 },
                 {
                     "command": "neo-visual-devtracker.transferAssets",
