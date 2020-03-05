@@ -1,0 +1,65 @@
+@import 'common';
+
+body {
+    padding: 0;
+    background-color: var(--vscode-editor-background);
+}
+
+.header {
+    padding: 10px 0px 10px 0px;
+    margin: 0px;
+    height: 45px;
+    line-height: 45px;
+    background-color: var(--vscode-sideBarSectionHeader-background);
+    color: var(--vscode-sideBarSectionHeader-foreground);
+    border-bottom: 1px solid var(--vscode-sideBarSectionHeader-border);
+    .col {
+        float: left;
+        padding: 0px 10px 0px 10px;
+        box-sizing: border-box;
+        font-size: 1.0em;
+        font-weight: bold;
+        &.col-1 {
+            width: 15%;
+            text-align: right;
+        }
+        &.col-2 {
+            width: 80%;
+            select {
+                width: 100%;
+                background-color: var(--vscode-input-background);
+                color: var(--vscode-input-foreground);
+            }
+        }
+        &.col-3 {
+            width: 5%;
+        }
+    }
+}
+
+.error {
+    padding: 10px;
+}
+
+.no-storage {
+    padding: 10px;
+    text-align: center;
+    font-style: italic;
+}
+
+#storageTable {
+    width: 100%;
+    border-spacing: 0px;
+    th, td {
+        padding: 10px;
+        border: 1px solid var(--vscode-sideBarSectionHeader-background);
+    }
+    th {
+        white-space: nowrap;
+        background-color: var(--vscode-sideBar-background);
+    }
+    td {
+        word-wrap: break-word;
+        word-break: break-all;
+    }
+}

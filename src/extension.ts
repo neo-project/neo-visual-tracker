@@ -14,6 +14,7 @@ import { NeoTrackerPanel } from './neoTrackerPanel';
 import { RpcServerExplorer, RpcServerTreeItemIdentifier } from './rpcServerExplorer';
 import { RpcConnectionPool } from './rpcConnectionPool';
 import { StartPanel } from './startPanel';
+import { StoragePanel } from './storagePanel';
 import { TransferPanel } from './transferPanel';
 import { WalletExplorer } from './walletExplorer';
 
@@ -186,6 +187,27 @@ export function activate(context: vscode.ExtensionContext) {
         } catch (e) {
             console.error('Error opening Neo tracker panel ', e);
         }
+    });
+
+    const openStorageExplorerCommand = vscode.commands.registerCommand('neo-visual-devtracker.storageExplorer', async (server) => {
+        await requireNeoExpress(async () => {
+            server = server || await selectBlockchain('Explore Storage', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
+            if (!server) {
+                return;
+            }
+            const rpcUri = await selectUri('Explore Storage', server, context.globalState);
+            try {
+                const panel = new StoragePanel(
+                    context.extensionPath,
+                    rpcUri,
+                    rpcConnectionPool.getConnection(rpcUri),
+                    contractDetector,
+                    context.subscriptions,
+                    server.jsonFile ? new NeoExpressConfig(server.jsonFile) : undefined);
+            } catch (e) {
+                console.error('Error opening new storage explorer panel ', e);
+            }
+        });
     });
 
     const refreshServersCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshObjectExplorerNode', () => {
@@ -495,6 +517,7 @@ export function activate(context: vscode.ExtensionContext) {
     const waletExplorerProvider = vscode.languages.registerCodeLensProvider({ language: 'json' }, walletExplorer);
 
     context.subscriptions.push(openTrackerCommand);
+    context.subscriptions.push(openStorageExplorerCommand);
     context.subscriptions.push(refreshServersCommand);
     context.subscriptions.push(startServerCommand);
     context.subscriptions.push(startServerAdvancedCommand);

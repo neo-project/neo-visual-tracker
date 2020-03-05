@@ -40,6 +40,7 @@ export interface INeoRpcConnection {
     getBlock(index: string | number, statusReceiver?: INeoStatusReceiver): Promise<any>;
     getBlocks(index: number | undefined, hideEmptyBlocks: boolean, forwards: boolean, statusReceiver: INeoStatusReceiver): Promise<Blocks>;
     getClaimable(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
+    getContractStorage(contractHash: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     getTransaction(txid: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     getUnspents(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
     getUnclaimed(address: string, statusReceiver: INeoStatusReceiver): Promise<any>;
@@ -220,6 +221,21 @@ export class NeoRpcConnection implements INeoRpcConnection {
         }        
     }
 
+    public async getContractStorage(contractHash: string, statusReceiver: INeoStatusReceiver) {
+        try {
+            statusReceiver.updateStatus('Getting storage for contract ' + contractHash);
+            return (await this.rpcClient.getContractStorage(contractHash)).result;
+        } catch(e) {
+            if (e.message.toLowerCase().indexOf('method not found') !== -1) {
+                console.warn('NeoRpcConnection: get-contract-storage unsupported by ' + this.rpcUrl + ' (contractHash=' + contractHash + '): ' + e);
+                return undefined;
+            } else {
+                console.error('NeoRpcConnection could not retrieve contract storage (contractHash=' + contractHash + '): ' + e);
+                return undefined;
+            }
+        }        
+    }
+
     public async getTransaction(txid: string, statusReceiver: INeoStatusReceiver) {
         try {
             statusReceiver.updateStatus('Retrieving transaction ' + txid);
@@ -362,7 +378,7 @@ export class NeoRpcConnection implements INeoRpcConnection {
                 try {
                     await this.subscriptions[i].onNewBlock(blockchainInfo);
                 } catch (e) {
-                    console.error('Error within INeoSubscription #' + i + ' (' + this.subscriptions[i] + ')');
+                    console.error('Error within INeoSubscription #' + i, e, this.subscriptions[i]);
                 }
             }
         }
