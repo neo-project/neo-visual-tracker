@@ -394,7 +394,7 @@ export class InvocationPanel {
             if (parameter.type === 'ByteArray') {
                 result.push(InvocationPanel.parseStringArgument(parameter.value));
             } else if (parameter.type === 'Integer') {
-                result.push(parseInt(parameter.value) || 0);
+                result.push(InvocationPanel.addLeadingZeroes((parseInt(parameter.value) || 0).toString(16)));
             } else if (parameter.type === 'String') {
                 result.push((Buffer.from(parameter.value)).toString('hex'));
             } else if (parameter.type === 'Array') {
@@ -427,7 +427,9 @@ export class InvocationPanel {
             throw new Error('Object passed instead of an array');
         }
         for (let j = 0; j < array.length; j++) {
-            if (typeof array[j] !== 'number') {
+            if (typeof array[j] === 'number') {
+                array[j] = InvocationPanel.addLeadingZeroes(array[j].toString(16));
+            } else {
                 array[j] = InvocationPanel.parseStringArgument(array[j]);
             }
         }
@@ -445,6 +447,16 @@ export class InvocationPanel {
             return parameter.substring(2);
         } else { // case (iii)
             return (Buffer.from(parameter)).toString('hex');
+        }
+    }
+
+    private static addLeadingZeroes(input: string) {
+        if (input.length === 0) {
+            return '00';
+        } else if ((input.length % 2) === 1) {
+            return '0' + input;
+        } else {
+            return input;
         }
     }
 

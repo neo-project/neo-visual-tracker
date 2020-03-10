@@ -11,15 +11,14 @@ export class ResultValue {
             if (value.length === 0) {
                 value = '00';
             }
-            this.asByteArray = '0x' + value;
             const buffer = Buffer.from(value, 'hex');
+            this.asByteArray = '0x' + buffer.toString('hex');
             this.asString = buffer.toString();
             this.asAddress = '';
             if (value.length === 42) {
                 this.asAddress = bs58check.encode(buffer);
             }
-            buffer.reverse();
-            this.asInteger = BigInt('0x' + buffer.toString('hex')).toString();
+            this.asInteger = BigInt(this.asByteArray).toString();
         } else {
             this.asInteger = '0';
             this.asByteArray = '(empty)';
