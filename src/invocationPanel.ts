@@ -200,21 +200,19 @@ export class InvocationPanel {
                             if (method.name === 'Main') {
                                 if (method.parameters.length === 0) {
                                     script = sb.emitAppCall(contractHash).str;
-                                } else if (method.parameters.length === 1) {
-                                    script = sb.emitAppCall(contractHash, method.parameters[0].value).str;
+                                } else if ((method.parameters.length === 2) && (method.parameters[0].type === 'String') && (method.parameters[1].type === 'Array')) {
+                                    script = sb.emitAppCall(contractHash, method.parameters[0].value, InvocationPanel.extractArgument(method.parameters[1])).str;
                                 } else {
-                                    const args = InvocationPanel.parseArrayArgument(method.parameters[1].value);
-                                    script = sb.emitAppCall(
-                                        contractHash, 
-                                        method.parameters[0].value, 
-                                        args).str;
+                                    for (let i = 0; i < method.parameters.length; i++) {
+                                        sb.emitPush(method.parameters[i]);
+                                    }
+                                    script = sb.emitAppCall(contractHash).str;
                                 }
                             } else {
-                                const args = InvocationPanel.extractArguments(method.parameters);
                                 script = sb.emitAppCall(
                                     contractHash, 
                                     method.name, 
-                                    args).str;
+                                    InvocationPanel.extractArguments(method.parameters)).str;
                             }
                             
                             if (onChain) {
@@ -289,20 +287,11 @@ export class InvocationPanel {
                             if (compiledContract) {
                                 let args: any[] = [];
                                 if (methodName === 'Main') {
-                                    if (method.parameters.length === 0) {
-                                        args = [];
-                                    } else if (method.parameters.length === 1) {
-                                        args = [ method.parameters[0].value, '[]' ];
-                                    } else {
-                                        args = [
-                                            method.parameters[0].value,
-                                            InvocationPanel.parseArrayArgument(method.parameters[1].value || '[]'),
-                                        ];
-                                    }
+                                    args = InvocationPanel.extractDebuggerArguments(method.parameters);
                                 } else {
                                     args = [
                                         methodName,
-                                        InvocationPanel.extractArguments(method.parameters),
+                                        InvocationPanel.extractDebuggerArguments(method.parameters),
                                     ];
                                 }
                                 const debugConfiguration: vscode.DebugConfiguration = {
@@ -387,23 +376,47 @@ export class InvocationPanel {
     }
 
     private static extractArguments(parameters: any[]) {
-        const result = [];
-        for (let i = 0; i < parameters.length; i++) {
-            const parameter = parameters[i];
-            parameter.value = parameter.value || '';
-            if (parameter.type === 'ByteArray') {
-                result.push(InvocationPanel.parseStringArgument(parameter.value));
-            } else if (parameter.type === 'Integer') {
-                result.push(InvocationPanel.addLeadingZeroes((parseInt(parameter.value) || 0).toString(16)));
-            } else if (parameter.type === 'String') {
-                result.push((Buffer.from(parameter.value)).toString('hex'));
-            } else if (parameter.type === 'Array') {
-                result.push(InvocationPanel.parseArrayArgument(parameter.value));
-            } else {
-                throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
-            }
+        return parameters.map(InvocationPanel.extractArgument);
+    }
+
+    private static extractArgument(parameter: any) {
+        parameter.value = parameter.value || '';
+        if (parameter.type === 'ByteArray') {
+            return InvocationPanel.parseByteArray(parameter.value);
+        } else if (parameter.type === 'Integer') {
+            return parseInt(parameter.value) || 0;
+        } else if (parameter.type === 'String') {
+            return Buffer.from(parameter.value).toString('hex');
+        } else if (parameter.type === 'Array') {
+            return InvocationPanel.parseArrayArgument(parameter.value);
+        } else if (parameter.type === 'Boolean') {
+            const normalized = parameter.value.trim().toLowerCase();
+            return (normalized === '1') || (normalized === 'true');
+        } else {
+            throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
         }
-        return result;
+    }
+
+    private static extractDebuggerArguments(parameters: any[]) {
+        return parameters.map(InvocationPanel.extractDebuggerArgument);
+    }
+
+    private static extractDebuggerArgument(parameter: any) {
+        parameter.value = parameter.value || '';
+        if (parameter.type === 'ByteArray') {
+            return parameter.value;
+        } else if (parameter.type === 'Integer') {
+            return parseInt(parameter.value) || 0;
+        } else if (parameter.type === 'String') {
+            return parameter.value;
+        } else if (parameter.type === 'Array') {
+            return InvocationPanel.parseArrayArgument(parameter.value);
+        } else if (parameter.type === 'Boolean') {
+            const normalized = parameter.value.trim().toLowerCase();
+            return (normalized === '1') || (normalized === 'true');
+        } else {
+            throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
+        }
     }
 
     private static extractIntents(method: any, contractHash: string): TransactionOutput[] | undefined {
@@ -422,21 +435,26 @@ export class InvocationPanel {
     }
 
     private static parseArrayArgument(parameter: string) {
-        const array = JSON.parse(parameter);
+        let array = [];
+        try {
+            array = JSON.parse(parameter);
+        } catch (e) {
+            throw new Error('Parameter was not well-formed JSON: ' + parameter);
+        }
         if (!Array.isArray(array)) {
-            throw new Error('Object passed instead of an array');
+            throw new Error('Parameter was not an array: ' + parameter);
         }
         for (let j = 0; j < array.length; j++) {
-            if (typeof array[j] === 'number') {
-                array[j] = InvocationPanel.addLeadingZeroes(array[j].toString(16));
-            } else {
-                array[j] = InvocationPanel.parseStringArgument(array[j]);
+            if (typeof array[j] === 'string') {
+                array[j] = InvocationPanel.parseByteArray(array[j]);
+            } else if (Array.isArray(array[j])) {
+                array[j] = InvocationPanel.parseArrayArgument(array[j]);
             }
         }
         return array;
     }
 
-    private static parseStringArgument(parameter: string) {
+    private static parseByteArray(parameter: string) {
         // For ByteArray parameters, the user can provide either:
         // i)   A NEO address (prefixed with '@'), or
         // ii)  A hex string (prefixed with '0x'), or
@@ -446,17 +464,7 @@ export class InvocationPanel {
         } else if ((parameter[0] === '0') && (parameter[1] === 'x')) { // case (ii)
             return parameter.substring(2);
         } else { // case (iii)
-            return (Buffer.from(parameter)).toString('hex');
-        }
-    }
-
-    private static addLeadingZeroes(input: string) {
-        if (input.length === 0) {
-            return '00';
-        } else if ((input.length % 2) === 1) {
-            return '0' + input;
-        } else {
-            return input;
+            return Buffer.from(parameter).toString('hex');
         }
     }
 
