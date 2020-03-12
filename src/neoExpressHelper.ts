@@ -99,16 +99,40 @@ export class NeoExpressHelper {
         });
     }
 
-    public static async isNeoExpressInstalled(): Promise<boolean> {
+    public static async isNeoExpressInstalled(requiredVersion: string): Promise<'ok' | 'missing' | 'upgrade'> {
         let command = shellEscape.default([ 'neo-express', '-v' ]);
         return await new Promise((resolve) => {
             childProcess.exec(command, (error, stdout, stderr) => {
                 if (error) {
-                    resolve(false);
+                    resolve('missing');
                 } else if (stderr) {
-                    resolve(false);
+                    resolve('missing');
                 } else {
-                    resolve(true);
+                    if (requiredVersion === '*') {
+                        resolve('ok');
+                    } else {
+                        const installedVersion = stdout.trim().split('+')[0];
+                        const installedVersionComponents = installedVersion.split('.').map(parseInt);
+                        const requiredVersionComponents = requiredVersion.trim().split('.').map(parseInt);
+                        console.log('version check', installedVersionComponents, requiredVersionComponents);
+                        if (installedVersionComponents.length !== requiredVersionComponents.length) {
+                            console.error('neo-express version check failure, unable to compare', requiredVersionComponents, 'with', installedVersionComponents);
+                            resolve('ok');
+                        } else {
+                            let success = true, i = 0;
+                            while (success && (i < installedVersionComponents.length)) {
+                                if (installedVersionComponents[i] < requiredVersionComponents[i]) {
+                                    success = false;
+                                } else if (installedVersionComponents[i] === requiredVersionComponents[i]) {
+                                    i++;
+                                } else {
+                                    i = installedVersionComponents.length;
+                                }
+                            }
+                            console.info('Required neo-express version: ', requiredVersion, 'Installed version: ', installedVersion);
+                            resolve(success ? 'ok' : 'upgrade');
+                        }
+                    }
                 }
             });
         });

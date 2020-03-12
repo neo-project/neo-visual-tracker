@@ -36,11 +36,15 @@ export function activate(context: vscode.ExtensionContext) {
 
     const installationTaskName = 'Install Neo Express';
     let postInstallAction: Function | null = null;
+    let postInstallVersionCheck: string | null = null;
     vscode.tasks.onDidEndTask(async e => {
-        if (postInstallAction && (e.execution.task.name === installationTaskName)) {
+        if (postInstallAction && postInstallVersionCheck && (e.execution.task.name === installationTaskName)) {
             const action = postInstallAction;
+            const version = postInstallVersionCheck;
             postInstallAction = null;
-            if (await NeoExpressHelper.isNeoExpressInstalled()) {
+            postInstallVersionCheck = null;
+            const checkResult = await NeoExpressHelper.isNeoExpressInstalled(version);
+            if (checkResult === 'ok') {
                 await action();
             } else {
                 await vscode.window.showErrorMessage(
@@ -49,12 +53,30 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    const requireNeoExpress = async (then: Function) => {
-        if (await NeoExpressHelper.isNeoExpressInstalled()) {
+    const requireNeoExpress = async (version: string, then: Function) => {
+        const checkResult = await NeoExpressHelper.isNeoExpressInstalled(version);
+        if (checkResult === 'ok') {
             await then();
         } else if (postInstallAction) {
             await vscode.window.showErrorMessage(
                 'Neo Express installation is in progress.\n\nPlease wait for the installation to finish and then try again.');
+        } else if (checkResult === 'upgrade') {
+            const upgrade = 'Upgrade';
+            const dialogResponse = await vscode.window.showInformationMessage(
+                'Neo Express ' + version + ' Required\n\nYour installation of Neo Express must be upgraded in order to use this functionality.\n',
+                { modal: true },
+                upgrade);
+            if (dialogResponse === upgrade) {
+                postInstallAction = then;
+                postInstallVersionCheck = version;
+                await vscode.tasks.executeTask(
+                    new vscode.Task(
+                        { type: 'install-neo-express' },
+                        vscode.TaskScope.Global,
+                        installationTaskName,
+                        'dotnet',
+                        new vscode.ShellExecution('dotnet tool update Neo.Express -g')));
+            }
         } else {
             const moreInfo = 'More Information';
             const install = 'Install';
@@ -67,6 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.env.openExternal(vscode.Uri.parse('https://github.com/neo-project/neo-express#Installation'));
             } else if (dialogResponse === install) {
                 postInstallAction = then;
+                postInstallVersionCheck = version;
                 await vscode.tasks.executeTask(
                     new vscode.Task(
                         { type: 'install-neo-express' },
@@ -190,7 +213,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const openStorageExplorerCommand = vscode.commands.registerCommand('neo-visual-devtracker.storageExplorer', async (server) => {
-        await requireNeoExpress(async () => {
+        await requireNeoExpress('*', async () => {
             server = server || await selectBlockchain('Explore Storage', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
             if (!server) {
                 return;
@@ -218,7 +241,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const startServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServer', async (server) => {
-        await requireNeoExpress(async () => {
+        await requireNeoExpress('*', async () => {
             server = server || await selectBlockchain('Start Neo Express (using default options)', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
             if (!server) {
                 return;
@@ -235,7 +258,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const startServerAdvancedCommand = vscode.commands.registerCommand('neo-visual-devtracker.startServerAdvanced', async (server) => {
-        await requireNeoExpress(async () => {
+        await requireNeoExpress('*', async () => {
             server = server || await selectBlockchain('Start Neo Express...', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
             if (!server) {
                 return;
@@ -254,7 +277,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const stopServerCommand = vscode.commands.registerCommand('neo-visual-devtracker.stopServer', async (server) => {
-        await requireNeoExpress(async () => {
+        await requireNeoExpress('*', async () => {
             server = server || await selectBlockchain('Stop Neo Express', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
             if (!server) {
                 return;
@@ -270,7 +293,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const createWalletCommand = vscode.commands.registerCommand('neo-visual-devtracker.createWallet', async (server) => {
-        await requireNeoExpress(async () => {
+        await requireNeoExpress('*', async () => {
             server = server || await selectBlockchain('Create Neo Express wallet', context.globalState, [ 'expressNode', 'expressNodeMulti' ]);
             if (!server) {
                 return;
@@ -310,7 +333,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
     
     const createCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.createCheckpoint', async (server) => {
-        await requireNeoExpress(async () => {
+        await requireNeoExpress('*', async () => {
             server = server || await selectBlockchain('Create checkpoint', context.globalState, [ 'expressNode' ]);
             if (!server) {
                 return;
@@ -331,7 +354,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const restoreCheckpointCommand = vscode.commands.registerCommand('neo-visual-devtracker.restoreCheckpoint', async (server) => {
-        await requireNeoExpress(async () => {
+        await requireNeoExpress('*', async () => {
             server = server || await selectBlockchain('Restore checkpoint', context.globalState, [ 'expressNode' ]);
             if (!server) {
                 return;
@@ -462,7 +485,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const createInstanceCommand = vscode.commands.registerCommand('neo-visual-devtracker.createInstance', async () => {
-        await requireNeoExpress(() => {
+        await requireNeoExpress('*', () => {
             if (createInstancePanel !== null) {
                 createInstancePanel.disposeIfCreated(); // clear previous successful creation
             }
