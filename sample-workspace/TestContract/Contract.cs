@@ -31,6 +31,15 @@ public class TestContract : SmartContract
         {
             return GetString();
         }
+        else if (method == "PutMapValue") 
+        {
+            PutMapValue((string) args[0], (string) args[1]);
+            return args[1];
+        } 
+        else if (method == "GetMapValue")
+        {
+            return GetMapValue((string) args[0]);
+        }
         else if (method == "PutData") 
         {
             PutData((byte[]) args[0]);
@@ -64,6 +73,18 @@ public class TestContract : SmartContract
     public static byte[] GetString()
     {
         return Storage.Get(Storage.CurrentContext, "String");
+    }
+
+    public static void PutMapValue(string key, string value)
+    {
+        StorageMap map = Storage.CurrentContext.CreateMap("ExampleMap");
+        map.Put(key, value);
+    }
+
+    public static byte[] GetMapValue(string key)
+    {
+        StorageMap map = Storage.CurrentContext.CreateMap("ExampleMap");
+        return map.Get(key);
     }
 
     public static void PutData(byte[] d)
