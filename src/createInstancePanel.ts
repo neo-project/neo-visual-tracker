@@ -19,12 +19,14 @@ class ViewState {
     showSuccess: boolean = false;
     result: string = '';
     nodeCount: number = 1;
+    preloadGas: number = 2000;
 }
 
 export class CreateInstancePanel {
 
     private readonly panel: vscode.WebviewPanel;
     private readonly rpcServerExplorer: RpcServerExplorer;
+    private readonly neoExpressHelper: NeoExpressHelper;
 
     private viewState: ViewState;
 
@@ -35,9 +37,11 @@ export class CreateInstancePanel {
         extensionPath: string,
         workspacePath: string,
         rpcServerExplorer: RpcServerExplorer,
+        neoExpressHelper: NeoExpressHelper,
         disposables: vscode.Disposable[]) {
 
         this.rpcServerExplorer = rpcServerExplorer;
+        this.neoExpressHelper = neoExpressHelper;
 
         this.viewState = new ViewState();
         this.viewState.path = workspacePath;
@@ -101,10 +105,22 @@ export class CreateInstancePanel {
     }
 
     private async doCreate() {
-        const result = await NeoExpressHelper.createInstance(
+        const preloadGasAmount = this.viewState.nodeCount > 1 ? 0 : this.viewState.preloadGas;
+        if (preloadGasAmount > 0) {
+            this.neoExpressHelper.requireNeoExpress('1.0.9', async () => {
+                this.doCreateInternal(preloadGasAmount);
+            }, 'use the "Preload GAS" feature');
+        } else {
+            this.doCreateInternal(preloadGasAmount);
+        }
+    }
+
+    private async doCreateInternal(preloadGasAmount: number) {
+        const result = await this.neoExpressHelper.createInstance(
             this.viewState.combinedPath,
             this.viewState.nodeCount,
-            this.viewState.allowOverwrite);
+            this.viewState.allowOverwrite,
+            preloadGasAmount);
         this.viewState.showError = result.isError;
         this.viewState.showSuccess = !result.isError;
         this.viewState.result = result.output;

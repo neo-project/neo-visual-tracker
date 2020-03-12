@@ -45,6 +45,7 @@ function initializePanel() {
     const nodeCountOption7 = document.querySelector(createSelectors.NodeCountOption7) as HTMLElement;
     const mainForm = document.querySelector(createSelectors.MainForm) as HTMLFormElement;
     const resultForm = document.querySelector(createSelectors.ResultForm) as HTMLFormElement;
+    const preloadGasInput = document.querySelector(createSelectors.PreloadGasInput) as HTMLInputElement;
     browseButton.addEventListener('click', _ => customPathPicker.click());
     customPathPicker.addEventListener('change', _ => {
         const newPath = customPathPicker.files && customPathPicker.files.length ? (customPathPicker.files[0] as any).path : viewState.path;
@@ -58,6 +59,14 @@ function initializePanel() {
     });
     filenameInput.addEventListener('keyup', _ => {
         viewState.filename = filenameInput.value;
+        postViewState();
+    });
+    preloadGasInput.addEventListener('change', _ => {
+        viewState.preloadGas = preloadGasInput.value;
+        postViewState();
+    });
+    preloadGasInput.addEventListener('keyup', _ => {
+        viewState.preloadGas = preloadGasInput.value;
         postViewState();
     });
     allowOverwrite.addEventListener('change', _ => {
