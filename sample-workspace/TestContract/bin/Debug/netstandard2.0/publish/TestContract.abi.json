@@ -1,5 +1,5 @@
 {
-    "hash":"0xe6e0ba5fbf6dffc05391f4a61682a7efd9b5012a",
+    "hash":"0xd5733400d754383fab0b156909a96b4ad01418c7",
     "metadata":
     {
         "title":"MyTestContract",
@@ -51,6 +51,21 @@
             "name":"PutString",
             "parameters":
             [
+                {
+                    "name":"s",
+                    "type":"String"
+                }
+            ],
+            "returntype":"Void"
+        },
+        {
+            "name":"ConditionalPutString",
+            "parameters":
+            [
+                {
+                    "name":"b",
+                    "type":"Boolean"
+                },
                 {
                     "name":"s",
                     "type":"String"
