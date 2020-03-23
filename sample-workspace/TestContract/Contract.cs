@@ -27,6 +27,11 @@ public class TestContract : SmartContract
             PutString((string) args[0]);
             return args[0];
         } 
+        else if (method == "ConditionalPutString") 
+        {
+            ConditionalPutString((bool) args[0], (string) args[1]);
+            return args[1];
+        } 
         else if (method == "GetString")
         {
             return GetString();
@@ -59,6 +64,14 @@ public class TestContract : SmartContract
     public static void PutString(string s)
     {
         Storage.Put(Storage.CurrentContext, "String", s);
+    }
+
+    public static void ConditionalPutString(bool b, string s)
+    {
+        if (b) 
+        {
+            Storage.Put(Storage.CurrentContext, "String", s);
+        }
     }
 
     public static byte[] GetString()
