@@ -62,10 +62,14 @@ export class RpcServerTreeItemIdentifier {
         uriFetch.then(uris => {
             for (let i = 0; i < uris.length; i++) {
                 try { 
-                    result.children.push(RpcServerTreeItemIdentifier.fromUri(
-                        uris[i], 
-                        vscode.Uri.parse(uris[i]).authority, 
-                        result));
+                    const parsed = vscode.Uri.parse(uris[i]);
+                    // cityofzion nodes don't have the RpcSystemAssetTracker plugin so cannot be used for a lot of devtracker functionality
+                    if (parsed.authority.indexOf('cityofzion.io') === -1) {
+                        result.children.push(RpcServerTreeItemIdentifier.fromUri(
+                            uris[i], 
+                            parsed.authority, 
+                            result));
+                    }
                 } catch (e) {
                     console.error('Error adding', uris[i], 'to', label, e);
                 }
