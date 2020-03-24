@@ -5,6 +5,12 @@ const createRenderers = {
 
     render: function(viewState: any) {
         
+        const preloadGasRegion = document.querySelector(createSelectors.PreloadGasRegion) as HTMLElement;
+        preloadGasRegion.style.display = (viewState.nodeCount > 1) ? 'none' : 'block';
+
+        const preloadGasInput = document.querySelector(createSelectors.PreloadGasInput) as HTMLInputElement;
+        preloadGasInput.value = viewState.preloadGas;
+
         htmlHelpers.setPlaceholder(createSelectors.CurrentPath, htmlHelpers.text(viewState.path));
 
         const filenameInput = document.querySelector(createSelectors.FilenameInput) as HTMLInputElement;

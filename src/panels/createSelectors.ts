@@ -18,6 +18,8 @@ const createSelectors = {
     NodeCountOption1: '#node-count-1',
     NodeCountOption4: '#node-count-4',
     NodeCountOption7: '#node-count-7',
+    PreloadGasInput: '#preloadGas',
+    PreloadGasRegion: '#preloadGasRegion',
     ResultForm: '#results-view form',
     ResultText: '.result-text',
     ViewDataEntry: '#data-entry-view',
