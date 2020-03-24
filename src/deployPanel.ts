@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import { deployEvents } from './panels/deployEvents';
 
 import { ContractDetector } from './contractDetector';
-import { INeoRpcConnection } from './neoRpcConnection';
+import { INeoRpcConnection, INeoStatusReceiver } from './neoRpcConnection';
 import { NeoExpressConfig } from './neoExpressConfig';
 import { NeoTrackerPanel } from './neoTrackerPanel';
 import { WalletExplorer } from './walletExplorer';
@@ -29,12 +29,13 @@ class ViewState {
     wallets: any[] = [];
 }
 
-export class DeployPanel {
+export class DeployPanel implements INeoStatusReceiver {
 
     private readonly contractDetector: ContractDetector;
     private readonly neoExpressConfig?: NeoExpressConfig;
     private readonly panel: vscode.WebviewPanel;
     private readonly rpcUri: string;
+    private readonly rpcConnection: INeoRpcConnection;
     private readonly walletExplorer: WalletExplorer;
     private readonly startSearch: Function;
 
@@ -55,6 +56,7 @@ export class DeployPanel {
 
         this.contractDetector = contractDetector;
         this.rpcUri = rpcUri;
+        this.rpcConnection = rpcConnection;
         this.walletExplorer = walletExplorer;
         this.neoExpressConfig = neoExpressConfig;
         this.viewState = new ViewState();
@@ -90,6 +92,10 @@ export class DeployPanel {
         this.panel.webview.html = htmlFileContents
             .replace(JavascriptHrefPlaceholder, javascriptHref)
             .replace(CssHrefPlaceholder, cssHref);
+    }
+
+    public updateStatus(status: string) {
+        console.log('deployPanel status', status);
     }
 
     public dispose() {
@@ -133,7 +139,11 @@ export class DeployPanel {
                 const gas = parseFloat(invokeResult.gas_consumed);
 
                 const walletConfig = this.viewState.wallets.filter(_ => _.address === this.viewState.walletAddress)[0];
-                if (await walletConfig.unlock()) {
+                if (!(await this.getUnspentsSupported())) {
+                    this.viewState.result = 'Selected RPC server does not support getunspents; deployment cannot proceed. Please try using a different RPC server.';
+                    this.viewState.showError = true;
+                    this.viewState.showSuccess = false;
+                } else if (await walletConfig.unlock()) {
                     const api = new neon.api.neoCli.instance(this.rpcUri);
                     const config: any = {
                         api: api,
@@ -167,6 +177,14 @@ export class DeployPanel {
                 this.viewState.showSuccess = false;
             }
         }
+    }
+
+    private async getUnspentsSupported() {
+        if (this.viewState.walletAddress) {
+            const result = await this.rpcConnection.getUnspents(this.viewState.walletAddress, this);
+            return !!result.getUnspentsSupport;
+        }
+        return true;
     }
 
     private async ensureMetadata() {
