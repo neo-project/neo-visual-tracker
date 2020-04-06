@@ -15,6 +15,7 @@ import { RpcServerExplorer, RpcServerTreeItemIdentifier } from './rpcServerExplo
 import { RpcConnectionPool } from './rpcConnectionPool';
 import { StartPanel } from './startPanel';
 import { StoragePanel } from './storagePanel';
+import { TokenDesignerPanel } from './tokenDesignerPanel';
 import { TransferPanel } from './transferPanel';
 import { WalletExplorer } from './walletExplorer';
 
@@ -471,6 +472,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    const createTokenCommand = vscode.commands.registerCommand('neo-visual-devtracker.createToken', async (commandContext) => {
+        const panel = new TokenDesignerPanel(context.extensionPath, context.subscriptions);
+    });
+
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
     const waletExplorerProvider = vscode.languages.registerCodeLensProvider({ language: 'json' }, walletExplorer);
@@ -492,6 +497,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createAccountCommand);
     context.subscriptions.push(customizeServerListCommand);
     context.subscriptions.push(createWalletFileCommand);
+    context.subscriptions.push(createTokenCommand);
     context.subscriptions.push(serverExplorerProvider);
     context.subscriptions.push(waletExplorerProvider);
 }

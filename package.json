@@ -29,6 +29,7 @@
         "Tracker"
     ],
     "activationEvents": [
+        "onCommand:neo-visual-devtracker.createToken",
         "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.customizeServerList",
         "onCommand:neo-visual-devtracker.createWalletFile",
@@ -56,6 +57,11 @@
             ]
         },
         "commands": [
+            {
+                "command": "neo-visual-devtracker.createToken",
+                "title": "Create token",
+                "category": "Neo Visual DevTracker"
+            },
             {
                 "command": "neo-visual-devtracker.openTracker",
                 "title": "Open Neo Visual DevTracker",
@@ -189,6 +195,10 @@
                 },
                 {
                     "command": "neo-visual-devtracker.customizeServerList",
+                    "when": "view == neo-visual-devtracker.rpcServerExplorer"
+                },
+                {
+                    "command": "neo-visual-devtracker.createToken",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer"
                 }
             ],
