@@ -1,4 +1,8 @@
 import * as vscode from 'vscode';
+import * as grpc from 'grpc';
+
+import * as ttfClient from './ttf/protos/service_grpc_pb';
+import * as ttfTaxonomy from './ttf/protos/taxonomy_pb';
 
 import { CheckpointDetector } from './checkpointDetector';
 import { ClaimPanel } from './claimPanel';
@@ -473,7 +477,13 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const createTokenCommand = vscode.commands.registerCommand('neo-visual-devtracker.createToken', async (commandContext) => {
-        const panel = new TokenDesignerPanel(context.extensionPath, context.subscriptions);
+        const creds = grpc.credentials.createInsecure();
+        const client = new ttfClient.ServiceClient('127.0.0.1:8086', creds);
+        const version = new ttfTaxonomy.TaxonomyVersion();
+        version.setVersion('1.0');
+        const taxonomy: ttfTaxonomy.Taxonomy = await new Promise(
+            (resolve, reject) => client.getFullTaxonomy(version, (error, response) => error ? reject(error) : resolve(response)));
+        const panel = new TokenDesignerPanel(taxonomy, context.extensionPath, context.subscriptions);
     });
 
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);

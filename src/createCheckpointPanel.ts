@@ -88,14 +88,9 @@ export class CreateCheckpointPanel {
     }
 
     private async doCreate() {
-        const result = await NeoExpressHelper.createCheckpoint(
-            this.viewState.neoExpressJsonFullPath,
-            this.viewState.path,
-            this.viewState.checkpointName,
-            this.viewState.allowOverwrite);
-        this.viewState.showError = result.isError;
-        this.viewState.showSuccess = !result.isError;
-        this.viewState.result = result.output;
+        this.viewState.showError = true;
+        this.viewState.showSuccess = false;
+        this.viewState.result = 'Functionality disabled';
         this.updateViewState();
         this.panel.webview.postMessage({ viewState: this.viewState });
     }

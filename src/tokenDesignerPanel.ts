@@ -1,12 +1,11 @@
 import * as fs from 'fs';
-import * as grpc from 'grpc';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import * as ttfClient from './ttf/protos/service_grpc_pb';
 import * as ttfTaxonomy from './ttf/protos/taxonomy_pb';
 
 import { tokenDesignerEvents } from './panels/tokenDesignerEvents';
+import { TokenDesignerTaxonomy } from './panels/tokenDesignerTaxonomy';
 import { TokenDesignerViewState } from './panels/tokenDesignerViewState';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
@@ -20,27 +19,20 @@ export class TokenDesignerPanel {
 
     private readonly panel: vscode.WebviewPanel;
     
+    private readonly taxonomy: TokenDesignerTaxonomy;
+    
     private viewState: TokenDesignerViewState = new TokenDesignerViewState();
     
-    constructor(private readonly extensionPath: string, disposables: vscode.Disposable[]) {
+    constructor(taxonomy: ttfTaxonomy.Taxonomy, private readonly extensionPath: string, disposables: vscode.Disposable[]) {
         this.panel = vscode.window.createWebviewPanel('tokenDesigner', this.title, vscode.ViewColumn.Active, { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
         this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);        
         this.panel.webview.html = this.getPanelHtml();
 
-        
-        const creds = grpc.credentials.createInsecure();
-        const client = new ttfClient.ServiceClient('127.0.0.1:8086', creds);
-        const version = new ttfTaxonomy.TaxonomyVersion();
-        version.setVersion('1.0');
-        client.getFullTaxonomy(version, (erro, response) => {
-            if (erro) {
-                console.error(erro);
-            } else {
-                console.log(response.getBaseTokenTypesMap());
-            }
-        });
+        this.taxonomy = {
+            baseTokenTypes: taxonomy.getBaseTokenTypesMap().toArray().map(_ => _[1]),
+        };
     }
 
     dispose() {
@@ -63,7 +55,7 @@ export class TokenDesignerPanel {
 
     private onMessage(message: any) {
         if (message.e === tokenDesignerEvents.Init) {
-            this.panel.webview.postMessage({ viewState: this.viewState });
+            this.panel.webview.postMessage({ viewState: this.viewState, taxonomy: this.taxonomy });
         } else if (message.e === tokenDesignerEvents.Update) {
             this.viewState = message.viewState;
             this.panel.title = this.viewState.tokenName + ' - Token Designer';
