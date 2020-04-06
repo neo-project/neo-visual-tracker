@@ -1,6 +1,10 @@
 import * as fs from 'fs';
+import * as grpc from 'grpc';
 import * as path from 'path';
 import * as vscode from 'vscode';
+
+import * as ttfClient from './ttf/protos/service_grpc_pb';
+import * as ttfTaxonomy from './ttf/protos/taxonomy_pb';
 
 import { tokenDesignerEvents } from './panels/tokenDesignerEvents';
 import { TokenDesignerViewState } from './panels/tokenDesignerViewState';
@@ -24,6 +28,19 @@ export class TokenDesignerPanel {
         this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);        
         this.panel.webview.html = this.getPanelHtml();
+
+        
+        const creds = grpc.credentials.createInsecure();
+        const client = new ttfClient.ServiceClient('127.0.0.1:8086', creds);
+        const version = new ttfTaxonomy.TaxonomyVersion();
+        version.setVersion('1.0');
+        client.getFullTaxonomy(version, (erro, response) => {
+            if (erro) {
+                console.error(erro);
+            } else {
+                console.log(response.getBaseTokenTypesMap());
+            }
+        });
     }
 
     dispose() {
