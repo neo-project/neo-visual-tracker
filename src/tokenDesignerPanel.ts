@@ -23,7 +23,7 @@ export class TokenDesignerPanel {
     
     private viewState: TokenDesignerViewState = new TokenDesignerViewState();
     
-    constructor(taxonomy: ttfTaxonomy.Taxonomy, private readonly extensionPath: string, disposables: vscode.Disposable[]) {
+    constructor(taxonomy: ttfTaxonomy.Taxonomy.AsObject, private readonly extensionPath: string, disposables: vscode.Disposable[]) {
         this.panel = vscode.window.createWebviewPanel('tokenDesigner', this.title, vscode.ViewColumn.Active, { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
         this.panel.onDidDispose(this.onClose, this, disposables);
@@ -31,7 +31,10 @@ export class TokenDesignerPanel {
         this.panel.webview.html = this.getPanelHtml();
 
         this.taxonomy = {
-            baseTokenTypes: taxonomy.getBaseTokenTypesMap().toArray().map(_ => _[1]),
+            baseTokenTypes: taxonomy.baseTokenTypesMap.map(_ => _[1]),
+            propertySets: taxonomy.propertySetsMap.map(_ => _[1]),
+            behaviors: taxonomy.behaviorsMap.map(_ => _[1]),
+            behaviorGroups: taxonomy.behaviorGroupsMap.map(_ => _[1]),
         };
     }
 

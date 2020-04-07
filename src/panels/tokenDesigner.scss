@@ -1,2 +1,97 @@
 @import 'common';
 
+body {
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-panel-background);
+    --paddingSmall: 5px;
+    --padding: 10px;
+    --borderWidth: 1px;
+}
+
+/* Setup the three main panes: */
+
+.leftPane {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 25vw;
+    background-color: var(--vscode-sideBar-background);
+    border-right: var(--borderWidth) solid var(--vscode-sideBar-border);
+    overflow: auto;
+}
+
+.canvasPane {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 25vw;
+    width: 50vw;
+}
+
+.rightPane {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 25vw;
+    background-color: var(--vscode-sideBar-background);
+    border-left: var(--borderWidth) solid var(--vscode-sideBar-border);
+    overflow: auto;
+}
+
+h1 {
+    background-color: var(--vscode-sideBarSectionHeader-background);
+    color: var(--vscode-sideBarTitle-foreground);
+    border: var(--borderWidth) solid var(--vscode-sideBarSectionHeader-border);
+    margin: var(--padding);
+    padding: var(--padding);
+    font-size: 1.2em;
+}
+
+/* Canvas area: */
+
+#canvas {
+    &.dragHover {
+        background-color: var(--vscode-panel-dropBackground);
+    }
+    .canvasContents {
+        display: inline-block;
+        margin: auto;
+    }
+    border: var(--borderWidth) solid var(--vscode-panel-border);
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-editor-background);
+    position: absolute;
+    top: var(--padding);
+    bottom: var(--padding);
+    left: var(--padding);
+    right: var(--padding);
+    overflow: auto;
+}
+
+/* Toolboxs (where artifcat icons can be dragged out of) */
+
+.toolbox {
+    max-height: 45vh;
+    overflow-y: auto;
+    margin: var(--padding);
+    padding: var(--padding);
+}
+
+.toolElement {
+    .icon {
+        font-size: 3.5em;
+    }
+    .title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    cursor: pointer;
+    display: inline-block;
+    width: 6vw;
+    text-align: center;
+    margin: var(--paddingSmall);
+    padding: var(--paddingSmall);
+}

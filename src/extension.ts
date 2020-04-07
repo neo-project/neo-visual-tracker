@@ -483,7 +483,7 @@ export function activate(context: vscode.ExtensionContext) {
         version.setVersion('1.0');
         const taxonomy: ttfTaxonomy.Taxonomy = await new Promise(
             (resolve, reject) => client.getFullTaxonomy(version, (error, response) => error ? reject(error) : resolve(response)));
-        const panel = new TokenDesignerPanel(taxonomy, context.extensionPath, context.subscriptions);
+        const panel = new TokenDesignerPanel(taxonomy.toObject(), context.extensionPath, context.subscriptions);
     });
 
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
