@@ -6,6 +6,7 @@ body {
     --paddingSmall: 5px;
     --padding: 10px;
     --borderWidth: 1px;
+    --iconWidth: 6vw;
 }
 
 /* Setup the three main panes: */
@@ -52,12 +53,12 @@ h1 {
 /* Canvas area: */
 
 #canvas {
-    &.dragHover {
-        background-color: var(--vscode-panel-dropBackground);
-    }
     .canvasContents {
         display: inline-block;
-        margin: auto;
+        margin-top: 10vh;
+    }
+    #behaviorsArea {
+        width: var(--iconWidth);
     }
     border: var(--borderWidth) solid var(--vscode-panel-border);
     color: var(--vscode-editor-foreground);
@@ -68,6 +69,7 @@ h1 {
     left: var(--padding);
     right: var(--padding);
     overflow: auto;
+    text-align: center;
 }
 
 /* Toolboxs (where artifcat icons can be dragged out of) */
@@ -90,8 +92,14 @@ h1 {
     }
     cursor: pointer;
     display: inline-block;
-    width: 6vw;
+    width: var(--iconWidth);
     text-align: center;
     margin: var(--paddingSmall);
     padding: var(--paddingSmall);
+}
+
+/* Drag-and-drop highlighting */
+
+.dragHover {
+    background-color: var(--vscode-panel-dropBackground) !important;
 }

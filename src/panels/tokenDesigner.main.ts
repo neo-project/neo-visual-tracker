@@ -15,36 +15,79 @@ type artifactType = 'base' | 'propertySet' | 'behavior' | 'behaviorGroup';
 
 declare var acquireVsCodeApi: any;
 
-let artifactBeingDragged: toolboxArtifact | null = null;
-let artifactTypeBeingDragged: artifactType | null = null;
+let artifactBeingDraggedOn: toolboxArtifact | null = null;
+let artifactTypeBeingDraggedOn: artifactType | null = null;
+let artifactBeingDraggedOff: toolboxArtifact | null = null;
+let artifactTypeBeingDraggedOff: artifactType | null = null;
 let canvas: HTMLElement | null = null;
 let canvasTokenBase: HTMLElement | null = null;
+let behaviorsArea: HTMLElement | null = null;
 let taxonomy: TokenDesignerTaxonomy | null = null;
 let viewState: TokenDesignerViewState | null = null;
 let vsCodePostMessage: Function;
 
 function addToTokenDesign() {
-    if (viewState && artifactTypeBeingDragged && artifactBeingDragged) {
-        switch(artifactTypeBeingDragged) {
-            case 'base':
-                viewState.tokenBase = artifactBeingDragged as ttfCore.Base.AsObject;
-                break;
-            case 'propertySet':
-                break;
-            case 'behavior':
-                break;
-            case 'behaviorGroup':
-                break;
+    if (viewState && artifactTypeBeingDraggedOn && artifactBeingDraggedOn) {
+        const artifactId = artifactBeingDraggedOn.artifact?.artifactSymbol?.id;
+        if (artifactId) {
+            switch(artifactTypeBeingDraggedOn) {
+                case 'base':
+                    viewState.tokenBase = artifactBeingDraggedOn as ttfCore.Base.AsObject;
+                    break;
+                case 'propertySet':
+                    if (!viewState.propertySets.find(_ => _.artifact?.artifactSymbol?.id === artifactId)) {
+                        viewState.propertySets.push(artifactBeingDraggedOn as ttfCore.PropertySet.AsObject);
+                    }
+                    break;
+                case 'behavior':
+                    if (!viewState.behaviors.find(_ => _.artifact?.artifactSymbol?.id === artifactId)) {
+                        viewState.behaviors.push(artifactBeingDraggedOn as ttfCore.Behavior.AsObject);
+                    }
+                    break;
+                case 'behaviorGroup':
+                    if (!viewState.behaviorGroups.find(_ => _.artifact?.artifactSymbol?.id === artifactId)) {
+                        viewState.behaviorGroups.push(artifactBeingDraggedOn as ttfCore.BehaviorGroup.AsObject);
+                    }
+                    break;
+            }
+            postViewState();
         }
         renderCanvas();
-        artifactBeingDragged = null;
+        artifactBeingDraggedOn = null;
+        artifactTypeBeingDraggedOn = null;
     }
+}
+    
+function canvasIsEmpty() {
+    if (!viewState) {
+        return true;
+    }
+    return (viewState.tokenBase === null) &&
+        !viewState.propertySets.length &&
+        !viewState.behaviors.length &&
+        !viewState.behaviorGroups.length;
+}
+
+function createInvalidToolElement() {
+    const iconCharacter = '❓';
+    const icon = document.createElement('div');
+    icon.innerText = iconCharacter;
+    icon.className = 'icon';
+    const title = document.createElement('div');
+    title.innerText = '(Unknown)';
+    title.className = 'title';
+    const element = document.createElement('span');
+    element.className = 'toolElement';
+    element.title = title.innerText;
+    element.appendChild(icon);
+    element.appendChild(title);
+    return element;
 }
 
 function createToolElement(
     type: artifactType, 
     taxonomyArtifact: toolboxArtifact,
-    draggable: boolean) {
+    draggableOntoCanvas: boolean) {
 
     let iconCharacter = '❓';
     switch(type) {
@@ -71,13 +114,22 @@ function createToolElement(
     const element = document.createElement('span');
     element.className = 'toolElement';
     element.title = title.innerText;
-    element.draggable = draggable;
+    element.draggable = true;
     element.appendChild(icon);
     element.appendChild(title);
-    if (draggable) {
+    if (draggableOntoCanvas) {
         element.ondragstart = () => {
-            artifactBeingDragged = taxonomyArtifact;
-            artifactTypeBeingDragged = type;
+            artifactBeingDraggedOff = null;
+            artifactTypeBeingDraggedOff = null;
+            artifactBeingDraggedOn = taxonomyArtifact;
+            artifactTypeBeingDraggedOn = type;
+        };
+    } else {
+        element.ondragstart = () => {
+            artifactBeingDraggedOff = taxonomyArtifact;
+            artifactTypeBeingDraggedOff = type;
+            artifactBeingDraggedOn = null;
+            artifactTypeBeingDraggedOn = null;
         };
     }
     return element;
@@ -102,10 +154,11 @@ function initializePanel() {
     vsCodePostMessage({ e: tokenDesignerEvents.Init });
     canvas = document.getElementById('canvas');
     canvasTokenBase = document.getElementById('canvasTokenBase');
+    behaviorsArea = document.getElementById('behaviorsArea');
     if (canvas) {
         canvas.ondragover = ev => {
             ev.preventDefault();
-            if (canvas) {
+            if (canvas && artifactTypeBeingDraggedOn) {
                 canvas.className = 'dragHover';
             }
         };
@@ -114,7 +167,8 @@ function initializePanel() {
                 canvas.className = '';
             }
         };
-        canvas.ondrop = () => {
+        canvas.ondrop = ev => {
+            ev.preventDefault();
             if (canvas) {
                 canvas.className = '';
             }
@@ -123,11 +177,44 @@ function initializePanel() {
     }
 }
 
+function postViewState() {
+    vsCodePostMessage({ e: tokenDesignerEvents.Update, viewState });
+}
+
+function removeFromTokenDesign() {
+    if (viewState && artifactTypeBeingDraggedOff && artifactBeingDraggedOff) {
+        if (artifactTypeBeingDraggedOff === 'base') {
+            viewState.tokenBase = null;
+        } else {
+            const artifactId = artifactBeingDraggedOff.artifact?.artifactSymbol?.id;
+            viewState.propertySets = viewState.propertySets.filter(_ => _.artifact?.artifactSymbol?.id !== artifactId);
+            viewState.behaviorGroups = viewState.behaviorGroups.filter(_ => _.artifact?.artifactSymbol?.id !== artifactId);
+            viewState.behaviors = viewState.behaviors.filter(_ => _.artifact?.artifactSymbol?.id !== artifactId);
+        }
+        postViewState();
+        renderCanvas();
+        artifactBeingDraggedOff = null;
+        artifactTypeBeingDraggedOff = null;
+    }
+}
+
 function renderCanvas() {
-    if (viewState && canvasTokenBase) {
+    if (viewState && canvasTokenBase && behaviorsArea) {
         htmlHelpers.clearChildren(canvasTokenBase);
+        htmlHelpers.clearChildren(behaviorsArea);
         if (viewState.tokenBase) {
             canvasTokenBase.appendChild(createToolElement('base', viewState.tokenBase, false));
+        } else if (!canvasIsEmpty()) {
+            canvasTokenBase.appendChild(createInvalidToolElement());
+        }
+        for (const propertySet of viewState.propertySets) {
+            canvasTokenBase.appendChild(createToolElement('propertySet', propertySet, false));
+        }
+        for (const behaviorGroup of viewState.behaviorGroups) {
+            behaviorsArea.appendChild(createToolElement('behaviorGroup', behaviorGroup, false));
+        }
+        for (const behavior of viewState.behaviors) {
+            behaviorsArea.appendChild(createToolElement('behavior', behavior, false));
         }
     }
 }
@@ -154,6 +241,20 @@ function renderToolbox(
             const toolElement = createToolElement(type, artifact, true);
             toolboxElement.appendChild(toolElement);
         }
+        toolboxElement.ondragover = ev => {
+            ev.preventDefault();
+            if (artifactBeingDraggedOff) {
+                toolboxElement.className = 'toolbox dragHover';
+            }
+        };
+        toolboxElement.ondragleave = ev => {
+            toolboxElement.className = 'toolbox';
+        };
+        toolboxElement.ondrop = ev => {
+            ev.preventDefault();
+            toolboxElement.className = 'toolbox';
+            removeFromTokenDesign();
+        };
     }
 }
 
