@@ -42,6 +42,37 @@ export class TokenDesignerPanel {
         this.panel.dispose();
     }
 
+    private generateFormula() {
+        this.viewState.formulaHtml = this.viewState.tokenBase?.artifact?.artifactSymbol?.visual || '❓';
+        this.viewState.formulaTooling = this.viewState.tokenBase?.artifact?.artifactSymbol?.tooling || '?';
+        let behaviorsHtml = this.viewState.behaviorGroups
+            .map(_ => _.artifact?.artifactSymbol?.visual || '❓')
+            .concat(this.viewState.behaviors.map(_ => _.artifact?.artifactSymbol?.visual || '❓'))
+            .join(',');
+        if (behaviorsHtml) {
+            if (this.viewState.formulaHtml.indexOf('}') !== -1) {
+                this.viewState.formulaHtml = this.viewState.formulaHtml.replace('}', ',' + behaviorsHtml + '}');
+            } else {
+                this.viewState.formulaHtml += `{${behaviorsHtml}}`;
+            }
+        }
+        let behaviorsTooling = this.viewState.behaviorGroups
+            .map(_ => _.artifact?.artifactSymbol?.tooling || '?')
+            .concat(this.viewState.behaviors.map(_ => _.artifact?.artifactSymbol?.tooling || '?'))
+            .join(',');
+        if (behaviorsTooling) {
+            if (this.viewState.formulaTooling.indexOf('}') !== -1) {
+                this.viewState.formulaTooling = this.viewState.formulaTooling.replace('}', ',' + behaviorsTooling + '}');
+            } else {
+                this.viewState.formulaTooling += `{${behaviorsTooling}}`;
+            }
+        }
+        for (const propertySet of this.viewState.propertySets) {
+            this.viewState.formulaHtml += ' + ' + propertySet.artifact?.artifactSymbol?.visual || '❓';
+            this.viewState.formulaTooling += ' + ' + propertySet.artifact?.artifactSymbol?.tooling || '?';
+        }
+    }
+
     private getPanelHtml() {
         const htmlFileContents = fs.readFileSync(
             path.join(this.extensionPath, 'src', 'panels', 'tokenDesigner.html'), { encoding: 'utf8' });
@@ -61,7 +92,9 @@ export class TokenDesignerPanel {
             this.panel.webview.postMessage({ viewState: this.viewState, taxonomy: this.taxonomy });
         } else if (message.e === tokenDesignerEvents.Update) {
             this.viewState = message.viewState;
+            this.generateFormula();
             this.panel.title = this.viewState.tokenName + ' - Token Designer';
+            this.panel.webview.postMessage({ viewState: this.viewState });
         }
     }
 

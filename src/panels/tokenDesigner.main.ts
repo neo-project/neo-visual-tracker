@@ -22,6 +22,7 @@ let artifactTypeBeingDraggedOff: artifactType | null = null;
 let canvas: HTMLElement | null = null;
 let canvasTokenBase: HTMLElement | null = null;
 let behaviorsArea: HTMLElement | null = null;
+let formula: HTMLElement | null = null;
 let taxonomy: TokenDesignerTaxonomy | null = null;
 let viewState: TokenDesignerViewState | null = null;
 let vsCodePostMessage: Function;
@@ -155,6 +156,7 @@ function initializePanel() {
     canvas = document.getElementById('canvas');
     canvasTokenBase = document.getElementById('canvasTokenBase');
     behaviorsArea = document.getElementById('behaviorsArea');
+    formula = document.getElementById('formula');
     if (canvas) {
         canvas.ondragover = ev => {
             ev.preventDefault();
@@ -179,6 +181,7 @@ function initializePanel() {
 
 function postViewState() {
     vsCodePostMessage({ e: tokenDesignerEvents.Update, viewState });
+    console.log('->', viewState);
 }
 
 function removeFromTokenDesign() {
@@ -199,7 +202,7 @@ function removeFromTokenDesign() {
 }
 
 function renderCanvas() {
-    if (viewState && canvasTokenBase && behaviorsArea) {
+    if (viewState && canvasTokenBase && behaviorsArea && formula) {
         htmlHelpers.clearChildren(canvasTokenBase);
         htmlHelpers.clearChildren(behaviorsArea);
         if (viewState.tokenBase) {
@@ -216,6 +219,8 @@ function renderCanvas() {
         for (const behavior of viewState.behaviors) {
             behaviorsArea.appendChild(createToolElement('behavior', behavior, false));
         }
+        formula.innerHTML = viewState.formulaHtml;
+        formula.title = viewState.formulaTooling;
     }
 }
 

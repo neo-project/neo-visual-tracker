@@ -1,6 +1,8 @@
 import * as ttfCore from '../ttf/protos/core_pb';
 
 export class TokenDesignerViewState {
+    formulaHtml = '';
+    formulaTooling = '';
     tokenName = 'Unamed token';
     tokenBase: ttfCore.Base.AsObject | null = null;
     propertySets: ttfCore.PropertySet.AsObject[] = [];

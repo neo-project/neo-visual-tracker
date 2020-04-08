@@ -60,6 +60,14 @@ h1 {
     #behaviorsArea {
         width: var(--iconWidth);
     }
+    #formula {
+        position: absolute;
+        padding: var(--padding);
+        margin: var(--padding);
+        font-size: 2em;
+        bottom: 0;
+        right: 0;
+    }
     border: var(--borderWidth) solid var(--vscode-panel-border);
     color: var(--vscode-editor-foreground);
     background-color: var(--vscode-editor-background);
