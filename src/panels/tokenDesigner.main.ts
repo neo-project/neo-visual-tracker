@@ -23,7 +23,9 @@ let artifactSelectedId: string | null = null;
 let canvas: HTMLElement | null = null;
 let canvasTokenBase: HTMLElement | null = null;
 let behaviorsArea: HTMLElement | null = null;
+let draggingInspector: DragEvent | null = null;
 let formula: HTMLElement | null = null;
+let inspector: HTMLElement | null = null;
 let taxonomy: TokenDesignerTaxonomy | null = null;
 let viewState: TokenDesignerViewState | null = null;
 let vsCodePostMessage: Function;
@@ -163,6 +165,7 @@ function initializePanel() {
     canvasTokenBase = document.getElementById('canvasTokenBase');
     behaviorsArea = document.getElementById('behaviorsArea');
     formula = document.getElementById('formula');
+    inspector = document.getElementById('inspector');
     if (canvas) {
         canvas.ondragover = ev => {
             ev.preventDefault();
@@ -180,6 +183,12 @@ function initializePanel() {
             if (canvas) {
                 canvas.className = '';
             }
+            if (canvas && inspector && draggingInspector) {
+                const canvasOffset = canvas.getBoundingClientRect();
+                inspector.style.left = Math.round(ev.x - canvasOffset.x - draggingInspector.offsetX) + 'px';
+                inspector.style.top = Math.round(ev.y - canvasOffset.y - draggingInspector.offsetY) + 'px';
+            }
+            draggingInspector = null;
             addToTokenDesign();
         };
         canvas.onclick = ev => {
@@ -187,6 +196,11 @@ function initializePanel() {
                 artifactSelectedId = null;
                 renderCanvas();
             }
+        };
+    }
+    if (inspector) {
+        inspector.ondragstart = ev => {
+            draggingInspector = ev;
         };
     }
 }
@@ -214,7 +228,7 @@ function removeFromTokenDesign() {
 }
 
 function renderCanvas() {
-    if (viewState && canvasTokenBase && behaviorsArea && formula) {
+    if (viewState && canvasTokenBase && behaviorsArea && formula && inspector) {
         htmlHelpers.clearChildren(canvasTokenBase);
         htmlHelpers.clearChildren(behaviorsArea);
         if (viewState.tokenBase) {
@@ -233,6 +247,7 @@ function renderCanvas() {
         }
         formula.innerHTML = viewState.formulaHtml;
         formula.title = viewState.formulaTooling;
+        inspector.style.display = artifactSelectedId ? 'block' : 'none';
     }
 }
 

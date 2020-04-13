@@ -68,6 +68,28 @@ h1 {
         bottom: 0;
         right: 0;
     }
+    #inspector {
+        .title {
+            margin: var(--padding);
+            padding: var(--padding);
+            font-weight: bold;
+            background-color: var(--vscode-sideBarSectionHeader-background);
+            color: var(--vscode-sideBarTitle-foreground);
+            border: var(--borderWidth) solid var(--vscode-sideBarSectionHeader-border);
+        }
+        .body {
+            padding: var(--padding);
+            margin: var(--padding);
+        }
+        min-width: 20%;
+        min-height: 20%;
+        position: absolute;
+        top: var(--padding);
+        left: var(--padding);
+        z-index: 10;
+        background-color: var(--vscode-sideBar-background);
+        border: var(--borderWidth) solid var(--vscode-sideBar-border);
+    }
     border: var(--borderWidth) solid var(--vscode-panel-border);
     color: var(--vscode-editor-foreground);
     background-color: var(--vscode-editor-background);
