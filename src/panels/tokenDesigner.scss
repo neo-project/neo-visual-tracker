@@ -69,26 +69,56 @@ h1 {
         right: 0;
     }
     #inspector {
-        .title {
+        #inspectorTitle {
             margin: var(--padding);
             padding: var(--padding);
+            font-size: 1.2em;
             font-weight: bold;
             background-color: var(--vscode-sideBarSectionHeader-background);
             color: var(--vscode-sideBarTitle-foreground);
             border: var(--borderWidth) solid var(--vscode-sideBarSectionHeader-border);
         }
-        .body {
-            padding: var(--padding);
+        #inspectorDescription {
             margin: var(--padding);
+            padding: var(--padding);
+            font-size: 1.15em;
+            overflow-y: auto;
+            max-height: 6em;
         }
-        min-width: 20%;
-        min-height: 20%;
+        #inspectorProperties {
+            td,th {
+                border: var(--borderWidth) solid var(--vscode-settings-textInputBorder);
+                padding: var(--padding);
+                input {
+                    border: none;
+                    outline: none;
+                    text-align: right;
+                }
+                input:focus {
+                    border: none;
+                }
+            }
+            margin: var(--padding);
+            font-size: 1.1em;
+            color: var(--vscode-settings-textInputForeground);
+            background-color: var(--vscode-settings-textInputBackground);
+            width: calc(100% - var(--padding) - var(--padding));
+            border-collapse: collapse;
+        }
+        #inspectorHelp {
+            margin: var(--padding);
+            padding: var(--padding);
+            font-size: 1.1em;
+            overflow-y: auto;
+            max-height: 5em;
+        }
+        width: 35%;
         position: absolute;
         top: var(--padding);
-        left: var(--padding);
+        right: var(--padding);
         z-index: 10;
         background-color: var(--vscode-sideBar-background);
-        border: var(--borderWidth) solid var(--vscode-sideBar-border);
+        border: var(--borderWidth) solid var(--vscode-editor-selectionBackground);
     }
     border: var(--borderWidth) solid var(--vscode-panel-border);
     color: var(--vscode-editor-foreground);
@@ -126,7 +156,7 @@ h1 {
     }
     &.selected {
         .icon {
-            border: 1px dashed var(--vscode-editor-selectionBackground);
+            border: var(--borderWidth) solid var(--vscode-editor-selectionBackground);
         }
         .title {
             background-color: var(--vscode-editor-selectionBackground);

@@ -8,4 +8,5 @@ export class TokenDesignerViewState {
     propertySets: ttfCore.PropertySet.AsObject[] = [];
     behaviors: ttfCore.Behavior.AsObject[] = [];
     behaviorGroups: ttfCore.BehaviorGroup.AsObject[] = [];
+    propertyValues: any = {};
 }

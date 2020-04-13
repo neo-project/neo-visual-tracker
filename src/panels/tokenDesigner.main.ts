@@ -19,13 +19,17 @@ let artifactBeingDraggedOn: toolboxArtifact | null = null;
 let artifactTypeBeingDraggedOn: artifactType | null = null;
 let artifactBeingDraggedOff: toolboxArtifact | null = null;
 let artifactTypeBeingDraggedOff: artifactType | null = null;
-let artifactSelectedId: string | null = null;
+let artifactSelected: toolboxArtifact | null = null;
 let canvas: HTMLElement | null = null;
 let canvasTokenBase: HTMLElement | null = null;
 let behaviorsArea: HTMLElement | null = null;
 let draggingInspector: DragEvent | null = null;
 let formula: HTMLElement | null = null;
 let inspector: HTMLElement | null = null;
+let inspectorDescription: HTMLElement | null = null;
+let inspectorHelp: HTMLElement | null = null;
+let inspectorProperties: HTMLElement | null = null;
+let inspectorTitle: HTMLElement | null = null;
 let taxonomy: TokenDesignerTaxonomy | null = null;
 let viewState: TokenDesignerViewState | null = null;
 let vsCodePostMessage: Function;
@@ -117,7 +121,7 @@ function createToolElement(
     title.className = 'title';
     const element = document.createElement('span');
     element.className = 'toolElement ' + 
-        (artifactSelectedId === taxonomyArtifact.artifact?.artifactSymbol?.id ? 'selected' : '');
+        (artifactSelected?.artifact?.artifactSymbol?.id === taxonomyArtifact.artifact?.artifactSymbol?.id ? 'selected' : '');
     element.title = title.innerText;
     element.draggable = true;
     element.appendChild(icon);
@@ -137,7 +141,7 @@ function createToolElement(
             artifactTypeBeingDraggedOn = null;
         };
         element.onclick = ev => {
-            artifactSelectedId = taxonomyArtifact.artifact?.artifactSymbol?.id || null;
+            artifactSelected = taxonomyArtifact;
             renderCanvas();
         };
     }
@@ -166,6 +170,10 @@ function initializePanel() {
     behaviorsArea = document.getElementById('behaviorsArea');
     formula = document.getElementById('formula');
     inspector = document.getElementById('inspector');
+    inspectorDescription = document.getElementById('inspectorDescription');
+    inspectorHelp = document.getElementById('inspectorHelp');
+    inspectorTitle = document.getElementById('inspectorTitle');
+    inspectorProperties = document.getElementById('inspectorProperties');
     if (canvas) {
         canvas.ondragover = ev => {
             ev.preventDefault();
@@ -187,13 +195,14 @@ function initializePanel() {
                 const canvasOffset = canvas.getBoundingClientRect();
                 inspector.style.left = Math.round(ev.x - canvasOffset.x - draggingInspector.offsetX) + 'px';
                 inspector.style.top = Math.round(ev.y - canvasOffset.y - draggingInspector.offsetY) + 'px';
+                inspector.style.right = 'auto';
             }
             draggingInspector = null;
             addToTokenDesign();
         };
         canvas.onclick = ev => {
             if (ev.target === canvas) {
-                artifactSelectedId = null;
+                artifactSelected = null;
                 renderCanvas();
             }
         };
@@ -247,7 +256,58 @@ function renderCanvas() {
         }
         formula.innerHTML = viewState.formulaHtml;
         formula.title = viewState.formulaTooling;
-        inspector.style.display = artifactSelectedId ? 'block' : 'none';
+        renderInspector();   
+    }
+}
+
+function renderInspector() {
+    if (inspector && inspectorTitle && inspectorProperties && inspectorDescription) {
+        inspector.style.display = artifactSelected ? 'block' : 'none';
+        if (artifactSelected) {
+            inspectorTitle.innerText = artifactSelected.artifact?.name || 'Inspector';
+            inspectorDescription.innerText = artifactSelected.artifact?.artifactDefinition?.businessDescription || '';
+            htmlHelpers.clearChildren(inspectorProperties);
+            renderInspectorProperties(artifactSelected, artifactSelected.artifact?.artifactSymbol?.id || '');
+        }
+    }
+}
+
+function renderInspectorProperties(artifact: any, prefix: string) {
+    if (inspectorProperties && viewState) {
+        const propertyList = (artifact).propertiesList as ttfCore.Property.AsObject[] | undefined;
+        for (const property of propertyList || []) {
+            console.log(property);
+            const row = document.createElement('tr');
+            const th = document.createElement('th');
+            th.innerText = property.name;
+            const td = document.createElement('td');
+            const input = document.createElement('input');
+            input.value = viewState.propertyValues[prefix + '/' + property.name] || property.templateValue;
+            input.onchange = () => {
+                if (viewState) {
+                    viewState.propertyValues[prefix + '/' + property.name] = input.value;
+                    postViewState();
+                }
+            };
+            input.onblur = () => {
+                if (artifactSelected && inspectorHelp) {
+                    inspectorHelp.innerText = '';
+                }
+            };
+            input.onfocus = () => {
+                if (inspectorHelp) {
+                    inspectorHelp.innerText = property.valueDescription;
+                }
+            };
+            td.appendChild(input);
+            row.appendChild(th);
+            row.appendChild(td);
+            inspectorProperties.appendChild(row);
+        }
+        const behaviorsList = (artifact).behaviorsList as ttfCore.BehaviorReference.AsObject[] | undefined;
+        for (const behavior of behaviorsList || []) {
+            renderInspectorProperties(behavior,  prefix + '/' + (behavior.reference?.id || ''));
+        }
     }
 }
 
