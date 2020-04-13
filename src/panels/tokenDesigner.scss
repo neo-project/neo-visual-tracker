@@ -92,11 +92,24 @@ h1 {
 .toolElement {
     .icon {
         font-size: 3.5em;
+        margin: var(--paddingSmall);
+        padding: var(--paddingSmall);
     }
     .title {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin: var(--paddingSmall);
+        padding: var(--paddingSmall);
+    }
+    &.selected {
+        .icon {
+            border: 1px dashed var(--vscode-editor-selectionBackground);
+        }
+        .title {
+            background-color: var(--vscode-editor-selectionBackground);
+            color: var(--vscode-editor-selectionForeground);
+        }
     }
     cursor: pointer;
     display: inline-block;

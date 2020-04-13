@@ -19,6 +19,7 @@ let artifactBeingDraggedOn: toolboxArtifact | null = null;
 let artifactTypeBeingDraggedOn: artifactType | null = null;
 let artifactBeingDraggedOff: toolboxArtifact | null = null;
 let artifactTypeBeingDraggedOff: artifactType | null = null;
+let artifactSelectedId: string | null = null;
 let canvas: HTMLElement | null = null;
 let canvasTokenBase: HTMLElement | null = null;
 let behaviorsArea: HTMLElement | null = null;
@@ -88,7 +89,7 @@ function createInvalidToolElement() {
 function createToolElement(
     type: artifactType, 
     taxonomyArtifact: toolboxArtifact,
-    draggableOntoCanvas: boolean) {
+    isInToolbox: boolean) {
 
     let iconCharacter = '❓';
     switch(type) {
@@ -106,19 +107,20 @@ function createToolElement(
             break;
     }
 
-    const icon = document.createElement('div');
+    const icon = document.createElement('span');
     icon.innerText = iconCharacter;
     icon.className = 'icon';
     const title = document.createElement('div');
     title.innerText = taxonomyArtifact.artifact?.name || '(Unknown)';
     title.className = 'title';
     const element = document.createElement('span');
-    element.className = 'toolElement';
+    element.className = 'toolElement ' + 
+        (artifactSelectedId === taxonomyArtifact.artifact?.artifactSymbol?.id ? 'selected' : '');
     element.title = title.innerText;
     element.draggable = true;
     element.appendChild(icon);
     element.appendChild(title);
-    if (draggableOntoCanvas) {
+    if (isInToolbox) {
         element.ondragstart = () => {
             artifactBeingDraggedOff = null;
             artifactTypeBeingDraggedOff = null;
@@ -131,6 +133,10 @@ function createToolElement(
             artifactTypeBeingDraggedOff = type;
             artifactBeingDraggedOn = null;
             artifactTypeBeingDraggedOn = null;
+        };
+        element.onclick = ev => {
+            artifactSelectedId = taxonomyArtifact.artifact?.artifactSymbol?.id || null;
+            renderCanvas();
         };
     }
     return element;
@@ -175,6 +181,12 @@ function initializePanel() {
                 canvas.className = '';
             }
             addToTokenDesign();
+        };
+        canvas.onclick = ev => {
+            if (ev.target === canvas) {
+                artifactSelectedId = null;
+                renderCanvas();
+            }
         };
     }
 }
