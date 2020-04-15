@@ -1,12 +1,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as uuid from 'uuid';
 import * as vscode from 'vscode';
+import * as protobufAny from 'google-protobuf/google/protobuf/any_pb';
 
+import * as ttfArtifact from './ttf/protos/artifact_pb';
+import * as ttfClient from './ttf/protos/service_grpc_pb';
+import * as ttfCore from './ttf/protos/core_pb';
 import * as ttfTaxonomy from './ttf/protos/taxonomy_pb';
 
 import { tokenDesignerEvents } from './panels/tokenDesignerEvents';
 import { TokenDesignerTaxonomy } from './panels/tokenDesignerTaxonomy';
-import { TokenDesignerViewState } from './panels/tokenDesignerViewState';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -14,63 +18,41 @@ const CssHrefPlaceholder : string = '[CSS_HREF]';
 export class TokenDesignerPanel {
     
     get title() {
-        return this.viewState.tokenName + ' - Token Designer';
+        return (this.formula?.getArtifact()?.getName() || 'New formula') + ' - Token Designer';
     }
 
     private readonly panel: vscode.WebviewPanel;
     
-    private readonly taxonomy: TokenDesignerTaxonomy;
+    private readonly taxonomyObjects: TokenDesignerTaxonomy;
+
+    private formula: ttfCore.TemplateFormula | null = null;
     
-    private viewState: TokenDesignerViewState = new TokenDesignerViewState();
-    
-    constructor(taxonomy: ttfTaxonomy.Taxonomy.AsObject, private readonly extensionPath: string, disposables: vscode.Disposable[]) {
+    constructor(
+        private readonly client: ttfClient.ServiceClient, 
+        private readonly taxonomy: ttfTaxonomy.Taxonomy, 
+        private readonly extensionPath: string, 
+        disposables: vscode.Disposable[]) {
+
         this.panel = vscode.window.createWebviewPanel('tokenDesigner', this.title, vscode.ViewColumn.Active, { enableScripts: true });
         this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'neo.svg'));
         this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);        
         this.panel.webview.html = this.getPanelHtml();
 
-        this.taxonomy = {
-            baseTokenTypes: taxonomy.baseTokenTypesMap.map(_ => _[1]),
-            propertySets: taxonomy.propertySetsMap.map(_ => _[1]),
-            behaviors: taxonomy.behaviorsMap.map(_ => _[1]),
-            behaviorGroups: taxonomy.behaviorGroupsMap.map(_ => _[1]),
+        const taxonomyObject = taxonomy.toObject();
+        this.taxonomyObjects = {
+            baseTokenTypes: taxonomyObject.baseTokenTypesMap.map(_ => _[1]),
+            propertySets: taxonomyObject.propertySetsMap.map(_ => _[1]),
+            behaviors: taxonomyObject.behaviorsMap.map(_ => _[1]),
+            behaviorGroups: taxonomyObject.behaviorGroupsMap.map(_ => _[1]),
         };
+
+        //this.newFormula('david-token', 'DN');
+        this.openFormula('[tF{~d,t,g,SC}+phSKU]');
     }
 
     dispose() {
         this.panel.dispose();
-    }
-
-    private generateFormula() {
-        this.viewState.formulaHtml = this.viewState.tokenBase?.artifact?.artifactSymbol?.visual || '❓';
-        this.viewState.formulaTooling = this.viewState.tokenBase?.artifact?.artifactSymbol?.tooling || '?';
-        let behaviorsHtml = this.viewState.behaviorGroups
-            .map(_ => _.artifact?.artifactSymbol?.visual || '❓')
-            .concat(this.viewState.behaviors.map(_ => _.artifact?.artifactSymbol?.visual || '❓'))
-            .join(',');
-        if (behaviorsHtml) {
-            if (this.viewState.formulaHtml.indexOf('}') !== -1) {
-                this.viewState.formulaHtml = this.viewState.formulaHtml.replace('}', ',' + behaviorsHtml + '}');
-            } else {
-                this.viewState.formulaHtml += `{${behaviorsHtml}}`;
-            }
-        }
-        let behaviorsTooling = this.viewState.behaviorGroups
-            .map(_ => _.artifact?.artifactSymbol?.tooling || '?')
-            .concat(this.viewState.behaviors.map(_ => _.artifact?.artifactSymbol?.tooling || '?'))
-            .join(',');
-        if (behaviorsTooling) {
-            if (this.viewState.formulaTooling.indexOf('}') !== -1) {
-                this.viewState.formulaTooling = this.viewState.formulaTooling.replace('}', ',' + behaviorsTooling + '}');
-            } else {
-                this.viewState.formulaTooling += `{${behaviorsTooling}}`;
-            }
-        }
-        for (const propertySet of this.viewState.propertySets) {
-            this.viewState.formulaHtml += ' + ' + propertySet.artifact?.artifactSymbol?.visual || '❓';
-            this.viewState.formulaTooling += ' + ' + propertySet.artifact?.artifactSymbol?.tooling || '?';
-        }
     }
 
     private getPanelHtml() {
@@ -83,19 +65,95 @@ export class TokenDesignerPanel {
         return htmlFileContents.replace(JavascriptHrefPlaceholder, javascriptHref).replace(CssHrefPlaceholder, cssHref);
     }
 
+    private async newFormula(name: string, symbol: string) {
+        const id = uuid.v1();
+        const newArtifactSymbol = new ttfArtifact.ArtifactSymbol();
+        newArtifactSymbol.setId(id);
+        newArtifactSymbol.setTooling(symbol);
+        newArtifactSymbol.setVisual(symbol);
+        newArtifactSymbol.setVersion('1.0,');
+        newArtifactSymbol.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
+        newArtifactSymbol.setTemplateValidated(false);
+        const newArtifact = new ttfArtifact.Artifact();
+        newArtifact.setName(name);
+        newArtifact.setArtifactSymbol(newArtifactSymbol);
+        const newFormula = new ttfCore.TemplateFormula();
+        newFormula.setArtifact(newArtifact);
+        const newArtifactRequest = new ttfArtifact.NewArtifactRequest();
+        newArtifactRequest.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
+        newArtifactRequest.setArtifact(this.packTemplateFormula(newFormula));
+        await new Promise((resolve, reject) => this.client.createArtifact(newArtifactRequest, (error, response) => (error && reject(error)) || resolve(response)));
+        this.refreshFormula(symbol);
+    }
+
+    private async openFormula(symbol: string) {
+        this.refreshFormula(symbol);
+    }
+
     private onClose() {
         this.dispose();
     }
 
-    private onMessage(message: any) {
+    private async onMessage(message: any) {
         if (message.e === tokenDesignerEvents.Init) {
-            this.panel.webview.postMessage({ viewState: this.viewState, taxonomy: this.taxonomy });
-        } else if (message.e === tokenDesignerEvents.Update) {
-            this.viewState = message.viewState;
-            this.generateFormula();
-            this.panel.title = this.viewState.tokenName + ' - Token Designer';
-            this.panel.webview.postMessage({ viewState: this.viewState });
+            this.panel.webview.postMessage({ formula: this.formula?.toObject(), taxonomy: this.taxonomyObjects });
+        } else if (message.e === tokenDesignerEvents.Remove) {
+            await this.removeArtifact(message.id);
         }
+    }
+
+    private packTemplateFormula(formula: ttfCore.TemplateFormula) {
+        const any = new protobufAny.Any();
+        any.pack(formula.serializeBinary(), 'taxonomy.model.core.TemplateFormula');
+        return any;
+    }
+
+    private async refreshFormula(symbol?: string) {
+        symbol = symbol || this.formula?.getArtifact()?.getArtifactSymbol()?.getTooling();
+        if (symbol) {
+            const existingArtifactSymbol = new ttfArtifact.ArtifactSymbol();
+            existingArtifactSymbol.setTooling(symbol);
+            const formula: ttfCore.TemplateFormula = await new Promise(
+                (resolve, reject) => this.client.getTemplateFormulaArtifact(existingArtifactSymbol, (error, response) => (error && reject(error)) || resolve(response)));
+            this.formula = formula;
+        } else {
+            this.formula = null;
+        }
+        this.panel.webview.postMessage({ formula: this.formula?.toObject() || null });
+        this.panel.title = this.title;
+    }
+
+    private async removeArtifact(id: string) {
+        const toRemove = 
+            this.taxonomy.getBaseTokenTypesMap().get(id) ||
+            this.taxonomy.getPropertySetsMap().get(id) ||
+            this.taxonomy.getBehaviorsMap().get(id) ||
+            this.taxonomy.getBehaviorGroupsMap().get(id);
+        if (this.formula && toRemove) {
+            const removeId = toRemove.getArtifact()?.getArtifactSymbol()?.getId();
+            const removeType = toRemove.getArtifact()?.getArtifactSymbol()?.getType();
+            if (removeType === ttfArtifact.ArtifactType.BASE) {
+                this.formula.setTokenBase(undefined);
+            } else {
+                this.formula.setPropertySetsList(this.formula.getPropertySetsList().filter(_ => _.getPropertySet()?.getId() !== removeId));
+                this.formula.setBehaviorsList(this.formula.getBehaviorsList().filter(_ => _.getBehavior()?.getId() !== removeId));
+                this.formula.setBehaviorGroupsList(this.formula.getBehaviorGroupsList().filter(_ => _.getBehaviorGroup()?.getId() !== removeId));
+            }
+            const updateReqest = new ttfArtifact.UpdateArtifactRequest();
+            updateReqest.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
+            updateReqest.setArtifactTypeObject(this.packTemplateFormula(this.formula));
+            const response: ttfArtifact.UpdateArtifactResponse =
+                await new Promise((resolve, reject) => this.client.updateArtifact(updateReqest, (error, response) => (error && reject(error)) || resolve(response)));
+            this.formula = this.unackTemplateFormula(response.getArtifactTypeObject());
+            this.refreshFormula();
+        }
+    }
+
+    private unackTemplateFormula(input?: protobufAny.Any): ttfCore.TemplateFormula | null {
+        if (input) {
+            return input.unpack<ttfCore.TemplateFormula>(ttfCore.TemplateFormula.deserializeBinary, 'taxonomy.model.core.TemplateFormula');
+        }
+        return null;
     }
 
 }

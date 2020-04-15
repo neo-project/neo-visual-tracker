@@ -2,7 +2,7 @@
 
 const tokenDesignerEvents = {
     Init: 'init',
-    Update: 'update',
+    Remove: 'remove',
 };
 
 export { tokenDesignerEvents };

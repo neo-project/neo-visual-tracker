@@ -367,6 +367,7 @@
         "@types/mocha": "^5.2.6",
         "@types/pouchdb-core": "^7.0.5",
         "@types/shell-escape": "^0.2.0",
+        "@types/uuid": "^7.0.2",
         "@types/vscode": "^1.42.0",
         "browserify": "^16.5.0",
         "glob": "^7.1.6",
@@ -395,6 +396,7 @@
         "grpc": "^1.24.2",
         "memoizee": "^0.4.14",
         "request": "^2.88.2",
-        "shell-escape": "^0.2.0"
+        "shell-escape": "^0.2.0",
+        "uuid": "^7.0.3"
     }
 }
