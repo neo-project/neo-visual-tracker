@@ -30,6 +30,8 @@ export class TokenDesignerPanel {
 
     private incompatabilities: any = {};
 
+    private disposed = false;
+
     static async openNewFormula(ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
         let symbolName;
         while (!symbolName) {
@@ -67,6 +69,7 @@ export class TokenDesignerPanel {
     }
 
     dispose() {
+        this.disposed = true;
         this.panel.dispose();
     }
 
@@ -195,19 +198,21 @@ export class TokenDesignerPanel {
     }
 
     private async refreshTaxonomy() {
-        const taxonomy = this.ttfTaxonomy.taxonomy;
-        if (taxonomy) {
-            const taxonomyObject = taxonomy.toObject();
-            this.taxonomyObjects = {
-                baseTokenTypes: taxonomyObject.baseTokenTypesMap.map(_ => _[1]),
-                propertySets: taxonomyObject.propertySetsMap.map(_ => _[1]),
-                behaviors: taxonomyObject.behaviorsMap.map(_ => _[1]),
-                behaviorGroups: taxonomyObject.behaviorGroupsMap.map(_ => _[1]),
-            };
-        } else {
-            this.taxonomyObjects = null;
+        if (!this.disposed) {
+            const taxonomy = this.ttfTaxonomy.taxonomy;
+            if (taxonomy) {
+                const taxonomyObject = taxonomy.toObject();
+                this.taxonomyObjects = {
+                    baseTokenTypes: taxonomyObject.baseTokenTypesMap.map(_ => _[1]),
+                    propertySets: taxonomyObject.propertySetsMap.map(_ => _[1]),
+                    behaviors: taxonomyObject.behaviorsMap.map(_ => _[1]),
+                    behaviorGroups: taxonomyObject.behaviorGroupsMap.map(_ => _[1]),
+                };
+            } else {
+                this.taxonomyObjects = null;
+            }
+            this.panel.webview.postMessage({ taxonomy: this.taxonomyObjects });
         }
-        this.panel.webview.postMessage({ taxonomy: this.taxonomyObjects });
     }
 
     private async removeArtifact(id: string, save: boolean = true) {
