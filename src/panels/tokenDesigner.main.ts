@@ -44,9 +44,8 @@ function addToTokenDesign() {
 }
 
 function createInvalidToolElement() {
-    const iconCharacter = '❓';
-    const icon = document.createElement('div');
-    icon.innerText = iconCharacter;
+    const icon = document.createElement('img');
+    icon.src = 'token-designer/unknown.svg';
     icon.className = 'icon';
     const title = document.createElement('div');
     title.innerText = '(Unknown)';
@@ -63,30 +62,30 @@ function createToolElement(
     taxonomyArtifactId: string | undefined,
     isInToolbox: boolean) {
 
-    let iconCharacter = '❓';
+    let imgSrc = 'token-designer/unknown.svg';
     let taxonomyArtifact: toolboxArtifact | undefined = undefined;
     taxonomyArtifact = taxonomy?.baseTokenTypes.find(_ => _.artifact?.artifactSymbol?.id === taxonomyArtifactId);
     if (taxonomyArtifact) {
-        iconCharacter = '🌐';
+        imgSrc = 'token-designer/token-base.svg';
     } else {
         taxonomyArtifact = taxonomy?.propertySets.find(_ => _.artifact?.artifactSymbol?.id === taxonomyArtifactId);
         if (taxonomyArtifact) {
-            iconCharacter = '🧱';
+            imgSrc = 'token-designer/property-set.svg';
         } else {
             taxonomyArtifact = taxonomy?.behaviors.find(_ => _.artifact?.artifactSymbol?.id === taxonomyArtifactId);
             if (taxonomyArtifact) {
-                iconCharacter = '🎵';
+                imgSrc = 'token-designer/behavior.svg';
             } else {
                 taxonomyArtifact = taxonomy?.behaviorGroups.find(_ => _.artifact?.artifactSymbol?.id === taxonomyArtifactId);
                 if (taxonomyArtifact) {
-                    iconCharacter = '🎶';
+                    imgSrc = 'token-designer/behavior-group.svg';
                 }
             }
         }
     }
 
-    const icon = document.createElement('span');
-    icon.innerText = iconCharacter;
+    const icon = document.createElement('img');
+    icon.src = imgSrc;
     icon.className = 'icon';
     const title = document.createElement('div');
     title.innerText = taxonomyArtifact?.artifact?.name || '(Unknown)';

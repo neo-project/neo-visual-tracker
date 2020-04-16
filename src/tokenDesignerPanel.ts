@@ -14,6 +14,7 @@ import { TokenDesignerTaxonomy } from './panels/tokenDesignerTaxonomy';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
+const BaseHrefPlaceholder : string = '[BASE_HREF]';
 
 export class TokenDesignerPanel {
     
@@ -62,7 +63,12 @@ export class TokenDesignerPanel {
             vscode.Uri.file(path.join(this.extensionPath, 'out', 'panels', 'bundles', 'tokenDesigner.main.js'))) + '';
         const cssHref: string = this.panel.webview.asWebviewUri(
             vscode.Uri.file(path.join(this.extensionPath, 'out', 'panels', 'tokenDesigner.css'))) + '';
-        return htmlFileContents.replace(JavascriptHrefPlaceholder, javascriptHref).replace(CssHrefPlaceholder, cssHref);
+        const baseHref: string = this.panel.webview.asWebviewUri(
+            vscode.Uri.file(path.join(this.extensionPath, 'resources'))) + '/';
+        return htmlFileContents
+            .replace(JavascriptHrefPlaceholder, javascriptHref)
+            .replace(CssHrefPlaceholder, cssHref)
+            .replace(BaseHrefPlaceholder, baseHref);
     }
 
     private async newFormula(name: string, symbol: string) {
