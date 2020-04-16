@@ -27,6 +27,8 @@ export class TokenDesignerPanel {
     private readonly taxonomyObjects: TokenDesignerTaxonomy;
 
     private formula: ttfCore.TemplateFormula | null = null;
+
+    private incompatabilities: any = {};
     
     constructor(
         private readonly client: ttfClient.ServiceClient, 
@@ -87,7 +89,10 @@ export class TokenDesignerPanel {
         }
     }
 
-    private getArtifcactById(id: string) {
+    private getArtifcactById(id?: string) {
+        if (!id) {
+            return undefined;
+        }
         return this.taxonomy.getBaseTokenTypesMap().get(id) ||
             this.taxonomy.getPropertySetsMap().get(id) ||
             this.taxonomy.getBehaviorsMap().get(id) ||
@@ -140,7 +145,11 @@ export class TokenDesignerPanel {
 
     private async onMessage(message: any) {
         if (message.e === tokenDesignerEvents.Init) {
-            this.panel.webview.postMessage({ formula: this.formula?.toObject(), taxonomy: this.taxonomyObjects });
+            this.panel.webview.postMessage({
+                formula: this.formula?.toObject(),
+                taxonomy: this.taxonomyObjects,
+                incompatabilities: this.incompatabilities,
+            });
         } else if (message.e === tokenDesignerEvents.Add) {
             await this.addArtifact(message.id);
         } else if (message.e === tokenDesignerEvents.Remove) {
@@ -165,7 +174,8 @@ export class TokenDesignerPanel {
         } else {
             this.formula = null;
         }
-        this.panel.webview.postMessage({ formula: this.formula?.toObject() || null });
+        this.updateIncompatibilities();
+        this.panel.webview.postMessage({ formula: this.formula?.toObject() || null, incompatabilities: this.incompatabilities });
         this.panel.title = this.title;
     }
 
@@ -203,6 +213,31 @@ export class TokenDesignerPanel {
             return input.unpack<ttfCore.TemplateFormula>(ttfCore.TemplateFormula.deserializeBinary, 'taxonomy.model.core.TemplateFormula');
         }
         return null;
+    }
+
+    private updateIncompatibilities() {
+        const newIncompatabilities: any = {};
+        if (this.formula) {
+            const allIds = [];
+            allIds.push(this.formula.getTokenBase()?.getBase()?.getId());
+            allIds.push(...this.formula.getBehaviorsList().map(_ => _.getBehavior()?.getId()));
+            allIds.push(...this.formula.getBehaviorGroupsList().map(_ => _.getBehaviorGroup()?.getId()));
+            allIds.push(...this.formula.getPropertySetsList().map(_ => _.getPropertySet()?.getId()));
+            for (const id of allIds) {
+                const artifact = this.getArtifcactById(id);
+                if (artifact) {
+                    const artifactName = artifact.getArtifact()?.getName();
+                    for (const artifactIncompatibleWith of artifact.getArtifact()?.getIncompatibleWithSymbolsList() || []) {
+                        if (newIncompatabilities[artifactIncompatibleWith.getId()]) {
+                            newIncompatabilities[artifactIncompatibleWith.getId()].push(artifactName);
+                        } else {
+                            newIncompatabilities[artifactIncompatibleWith.getId()] = [ artifactName ];
+                        }
+                    }
+                }
+            }
+        }
+        this.incompatabilities = newIncompatabilities;
     }
 
     private updateSymbol() {

@@ -163,6 +163,15 @@ h1 {
             color: var(--vscode-editor-selectionForeground);
         }
     }
+    &.error {
+        .icon {
+            filter: grayscale(100%);
+        }
+        .title {
+            color: var(--vscode-errorForeground) !important;
+            font-weight: bold;
+        }
+    }
     cursor: pointer;
     display: inline-block;
     width: var(--iconWidth);

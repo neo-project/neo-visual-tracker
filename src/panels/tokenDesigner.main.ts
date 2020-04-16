@@ -29,6 +29,7 @@ let artifactBeingDraggedOn: toolboxArtifact | undefined = undefined;
 let artifactBeingDraggedOff: toolboxArtifact | undefined = undefined;
 let artifactSelected: toolboxArtifact | undefined = undefined;
 let draggingInspector: DragEvent | undefined = undefined;
+let incompatabilities: any = {};
 let taxonomy: TokenDesignerTaxonomy | undefined = undefined;
 let tokenFormula: ttfCore.TemplateFormula.AsObject | undefined = undefined;
 let vsCodePostMessage: Function;
@@ -108,6 +109,10 @@ function createToolElement(
             artifactSelected = taxonomyArtifact;
             renderCanvas();
         };
+        if (taxonomyArtifactId && incompatabilities[taxonomyArtifactId]) {
+            element.className += ' error';
+            element.title += ' (incompatible with ' + incompatabilities[taxonomyArtifactId].join(', ') + ')';
+        }
     }
     return element;
 }
@@ -118,9 +123,18 @@ function handleMessage(message: any) {
         taxonomy = message.taxonomy;
         renderTaxonomy();
     }
+    let shouldRenderCanvas = false;
     if (message.formula) {
         console.log('Received TokenFormula update', message.formula);
         tokenFormula = message.formula;
+        shouldRenderCanvas = true;
+    }
+    if (message.incompatabilities) {
+        console.log('Received incompatabilities update', message.incompatabilities);
+        incompatabilities = message.incompatabilities;
+        shouldRenderCanvas = true;
+    }
+    if (shouldRenderCanvas) {
         renderCanvas();
     }
 }
