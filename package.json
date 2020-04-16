@@ -29,12 +29,14 @@
         "Tracker"
     ],
     "activationEvents": [
-        "onCommand:neo-visual-devtracker.createToken",
+        "onCommand:neo-visual-devtracker.createTokenFormula",
+        "onCommand:neo-visual-devtracker.openTokenFormula",
         "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.customizeServerList",
         "onCommand:neo-visual-devtracker.createWalletFile",
         "onCommand:neo-visual-devtracker.openTracker",
         "onView:neo-visual-devtracker.rpcServerExplorer",
+        "onView:neo-visual-devtracker.tokenFormulaExplorer",
         "workspaceContains:**/*.avm"
     ],
     "main": "./out/extension.js",
@@ -53,14 +55,32 @@
                 {
                     "id": "neo-visual-devtracker.rpcServerExplorer",
                     "name": "Blockchains"
+                },
+                {
+                    "id": "neo-visual-devtracker.tokenFormulaExplorer",
+                    "name": "Token Formulae"
                 }
             ]
         },
         "commands": [
             {
-                "command": "neo-visual-devtracker.createToken",
-                "title": "Create token",
-                "category": "Neo Visual DevTracker"
+                "command": "neo-visual-devtracker.createTokenFormula",
+                "title": "Create token formula",
+                "category": "Token Taxonomy Framework"
+            },
+            {
+                "command": "neo-visual-devtracker.openTokenFormula",
+                "title": "Open token formula",
+                "category": "Token Taxonomy Framework"
+            },
+            {
+                "command": "neo-visual-devtracker.refreshTokenTaxonomy",
+                "title": "Refresh Token Taxonomy",
+                "category": "Token Taxonomy Framework",
+                "icon": {
+                    "light": "resources/light/refresh.svg",
+                    "dark": "resources/dark/refresh.svg"
+                }
             },
             {
                 "command": "neo-visual-devtracker.openTracker",
@@ -198,8 +218,13 @@
                     "when": "view == neo-visual-devtracker.rpcServerExplorer"
                 },
                 {
-                    "command": "neo-visual-devtracker.createToken",
-                    "when": "view == neo-visual-devtracker.rpcServerExplorer"
+                    "command": "neo-visual-devtracker.refreshTokenTaxonomy",
+                    "when": "view == neo-visual-devtracker.tokenFormulaExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.createTokenFormula",
+                    "when": "view == neo-visual-devtracker.tokenFormulaExplorer"
                 }
             ],
             "view/item/context": [

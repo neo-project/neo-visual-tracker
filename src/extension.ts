@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as grpc from 'grpc';
 
 import * as ttfClient from './ttf/protos/service_grpc_pb';
-import * as ttfTaxonomy from './ttf/protos/taxonomy_pb';
 
 import { CheckpointDetector } from './checkpointDetector';
 import { ClaimPanel } from './claimPanel';
@@ -20,14 +19,22 @@ import { RpcConnectionPool } from './rpcConnectionPool';
 import { StartPanel } from './startPanel';
 import { StoragePanel } from './storagePanel';
 import { TokenDesignerPanel } from './tokenDesignerPanel';
+import { TokenFormulaExplorer } from './tokenFormulaExplorer';
+import { TokenTaxonomy } from './tokenTaxonomy';
 import { TransferPanel } from './transferPanel';
 import { WalletExplorer } from './walletExplorer';
 
 export function activate(context: vscode.ExtensionContext) {
 
+    const ttfConnection = new ttfClient.ServiceClient('127.0.0.1:8086', grpc.credentials.createInsecure());
+
+    const ttfTaxonomy = new TokenTaxonomy(ttfConnection);
+
     const rpcConnectionPool = new RpcConnectionPool();
 
     const rpcServerExplorer = new RpcServerExplorer(context.extensionPath, rpcConnectionPool);
+
+    const tokenFormulaExplorer = new TokenFormulaExplorer(context.extensionPath, ttfTaxonomy);
 
     const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
@@ -476,15 +483,19 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    const createTokenCommand = vscode.commands.registerCommand('neo-visual-devtracker.createToken', async (commandContext) => {
-        const creds = grpc.credentials.createInsecure();
-        const client = new ttfClient.ServiceClient('127.0.0.1:8086', creds);
-        const version = new ttfTaxonomy.TaxonomyVersion();
-        version.setVersion('1.0');
-        const taxonomy: ttfTaxonomy.Taxonomy = await new Promise(
-            (resolve, reject) => client.getFullTaxonomy(version, (error, response) => error ? reject(error) : resolve(response)));
-        const panel = new TokenDesignerPanel(client, taxonomy, context.extensionPath, context.subscriptions);
+    const createTokenFormulaCommand = vscode.commands.registerCommand('neo-visual-devtracker.createTokenFormula', async (commandContext) => {
+        const panel = await TokenDesignerPanel.openNewFormula(ttfConnection, ttfTaxonomy, context.extensionPath, context.subscriptions);
     });
+
+    const openTokenFormulaCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTokenFormula', async (commandContext) => {
+        const panel = await TokenDesignerPanel.openExistingFormula(commandContext, ttfConnection, ttfTaxonomy, context.extensionPath, context.subscriptions);
+    });
+
+    const refreshTokenTaxonomyCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshTokenTaxonomy', async (commandContext) => {
+        await ttfTaxonomy.refresh();
+    });
+
+    const tokenFormulaExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.tokenFormulaExplorer', tokenFormulaExplorer);
 
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
@@ -507,7 +518,10 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createAccountCommand);
     context.subscriptions.push(customizeServerListCommand);
     context.subscriptions.push(createWalletFileCommand);
-    context.subscriptions.push(createTokenCommand);
+    context.subscriptions.push(createTokenFormulaCommand);
+    context.subscriptions.push(openTokenFormulaCommand);
+    context.subscriptions.push(refreshTokenTaxonomyCommand);
+    context.subscriptions.push(tokenFormulaExplorerProvider);
     context.subscriptions.push(serverExplorerProvider);
     context.subscriptions.push(waletExplorerProvider);
 }
