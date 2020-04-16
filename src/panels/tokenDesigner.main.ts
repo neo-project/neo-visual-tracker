@@ -35,10 +35,7 @@ let vsCodePostMessage: Function;
 
 function addToTokenDesign() {
     if (tokenFormula && artifactBeingDraggedOn) {
-        const artifactId = artifactBeingDraggedOn.artifact?.artifactSymbol?.id;
-        if (artifactId) {
-            // ...
-        }
+        vsCodePostMessage({ e: tokenDesignerEvents.Add, id: artifactBeingDraggedOn.artifact?.artifactSymbol?.id });
         artifactBeingDraggedOn = undefined;
     }
 }

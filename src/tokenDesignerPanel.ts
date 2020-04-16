@@ -56,6 +56,44 @@ export class TokenDesignerPanel {
         this.panel.dispose();
     }
 
+    private async addArtifact(id: string) {
+        const toAdd = this.getArtifcactById(id);
+        if (this.formula && toAdd) {
+            await this.removeArtifact(id, false); // avoid duplicates
+            const addType = toAdd.getArtifact()?.getArtifactSymbol()?.getType();
+            switch (addType) {
+                case ttfArtifact.ArtifactType.BASE:
+                    const templateBase = new ttfCore.TemplateBase();
+                    templateBase.setBase(toAdd.getArtifact()?.getArtifactSymbol());
+                    this.formula.setTokenBase(templateBase);
+                    break;
+                case ttfArtifact.ArtifactType.PROPERTY_SET:
+                    const templatePropertySet = new ttfCore.TemplatePropertySet();
+                    templatePropertySet.setPropertySet(toAdd.getArtifact()?.getArtifactSymbol());
+                    this.formula.getPropertySetsList().push(templatePropertySet);
+                    break;
+                case ttfArtifact.ArtifactType.BEHAVIOR:
+                    const templateBehavior = new ttfCore.TemplateBehavior();
+                    templateBehavior.setBehavior(toAdd.getArtifact()?.getArtifactSymbol());
+                    this.formula.getBehaviorsList().push(templateBehavior);
+                    break;
+                case ttfArtifact.ArtifactType.BEHAVIOR_GROUP:
+                    const templateBehaviorGroup = new ttfCore.TemplateBehaviorGroup();
+                    templateBehaviorGroup.setBehaviorGroup(toAdd.getArtifact()?.getArtifactSymbol());
+                    this.formula.getBehaviorGroupsList().push(templateBehaviorGroup);
+                    break;
+            }
+            await this.saveFormula();
+        }
+    }
+
+    private getArtifcactById(id: string) {
+        return this.taxonomy.getBaseTokenTypesMap().get(id) ||
+            this.taxonomy.getPropertySetsMap().get(id) ||
+            this.taxonomy.getBehaviorsMap().get(id) ||
+            this.taxonomy.getBehaviorGroupsMap().get(id);
+    }
+
     private getPanelHtml() {
         const htmlFileContents = fs.readFileSync(
             path.join(this.extensionPath, 'src', 'panels', 'tokenDesigner.html'), { encoding: 'utf8' });
@@ -103,6 +141,8 @@ export class TokenDesignerPanel {
     private async onMessage(message: any) {
         if (message.e === tokenDesignerEvents.Init) {
             this.panel.webview.postMessage({ formula: this.formula?.toObject(), taxonomy: this.taxonomyObjects });
+        } else if (message.e === tokenDesignerEvents.Add) {
+            await this.addArtifact(message.id);
         } else if (message.e === tokenDesignerEvents.Remove) {
             await this.removeArtifact(message.id);
         }
@@ -129,22 +169,25 @@ export class TokenDesignerPanel {
         this.panel.title = this.title;
     }
 
-    private async removeArtifact(id: string) {
-        const toRemove = 
-            this.taxonomy.getBaseTokenTypesMap().get(id) ||
-            this.taxonomy.getPropertySetsMap().get(id) ||
-            this.taxonomy.getBehaviorsMap().get(id) ||
-            this.taxonomy.getBehaviorGroupsMap().get(id);
+    private async removeArtifact(id: string, save: boolean = true) {
+        const toRemove = this.getArtifcactById(id);
         if (this.formula && toRemove) {
-            const removeId = toRemove.getArtifact()?.getArtifactSymbol()?.getId();
-            const removeType = toRemove.getArtifact()?.getArtifactSymbol()?.getType();
-            if (removeType === ttfArtifact.ArtifactType.BASE) {
-                this.formula.setTokenBase(undefined);
+            if (this.formula.getTokenBase()?.getBase()?.getId() === id) {
+                this.formula.setTokenBase(undefined);            
             } else {
-                this.formula.setPropertySetsList(this.formula.getPropertySetsList().filter(_ => _.getPropertySet()?.getId() !== removeId));
-                this.formula.setBehaviorsList(this.formula.getBehaviorsList().filter(_ => _.getBehavior()?.getId() !== removeId));
-                this.formula.setBehaviorGroupsList(this.formula.getBehaviorGroupsList().filter(_ => _.getBehaviorGroup()?.getId() !== removeId));
+                this.formula.setPropertySetsList(this.formula.getPropertySetsList().filter(_ => _.getPropertySet()?.getId() !== id));
+                this.formula.setBehaviorsList(this.formula.getBehaviorsList().filter(_ => _.getBehavior()?.getId() !== id));
+                this.formula.setBehaviorGroupsList(this.formula.getBehaviorGroupsList().filter(_ => _.getBehaviorGroup()?.getId() !== id));
             }
+            if (save) {
+                await this.saveFormula();
+            }
+        }
+    }
+
+    private async saveFormula() {
+        if (this.formula) {
+            this.updateSymbol();
             const updateReqest = new ttfArtifact.UpdateArtifactRequest();
             updateReqest.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
             updateReqest.setArtifactTypeObject(this.packTemplateFormula(this.formula));
@@ -160,6 +203,37 @@ export class TokenDesignerPanel {
             return input.unpack<ttfCore.TemplateFormula>(ttfCore.TemplateFormula.deserializeBinary, 'taxonomy.model.core.TemplateFormula');
         }
         return null;
+    }
+
+    private updateSymbol() {
+        if (this.formula) {
+            const tokenBaseTooling = this.formula.getTokenBase()?.getBase()?.getTooling() || '?{}';
+            const tokenBaseVisual = this.formula.getTokenBase()?.getBase()?.getVisual() || '?{}';
+            let [ tooling, includedBehaviorsTooling ] = tokenBaseTooling.replace('}', '').split('{', 2);
+            let [ visual, includedBehaviorsVisual ] = tokenBaseVisual.replace('}', '').split('{', 2);
+            const behaviorsTooling = (includedBehaviorsTooling || '').split(',');
+            const behaviorsVisual = (includedBehaviorsVisual || '').split(',');
+            for (const behavior of this.formula.getBehaviorsList()) {
+                if (behaviorsTooling.indexOf(behavior.getBehavior()?.getTooling() || '') === -1) {
+                    behaviorsTooling.push(behavior.getBehavior()?.getTooling() || '?');
+                    behaviorsVisual.push(behavior.getBehavior()?.getVisual() || '?');
+                }
+            }
+            for (const behaviorGroup of this.formula.getBehaviorGroupsList()) {
+                if (behaviorsTooling.indexOf(behaviorGroup.getBehaviorGroup()?.getTooling() || '') === -1) {
+                    behaviorsTooling.push(behaviorGroup.getBehaviorGroup()?.getTooling() || '?');
+                    behaviorsVisual.push(behaviorGroup.getBehaviorGroup()?.getVisual() || '?');
+                }
+            }
+            tooling += '{' + behaviorsTooling.join(',') + '}';
+            visual += '{' + behaviorsVisual.join(',') + '}';
+            for (const propertySet of this.formula.getPropertySetsList()) {
+                tooling += '+' + (propertySet.getPropertySet()?.getTooling() || '?');
+                visual += '+' + (propertySet.getPropertySet()?.getVisual() || '?');
+            }
+            this.formula.getArtifact()?.getArtifactSymbol()?.setTooling('[' + tooling + ']');
+            this.formula.getArtifact()?.getArtifactSymbol()?.setVisual('[' + visual + ']');
+        }
     }
 
 }
