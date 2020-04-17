@@ -84,6 +84,7 @@ h1 {
             font-size: 1.15em;
             overflow-y: auto;
             max-height: 10em;
+            text-align: left;
         }
         #propertiesHeading {
             text-align: left;
@@ -115,6 +116,7 @@ h1 {
             text-align: left;
         }
         #inspectorHelp {
+            text-align: left;
             margin: var(--padding);
             padding: 0 var(--padding) var(--padding) var(--padding);
             font-size: 1.1em;
