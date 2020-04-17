@@ -71,7 +71,7 @@ export class TokenDefinitionIdentifier {
             this.children?.length ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
         result.iconPath = this.artifact ?
             vscode.Uri.file(path.join(this.extensionPath, 'resources', 'token-designer', 'token-base.svg')) : 
-            vscode.Uri.file(path.join(this.extensionPath, 'resources', 'token-designer', 'unknown.svg'));
+            vscode.ThemeIcon.Folder;
         if (this.artifact) {
             result.command = {
                 title: 'Open definition',
