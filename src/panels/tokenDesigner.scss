@@ -80,12 +80,17 @@ h1 {
         }
         #inspectorDescription {
             margin: var(--padding);
-            padding: var(--padding);
+            padding: 0 var(--padding) var(--padding) var(--padding);
             font-size: 1.15em;
             overflow-y: auto;
-            max-height: 6em;
+            max-height: 10em;
         }
-        #inspectorProperties {
+        #propertiesHeading {
+            text-align: left;
+            color: var(--vscode-sideBarTitle-foreground);
+            margin-left: var(--padding);
+        }
+        #inspectorPropertiesTable {
             td,th {
                 border: var(--borderWidth) solid var(--vscode-settings-textInputBorder);
                 padding: var(--padding);
@@ -93,6 +98,7 @@ h1 {
                     border: none;
                     outline: none;
                     text-align: right;
+                    width: 100%;
                 }
                 input:focus {
                     border: none;
@@ -105,12 +111,15 @@ h1 {
             width: calc(100% - var(--padding) - var(--padding));
             border-collapse: collapse;
         }
+        #inspectorPropertiesList {
+            text-align: left;
+        }
         #inspectorHelp {
             margin: var(--padding);
-            padding: var(--padding);
+            padding: 0 var(--padding) var(--padding) var(--padding);
             font-size: 1.1em;
             overflow-y: auto;
-            max-height: 5em;
+            max-height: 8em;
         }
         width: 35%;
         position: absolute;
@@ -118,7 +127,7 @@ h1 {
         right: var(--padding);
         z-index: 10;
         background-color: var(--vscode-sideBar-background);
-        border: var(--borderWidth) solid var(--vscode-editor-selectionBackground);
+        border: var(--borderWidth) solid var(--vscode-panel-border);
     }
     border: var(--borderWidth) solid var(--vscode-panel-border);
     color: var(--vscode-editor-foreground);

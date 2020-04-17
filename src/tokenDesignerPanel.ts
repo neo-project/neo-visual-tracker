@@ -20,11 +20,19 @@ export class TokenDesignerPanel {
     
     get title() {
         if (this.formula) {
-            return (this.formula.getArtifact()?.getName() || 'New formula') + ' - Token Designer';
+            return (this.formula.getArtifact()?.getName() || 'New formula') + ' - Token Formula';
         } else if (this.definition) {
-            return (this.definition.getArtifact()?.getName() || 'New definition') + ' - Token Designer';
+            return (this.definition.getArtifact()?.getName() || 'New definition') + ' - Token Definition';
         } else {
             return 'Token Designer';
+        }
+    }
+
+    get iconPath() {
+        if (this.formula) {
+            return vscode.Uri.file(path.join(this.extensionPath, 'resources', 'token-designer', 'unknown.svg'));
+        } else {
+            return vscode.Uri.file(path.join(this.extensionPath, 'resources', 'token-designer', 'token-base.svg'));
         }
     }
 
@@ -72,7 +80,7 @@ export class TokenDesignerPanel {
         disposables: vscode.Disposable[]) {
     
         this.panel = vscode.window.createWebviewPanel('tokenDesigner', this.title, vscode.ViewColumn.Active, { enableScripts: true });
-        this.panel.iconPath = vscode.Uri.file(path.join(extensionPath, 'resources', 'token-designer', 'token-base.svg'));
+        this.panel.iconPath = this.iconPath;
         this.panel.onDidDispose(this.onClose, this, disposables);
         this.panel.webview.onDidReceiveMessage(this.onMessage, this, disposables);        
         this.panel.webview.html = this.getPanelHtml();
@@ -212,6 +220,7 @@ export class TokenDesignerPanel {
         this.updateIncompatibilities();
         this.panel.webview.postMessage({ definition: this.definition?.toObject(), formula: null, incompatabilities: this.incompatabilities });
         this.panel.title = this.title;
+        this.panel.iconPath = this.iconPath;
         await this.ttfTaxonomy.refresh();
     }
 
@@ -229,6 +238,7 @@ export class TokenDesignerPanel {
         this.updateIncompatibilities();
         this.panel.webview.postMessage({ definition: null, formula: this.formula?.toObject() || null, incompatabilities: this.incompatabilities });
         this.panel.title = this.title;
+        this.panel.iconPath = this.iconPath;
         await this.ttfTaxonomy.refresh();
     }
 

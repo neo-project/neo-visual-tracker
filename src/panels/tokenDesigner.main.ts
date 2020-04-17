@@ -21,7 +21,9 @@ class Dom {
     inspectorDescription = document.getElementById('inspectorDescription') as HTMLElement;
     inspectorHelp = document.getElementById('inspectorHelp') as HTMLElement;
     inspectorTitle = document.getElementById('inspectorTitle') as HTMLElement;
-    inspectorProperties = document.getElementById('inspectorProperties') as HTMLElement;
+    inspectorPropertiesTable = document.getElementById('inspectorPropertiesTable') as HTMLElement;
+    inspectorPropertiesList = document.getElementById('inspectorPropertiesList') as HTMLElement;
+    propertiesHeading = document.getElementById('propertiesHeading') as HTMLElement;
 }
 
 let dom: Dom;
@@ -245,41 +247,58 @@ function renderInspector() {
     if (artifactSelected) {
         dom.inspectorTitle.innerText = artifactSelected.artifact?.name || 'Inspector';
         dom.inspectorDescription.innerText = artifactSelected.artifact?.artifactDefinition?.businessDescription || '';
-        htmlHelpers.clearChildren(dom.inspectorProperties);
+        htmlHelpers.clearChildren(dom.inspectorPropertiesTable);
+        htmlHelpers.clearChildren(dom.inspectorPropertiesList);
+        dom.inspectorPropertiesTable.style.display = tokenDefinition ? 'table' : 'none';
+        dom.inspectorPropertiesList.style.display = tokenDefinition ? 'none' : 'block';
         renderInspectorProperties(artifactSelected, artifactSelected.artifact?.artifactSymbol?.id || '');
     }
 }
 
 function renderInspectorProperties(artifact: any, prefix: string) {
-    const propertyList = (artifact).propertiesList as ttfCore.Property.AsObject[] | undefined;
+    const propertyList = artifact.propertiesList as ttfCore.Property.AsObject[] | undefined;
+    dom.propertiesHeading.style.display = 'none';
     for (const property of propertyList || []) {
-        console.log(property);
-        const row = document.createElement('tr');
-        const th = document.createElement('th');
-        th.innerText = property.name;
-        const td = document.createElement('td');
-        const input = document.createElement('input');
-        // input.value = viewState.propertyValues[prefix + '/' + property.name] || property.templateValue;
-        // input.onchange = () => {
-        //     if (viewState) {
-        //         viewState.propertyValues[prefix + '/' + property.name] = input.value;
-        //         postViewState();
-        //     }
-        // };
-        // input.onblur = () => {
-        //     if (artifactSelected && inspectorHelp) {
-        //         inspectorHelp.innerText = '';
-        //     }
-        // };
-        // input.onfocus = () => {
-        //     if (inspectorHelp) {
-        //         inspectorHelp.innerText = property.valueDescription;
-        //     }
-        // };
-        td.appendChild(input);
-        row.appendChild(th);
-        row.appendChild(td);
-        dom.inspectorProperties.appendChild(row);
+        dom.propertiesHeading.style.display = 'block';
+        if (tokenDefinition) {
+            const row = document.createElement('tr');
+            const th = document.createElement('th');
+            th.innerText = property.name;
+            row.appendChild(th);
+            const td = document.createElement('td');
+            const input = document.createElement('input');
+            // console.log('Rendering properties', artifact, property, tokenDefinition);
+            input.value = property.templateValue || ''; // TODO: This is wrong, it gets the forula value not the one from the definition
+            // input.onchange = () => {
+            //     if (viewState) {
+            //         viewState.propertyValues[prefix + '/' + property.name] = input.value;
+            //         postViewState();
+            //     }
+            // };
+            input.onblur = () => {
+                dom.inspectorHelp.innerText = '';
+            };
+            input.onfocus = () => {
+                dom.inspectorHelp.innerText = property.valueDescription;
+            };
+            td.appendChild(input);
+            row.appendChild(td);
+            dom.inspectorPropertiesTable.appendChild(row);
+        } else if (tokenFormula) {
+            const listItem = document.createElement('li');
+            listItem.innerText = property.name;
+            if (property.templateValue) {
+                listItem.innerText += ' = ' + property.templateValue;
+            }
+            if (property.valueDescription) {
+                const subList = document.createElement('ul');
+                const subListItem = document.createElement('li');
+                subListItem.innerText = property.valueDescription;
+                subList.appendChild(subListItem);
+                listItem.appendChild(subList);
+            }
+            dom.inspectorPropertiesList.appendChild(listItem);
+        }
     }
     const behaviorsList = (artifact).behaviorsList as ttfCore.BehaviorReference.AsObject[] | undefined;
     for (const behavior of behaviorsList || []) {
