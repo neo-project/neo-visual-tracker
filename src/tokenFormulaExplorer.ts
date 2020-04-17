@@ -31,6 +31,8 @@ export class TokenFormulaExplorer implements vscode.TreeDataProvider<TokenFormul
 
     public readonly onDidChangeTreeData: vscode.Event<any> = this.onDidChangeTreeDataEmitter.event;
 
+    private disposed = false;
+
     private rootItems: TokenFormulaIdentifier[] = [];
 
     constructor(private readonly extensionPath: string, private readonly ttfTaxonomy: TokenTaxonomy) {
@@ -39,6 +41,7 @@ export class TokenFormulaExplorer implements vscode.TreeDataProvider<TokenFormul
     }
 
     dispose() {
+        this.disposed = true;
     }
 
     getTreeItem(element: TokenFormulaIdentifier): vscode.TreeItem {
@@ -54,7 +57,7 @@ export class TokenFormulaExplorer implements vscode.TreeDataProvider<TokenFormul
     }
 
     private refresh() {
-        if (this.ttfTaxonomy.taxonomy) {
+        if (this.ttfTaxonomy.taxonomy && !this.disposed) {
             this.rootItems = this.ttfTaxonomy
                 .taxonomy
                 .toObject()

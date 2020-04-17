@@ -172,6 +172,11 @@ h1 {
             font-weight: bold;
         }
     }
+    &.disabled {
+        .icon {
+            filter: grayscale(100%);
+        }
+    }
     cursor: pointer;
     display: inline-block;
     width: var(--iconWidth);

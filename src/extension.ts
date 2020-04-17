@@ -18,6 +18,7 @@ import { RpcServerExplorer, RpcServerTreeItemIdentifier } from './rpcServerExplo
 import { RpcConnectionPool } from './rpcConnectionPool';
 import { StartPanel } from './startPanel';
 import { StoragePanel } from './storagePanel';
+import { TokenDefinitionExplorer } from './tokenDefinitionExplorer';
 import { TokenDesignerPanel } from './tokenDesignerPanel';
 import { TokenFormulaExplorer } from './tokenFormulaExplorer';
 import { TokenTaxonomy } from './tokenTaxonomy';
@@ -35,6 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
     const rpcServerExplorer = new RpcServerExplorer(context.extensionPath, rpcConnectionPool);
 
     const tokenFormulaExplorer = new TokenFormulaExplorer(context.extensionPath, ttfTaxonomy);
+
+    const tokenDefinitionExplorer = new TokenDefinitionExplorer(context.extensionPath, ttfTaxonomy);
 
     const neoExpressInstanceManager = new NeoExpressInstanceManager();
 
@@ -491,11 +494,17 @@ export function activate(context: vscode.ExtensionContext) {
         const panel = await TokenDesignerPanel.openExistingFormula(commandContext, ttfConnection, ttfTaxonomy, context.extensionPath, context.subscriptions);
     });
 
+    const openTokenDefinitionCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTokenDefinition', async (commandContext) => {
+        const panel = await TokenDesignerPanel.openExistingDefinition(commandContext, ttfConnection, ttfTaxonomy, context.extensionPath, context.subscriptions);
+    });
+
     const refreshTokenTaxonomyCommand = vscode.commands.registerCommand('neo-visual-devtracker.refreshTokenTaxonomy', async (commandContext) => {
         await ttfTaxonomy.refresh();
     });
 
     const tokenFormulaExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.tokenFormulaExplorer', tokenFormulaExplorer);
+
+    const tokenDefinitionExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.tokenDefinitionExplorer', tokenDefinitionExplorer);
 
     const serverExplorerProvider = vscode.window.registerTreeDataProvider('neo-visual-devtracker.rpcServerExplorer', rpcServerExplorer);
 
@@ -520,8 +529,10 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createWalletFileCommand);
     context.subscriptions.push(createTokenFormulaCommand);
     context.subscriptions.push(openTokenFormulaCommand);
+    context.subscriptions.push(openTokenDefinitionCommand);
     context.subscriptions.push(refreshTokenTaxonomyCommand);
     context.subscriptions.push(tokenFormulaExplorerProvider);
+    context.subscriptions.push(tokenDefinitionExplorerProvider);
     context.subscriptions.push(serverExplorerProvider);
     context.subscriptions.push(waletExplorerProvider);
 }

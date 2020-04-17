@@ -31,12 +31,14 @@
     "activationEvents": [
         "onCommand:neo-visual-devtracker.createTokenFormula",
         "onCommand:neo-visual-devtracker.openTokenFormula",
+        "onCommand:neo-visual-devtracker.openTokenDefinition",
         "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.customizeServerList",
         "onCommand:neo-visual-devtracker.createWalletFile",
         "onCommand:neo-visual-devtracker.openTracker",
         "onView:neo-visual-devtracker.rpcServerExplorer",
         "onView:neo-visual-devtracker.tokenFormulaExplorer",
+        "onView:neo-visual-devtracker.tokenDefinitionExplorer",
         "workspaceContains:**/*.avm"
     ],
     "main": "./out/extension.js",
@@ -59,6 +61,10 @@
                 {
                     "id": "neo-visual-devtracker.tokenFormulaExplorer",
                     "name": "Token Formulae"
+                },
+                {
+                    "id": "neo-visual-devtracker.tokenDefinitionExplorer",
+                    "name": "Token Definitions"
                 }
             ]
         },
@@ -71,6 +77,11 @@
             {
                 "command": "neo-visual-devtracker.openTokenFormula",
                 "title": "Open token formula",
+                "category": "Token Taxonomy Framework"
+            },
+            {
+                "command": "neo-visual-devtracker.openTokenDefinition",
+                "title": "Open token definition",
                 "category": "Token Taxonomy Framework"
             },
             {
@@ -220,6 +231,11 @@
                 {
                     "command": "neo-visual-devtracker.refreshTokenTaxonomy",
                     "when": "view == neo-visual-devtracker.tokenFormulaExplorer",
+                    "group": "navigation"
+                },
+                {
+                    "command": "neo-visual-devtracker.refreshTokenTaxonomy",
+                    "when": "view == neo-visual-devtracker.tokenDefinitionExplorer",
                     "group": "navigation"
                 },
                 {

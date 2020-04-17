@@ -19,12 +19,20 @@ const BaseHrefPlaceholder : string = '[BASE_HREF]';
 export class TokenDesignerPanel {
     
     get title() {
-        return (this.formula?.getArtifact()?.getName() || 'New formula') + ' - Token Designer';
+        if (this.formula) {
+            return (this.formula.getArtifact()?.getName() || 'New formula') + ' - Token Designer';
+        } else if (this.definition) {
+            return (this.definition.getArtifact()?.getName() || 'New definition') + ' - Token Designer';
+        } else {
+            return 'Token Designer';
+        }
     }
 
     private readonly panel: vscode.WebviewPanel;
     
     private taxonomyObjects: TokenDesignerTaxonomy | null = null;
+
+    private definition: ttfCore.TemplateDefinition | null = null;
 
     private formula: ttfCore.TemplateFormula | null = null;
 
@@ -48,6 +56,12 @@ export class TokenDesignerPanel {
     static async openExistingFormula(toolingSymbol: string, ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
         const panel = new TokenDesignerPanel(ttfConnection, ttfTaxonomy, extensionPath, disposables);
         await panel.openFormula(toolingSymbol);
+        return panel;
+    }
+
+    static async openExistingDefinition(artifactId: string, ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
+        const panel = new TokenDesignerPanel(ttfConnection, ttfTaxonomy, extensionPath, disposables);
+        await panel.openDefinition(artifactId);
         return panel;
     }
 
@@ -155,6 +169,10 @@ export class TokenDesignerPanel {
         this.refreshFormula(symbol);
     }
 
+    private async openDefinition(artifactId: string) {
+        this.refreshDefinition(artifactId);
+    }
+
     private onClose() {
         this.dispose();
     }
@@ -162,6 +180,7 @@ export class TokenDesignerPanel {
     private async onMessage(message: any) {
         if (message.e === tokenDesignerEvents.Init) {
             this.panel.webview.postMessage({
+                definition: this.definition?.toObject(),
                 formula: this.formula?.toObject(),
                 taxonomy: this.taxonomyObjects,
                 incompatabilities: this.incompatabilities,
@@ -179,19 +198,36 @@ export class TokenDesignerPanel {
         return any;
     }
 
+    private async refreshDefinition(artifactId?: string) {
+        this.formula = null;
+        artifactId = artifactId || this.definition?.getArtifact()?.getArtifactSymbol()?.getId();
+        if (artifactId) {
+            const existingArtifactSymbol = new ttfArtifact.ArtifactSymbol();
+            existingArtifactSymbol.setId(artifactId);
+            this.definition = await new Promise(
+                (resolve, reject) => this.ttfConnection.getTemplateDefinitionArtifact(existingArtifactSymbol, (error, response) => (error && reject(error)) || resolve(response)));
+        } else {
+            this.definition = null;
+        }
+        this.updateIncompatibilities();
+        this.panel.webview.postMessage({ definition: this.definition?.toObject(), formula: null, incompatabilities: this.incompatabilities });
+        this.panel.title = this.title;
+        await this.ttfTaxonomy.refresh();
+    }
+
     private async refreshFormula(symbol?: string) {
+        this.definition = null;
         symbol = symbol || this.formula?.getArtifact()?.getArtifactSymbol()?.getTooling();
         if (symbol) {
             const existingArtifactSymbol = new ttfArtifact.ArtifactSymbol();
             existingArtifactSymbol.setTooling(symbol);
-            const formula: ttfCore.TemplateFormula = await new Promise(
+            this.formula = await new Promise(
                 (resolve, reject) => this.ttfConnection.getTemplateFormulaArtifact(existingArtifactSymbol, (error, response) => (error && reject(error)) || resolve(response)));
-            this.formula = formula;
         } else {
             this.formula = null;
         }
         this.updateIncompatibilities();
-        this.panel.webview.postMessage({ formula: this.formula?.toObject() || null, incompatabilities: this.incompatabilities });
+        this.panel.webview.postMessage({ definition: null, formula: this.formula?.toObject() || null, incompatabilities: this.incompatabilities });
         this.panel.title = this.title;
         await this.ttfTaxonomy.refresh();
     }

@@ -31,6 +31,7 @@ let artifactSelected: toolboxArtifact | undefined = undefined;
 let draggingInspector: DragEvent | undefined = undefined;
 let incompatabilities: any = {};
 let taxonomy: TokenDesignerTaxonomy | undefined = undefined;
+let tokenDefinition: ttfCore.TemplateDefinition.AsObject | undefined = undefined;
 let tokenFormula: ttfCore.TemplateFormula.AsObject | undefined = undefined;
 let vsCodePostMessage: Function;
 
@@ -58,7 +59,8 @@ function createInvalidToolElement() {
 
 function createToolElement(
     taxonomyArtifactId: string | undefined,
-    isInToolbox: boolean) {
+    isInToolbox: boolean,
+    dragEnabled: boolean) {
 
     let imgSrc = 'token-designer/unknown.svg';
     let taxonomyArtifact: toolboxArtifact | undefined = undefined;
@@ -92,19 +94,25 @@ function createToolElement(
     element.className = 'toolElement ' + 
         (artifactSelected?.artifact?.artifactSymbol?.id === taxonomyArtifact?.artifact?.artifactSymbol?.id ? 'selected' : '');
     element.title = title.innerText;
-    element.draggable = true;
+    element.draggable = dragEnabled;
     element.appendChild(icon);
     element.appendChild(title);
     if (isInToolbox) {
-        element.ondragstart = () => {
-            artifactBeingDraggedOff = undefined;
-            artifactBeingDraggedOn = taxonomyArtifact;
-        };
+        if (dragEnabled) {
+            element.ondragstart = () => {
+                artifactBeingDraggedOff = undefined;
+                artifactBeingDraggedOn = taxonomyArtifact;
+            };
+        } else {
+            element.className += ' disabled';
+        }
     } else {
-        element.ondragstart = () => {
-            artifactBeingDraggedOff = taxonomyArtifact;
-            artifactBeingDraggedOn = undefined;
-        };
+        if (dragEnabled) {
+            element.ondragstart = () => {
+                artifactBeingDraggedOff = taxonomyArtifact;
+                artifactBeingDraggedOn = undefined;
+            };
+        }
         element.onclick = ev => {
             artifactSelected = taxonomyArtifact;
             renderCanvas();
@@ -121,12 +129,18 @@ function handleMessage(message: any) {
     if (message.taxonomy) {
         console.log('Received taxonomy update', message.taxonomy);
         taxonomy = message.taxonomy;
-        renderTaxonomy();
     }
     let shouldRenderCanvas = false;
     if (message.formula) {
         console.log('Received TokenFormula update', message.formula);
         tokenFormula = message.formula;
+        tokenDefinition = undefined;
+        shouldRenderCanvas = true;
+    }
+    if (message.definition) {
+        console.log('Received TokenDefinition update', message.definition);
+        tokenDefinition = message.definition;
+        tokenFormula = undefined;
         shouldRenderCanvas = true;
     }
     if (message.incompatabilities) {
@@ -134,6 +148,7 @@ function handleMessage(message: any) {
         incompatabilities = message.incompatabilities;
         shouldRenderCanvas = true;
     }
+    renderTaxonomy();
     if (shouldRenderCanvas) {
         renderCanvas();
     }
@@ -188,21 +203,39 @@ function renderCanvas() {
     htmlHelpers.clearChildren(dom.behaviorsArea);
     if (tokenFormula) {
         if (tokenFormula.tokenBase?.base?.id) {
-            dom.canvasTokenBase.appendChild(createToolElement(tokenFormula.tokenBase?.base?.id, false));
+            dom.canvasTokenBase.appendChild(createToolElement(tokenFormula.tokenBase?.base?.id, false, true));
         } else {
             dom.canvasTokenBase.appendChild(createInvalidToolElement());
         }
         for (const propertySet of tokenFormula.propertySetsList) {
-            dom.canvasTokenBase.appendChild(createToolElement(propertySet.propertySet?.id, false));
+            dom.canvasTokenBase.appendChild(createToolElement(propertySet.propertySet?.id, false, true));
         }
         for (const behaviorGroup of tokenFormula.behaviorGroupsList) {
-            dom.behaviorsArea.appendChild(createToolElement(behaviorGroup.behaviorGroup?.id, false));
+            dom.behaviorsArea.appendChild(createToolElement(behaviorGroup.behaviorGroup?.id, false, true));
         }
         for (const behavior of tokenFormula.behaviorsList) {
-            dom.behaviorsArea.appendChild(createToolElement(behavior.behavior?.id, false));
+            dom.behaviorsArea.appendChild(createToolElement(behavior.behavior?.id, false, true));
         }
         dom.formula.innerHTML = tokenFormula.artifact?.artifactSymbol?.visual || '';
         dom.formula.title = tokenFormula.artifact?.artifactSymbol?.tooling || '';
+    }
+    if (tokenDefinition) {
+        if (tokenDefinition.tokenBase?.reference?.id) {
+            dom.canvasTokenBase.appendChild(createToolElement(tokenDefinition.tokenBase?.reference?.id, false, false));
+        } else {
+            dom.canvasTokenBase.appendChild(createInvalidToolElement());
+        }
+        for (const propertySet of tokenDefinition.propertySetsList) {
+            dom.canvasTokenBase.appendChild(createToolElement(propertySet.reference?.id, false, false));
+        }
+        for (const behaviorGroup of tokenDefinition.behaviorGroupsList) {
+            dom.behaviorsArea.appendChild(createToolElement(behaviorGroup.reference?.id, false, false));
+        }
+        for (const behavior of tokenDefinition.behaviorsList) {
+            dom.behaviorsArea.appendChild(createToolElement(behavior.reference?.id, false, false));
+        }
+        dom.formula.innerHTML = tokenDefinition.artifact?.artifactSymbol?.visual || '';
+        dom.formula.title = tokenDefinition.artifact?.artifactSymbol?.tooling || '';
     }
     renderInspector();   
 }
@@ -268,11 +301,11 @@ function renderToolbox(
     artifacts: toolboxArtifact[]) {
 
     const toolboxElement = document.getElementById(elementId);
-    console.log('rendering toolbox', elementId, artifacts, toolboxElement);
     if (toolboxElement) {
         htmlHelpers.clearChildren(toolboxElement);
+        const dragEnabled = !!tokenFormula;
         for (const artifact of artifacts) {
-            const toolElement = createToolElement(artifact.artifact?.artifactSymbol?.id, true);
+            const toolElement = createToolElement(artifact.artifact?.artifactSymbol?.id, true, dragEnabled);
             toolboxElement.appendChild(toolElement);
         }
         toolboxElement.ondragover = ev => {
