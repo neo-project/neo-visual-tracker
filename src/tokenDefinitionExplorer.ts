@@ -10,7 +10,7 @@ export class TokenDefinitionIdentifier {
 
     static create(extensionPath: string, label: string, parent: TokenDefinitionIdentifier | undefined, dataSource: any) {
         const children: TokenDefinitionIdentifier[] = [];
-        const result = new TokenDefinitionIdentifier(extensionPath, label, parent, children, dataSource?.artifact);
+        const result = new TokenDefinitionIdentifier(extensionPath, label, parent, dataSource?.artifact);
         if (dataSource?.fungibles) {
             children.push(TokenDefinitionIdentifier.create(extensionPath, 'Fungibles', result, dataSource.fungibles));
         }
@@ -52,21 +52,23 @@ export class TokenDefinitionIdentifier {
                 }
             }
         }
+        result.children = children.sort((a, b) => a.label.localeCompare(b.label));
         return result;
     }
+
+    children: TokenDefinitionIdentifier[] = [];
 
     private constructor(
         public readonly extensionPath: string,
         public readonly label: string,
         public readonly parent: TokenDefinitionIdentifier | undefined,
-        public readonly children: TokenDefinitionIdentifier[],
         public readonly artifact?: ttfArtifact.Artifact.AsObject) {
     }
 
     public asTreeItem(): vscode.TreeItem {
         const result = new vscode.TreeItem(
             this.label, 
-            this.artifact ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Expanded);
+            this.children?.length ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None);
         result.iconPath = this.artifact ?
             vscode.Uri.file(path.join(this.extensionPath, 'resources', 'token-designer', 'token-base.svg')) : 
             vscode.Uri.file(path.join(this.extensionPath, 'resources', 'token-designer', 'unknown.svg'));
