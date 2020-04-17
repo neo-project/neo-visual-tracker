@@ -66,6 +66,7 @@ export class TokenFormulaExplorer implements vscode.TreeDataProvider<TokenFormul
                     _.artifact?.artifactSymbol?.tooling as string, 
                     _.artifact?.name || _.artifact?.artifactSymbol?.tooling as string, 
                     _.artifact?.artifactDefinition?.businessDescription || ''));
+            this.rootItems.sort((a, b) => a.label.localeCompare(b.label));
             this.onDidChangeTreeDataEmitter.fire();
         }
     }
