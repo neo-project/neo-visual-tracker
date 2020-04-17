@@ -248,10 +248,10 @@ export class TokenDesignerPanel {
             if (taxonomy) {
                 const taxonomyObject = taxonomy.toObject();
                 this.taxonomyObjects = {
-                    baseTokenTypes: taxonomyObject.baseTokenTypesMap.map(_ => _[1]),
-                    propertySets: taxonomyObject.propertySetsMap.map(_ => _[1]),
-                    behaviors: taxonomyObject.behaviorsMap.map(_ => _[1]),
-                    behaviorGroups: taxonomyObject.behaviorGroupsMap.map(_ => _[1]),
+                    baseTokenTypes: taxonomyObject.baseTokenTypesMap.map(_ => _[1]).sort((a, b) => a.artifact?.name.localeCompare(b.artifact?.name || '') || 0),
+                    propertySets: taxonomyObject.propertySetsMap.map(_ => _[1]).sort((a, b) => a.artifact?.name.localeCompare(b.artifact?.name || '') || 0),
+                    behaviors: taxonomyObject.behaviorsMap.map(_ => _[1]).sort((a, b) => a.artifact?.name.localeCompare(b.artifact?.name || '') || 0),
+                    behaviorGroups: taxonomyObject.behaviorGroupsMap.map(_ => _[1]).sort((a, b) => a.artifact?.name.localeCompare(b.artifact?.name || '') || 0),
                 };
             } else {
                 this.taxonomyObjects = null;
