@@ -9,7 +9,8 @@ export class TokenFormulaIdentifier {
         public readonly extensionPath: string,
         public readonly toolingSymbol: string,
         public readonly label: string,
-        public readonly description: string) {
+        public readonly description: string,
+        public readonly id: string) {
     }
 
     public asTreeItem(): vscode.TreeItem {
@@ -68,7 +69,8 @@ export class TokenFormulaExplorer implements vscode.TreeDataProvider<TokenFormul
                     this.extensionPath, 
                     _.artifact?.artifactSymbol?.tooling as string, 
                     _.artifact?.name || _.artifact?.artifactSymbol?.tooling as string, 
-                    _.artifact?.artifactDefinition?.businessDescription || ''));
+                    _.artifact?.artifactDefinition?.businessDescription || '',
+                    _.artifact?.artifactSymbol?.id || ''));
             this.rootItems.sort((a, b) => a.label.localeCompare(b.label));
             this.onDidChangeTreeDataEmitter.fire();
         }

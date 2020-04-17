@@ -494,6 +494,10 @@ export function activate(context: vscode.ExtensionContext) {
         const panel = await TokenDesignerPanel.openExistingFormula(commandContext, ttfConnection, ttfTaxonomy, context.extensionPath, context.subscriptions);
     });
 
+    const createTokenDefinitionCommand = vscode.commands.registerCommand('neo-visual-devtracker.createTokenDefinition', async (commandContext) => {
+        const panel = await TokenDesignerPanel.openNewDefinition(commandContext?.id || '', ttfConnection, ttfTaxonomy, context.extensionPath, context.subscriptions);
+    });
+
     const openTokenDefinitionCommand = vscode.commands.registerCommand('neo-visual-devtracker.openTokenDefinition', async (commandContext) => {
         const panel = await TokenDesignerPanel.openExistingDefinition(commandContext, ttfConnection, ttfTaxonomy, context.extensionPath, context.subscriptions);
     });
@@ -529,6 +533,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(createWalletFileCommand);
     context.subscriptions.push(createTokenFormulaCommand);
     context.subscriptions.push(openTokenFormulaCommand);
+    context.subscriptions.push(createTokenDefinitionCommand);
     context.subscriptions.push(openTokenDefinitionCommand);
     context.subscriptions.push(refreshTokenTaxonomyCommand);
     context.subscriptions.push(tokenFormulaExplorerProvider);

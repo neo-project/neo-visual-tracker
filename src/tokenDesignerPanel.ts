@@ -67,6 +67,19 @@ export class TokenDesignerPanel {
         return panel;
     }
 
+    static async openNewDefinition(formulaId: any, ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
+        let definitionName = await vscode.window.showInputBox({ 
+            ignoreFocusOut: true, 
+            prompt: 'Choose a name for the definition',
+            validateInput: _ => _ && _.length ? '' : 'The name cannot be empty',
+        });
+        if (definitionName) {
+            const panel = new TokenDesignerPanel(ttfConnection, ttfTaxonomy, extensionPath, disposables);
+            panel.newDefinition(formulaId, definitionName);
+            return panel;
+        }
+    }
+
     static async openExistingDefinition(artifactId: string, ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
         const panel = new TokenDesignerPanel(ttfConnection, ttfTaxonomy, extensionPath, disposables);
         await panel.openDefinition(artifactId);
@@ -175,6 +188,16 @@ export class TokenDesignerPanel {
 
     private async openFormula(symbol: string) {
         this.refreshFormula(symbol);
+    }
+
+    private async newDefinition(formulaId: any, name: string) {
+        const newTemplateDefinition = new ttfArtifact.NewTemplateDefinition();
+        newTemplateDefinition.setTemplateFormulaId(formulaId);
+        newTemplateDefinition.setTokenName(name);
+        const result: ttfCore.TemplateDefinition = await new Promise(
+            (resolve, reject) => this.ttfConnection.createTemplateDefinition(newTemplateDefinition, (error, response) => (error && reject(error)) || resolve(response)));
+        const newDefinitionId: string = result.getArtifact()?.getArtifactSymbol()?.getId() || '';
+        this.refreshDefinition(newDefinitionId);
     }
 
     private async openDefinition(artifactId: string) {

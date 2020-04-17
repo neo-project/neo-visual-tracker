@@ -32,6 +32,7 @@
         "onCommand:neo-visual-devtracker.createTokenFormula",
         "onCommand:neo-visual-devtracker.openTokenFormula",
         "onCommand:neo-visual-devtracker.openTokenDefinition",
+        "onCommand:neo-visual-devtracker.createTokenDefinition",
         "onCommand:neo-visual-devtracker.createInstance",
         "onCommand:neo-visual-devtracker.customizeServerList",
         "onCommand:neo-visual-devtracker.createWalletFile",
@@ -77,6 +78,11 @@
             {
                 "command": "neo-visual-devtracker.openTokenFormula",
                 "title": "Open token formula",
+                "category": "Token Taxonomy Framework"
+            },
+            {
+                "command": "neo-visual-devtracker.createTokenDefinition",
+                "title": "Create token definition",
                 "category": "Token Taxonomy Framework"
             },
             {
@@ -244,6 +250,10 @@
                 }
             ],
             "view/item/context": [
+                {
+                    "command": "neo-visual-devtracker.createTokenDefinition",
+                    "when": "view == neo-visual-devtracker.tokenFormulaExplorer"
+                },
                 {
                     "command": "neo-visual-devtracker.startServer",
                     "when": "view == neo-visual-devtracker.rpcServerExplorer && viewItem == expressNode",
