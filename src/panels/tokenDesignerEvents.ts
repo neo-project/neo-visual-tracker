@@ -4,6 +4,7 @@ const tokenDesignerEvents = {
     Add: 'add',
     Init: 'init',
     Remove: 'remove',
+    SetDefinitionProperty: 'setDefinitionProperty',
 };
 
 export { tokenDesignerEvents };

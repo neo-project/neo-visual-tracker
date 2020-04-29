@@ -127,6 +127,27 @@ function createToolElement(
     return element;
 }
 
+function getPropertyValueFromDefinition(artifactId: string, propertyName: string) {
+    if (tokenDefinition) {
+        for (const searchIn of [
+            tokenDefinition.behaviorsList, 
+            tokenDefinition.behaviorGroupsList.map(_ => _.behaviorArtifactsList).reduce((a, b) => a.concat(b), []), 
+            tokenDefinition.propertySetsList, 
+        ]) {
+            for (const candidate of searchIn) {
+                if (candidate?.reference?.id === artifactId) {
+                    for (const property of candidate.propertiesList) {
+                        if (property.name === propertyName) {
+                            return property.templateValue;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return '';
+}
+
 function handleMessage(message: any) {
     if (message.taxonomy) {
         console.log('Received taxonomy update', message.taxonomy);
@@ -267,14 +288,15 @@ function renderInspectorProperties(artifact: any, prefix: string) {
             row.appendChild(th);
             const td = document.createElement('td');
             const input = document.createElement('input');
-            // console.log('Rendering properties', artifact, property, tokenDefinition);
-            input.value = property.templateValue || ''; // TODO: This is wrong, it gets the forula value not the one from the definition
-            // input.onchange = () => {
-            //     if (viewState) {
-            //         viewState.propertyValues[prefix + '/' + property.name] = input.value;
-            //         postViewState();
-            //     }
-            // };
+            input.value = getPropertyValueFromDefinition(artifact.artifact?.artifactSymbol?.id, property.name);
+            input.onchange = () => {
+                vsCodePostMessage({ 
+                    e: tokenDesignerEvents.SetDefinitionProperty, 
+                    artifactId: artifact.artifact?.artifactSymbol?.id,
+                    propertyName: property.name,
+                    value: input.value,
+                });
+            };
             input.onblur = () => {
                 dom.inspectorHelp.innerText = '';
             };

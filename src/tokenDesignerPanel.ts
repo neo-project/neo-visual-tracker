@@ -220,7 +220,18 @@ export class TokenDesignerPanel {
             await this.addArtifact(message.id);
         } else if (message.e === tokenDesignerEvents.Remove) {
             await this.removeArtifact(message.id);
+        } else if (message.e === tokenDesignerEvents.SetDefinitionProperty) {
+            await this.setDefinitionProperty(
+                message.artifactId,
+                message.propertyName,
+                message.value);
         }
+    }
+
+    private packTemplateDefinition(definition: ttfCore.TemplateDefinition) {
+        const any = new protobufAny.Any();
+        any.pack(definition.serializeBinary(), 'taxonomy.model.core.TemplateDefinition');
+        return any;
     }
 
     private packTemplateFormula(formula: ttfCore.TemplateFormula) {
@@ -309,6 +320,31 @@ export class TokenDesignerPanel {
                 await new Promise((resolve, reject) => this.ttfConnection.updateArtifact(updateReqest, (error, response) => (error && reject(error)) || resolve(response)));
             this.formula = this.unackTemplateFormula(response.getArtifactTypeObject());
             this.refreshFormula();
+        }
+    }
+
+    private async setDefinitionProperty(artifactId: string, propertyName: string, value: string) {
+        const findAndSet = (list: (ttfCore.BehaviorReference[] | ttfCore.PropertySetReference[])) => {
+            for (const behavior of list) {
+                if (behavior.getReference()?.getId() === artifactId) {
+                    for (const property of behavior.getPropertiesList()) {
+                        if (property.getName() === propertyName) {
+                            property.setTemplateValue(value);
+                        }
+                    }
+                }
+            }
+        };
+        if (this.definition) {
+            findAndSet(this.definition.getBehaviorsList());
+            this.definition.getBehaviorGroupsList().forEach(bgl => findAndSet(bgl.getBehaviorArtifactsList()));
+            findAndSet(this.definition.getPropertySetsList());
+            const updateReqest = new ttfArtifact.UpdateArtifactRequest();
+            updateReqest.setType(ttfArtifact.ArtifactType.TEMPLATE_DEFINITION);
+            updateReqest.setArtifactTypeObject(this.packTemplateDefinition(this.definition));
+            await new Promise((resolve, reject) => 
+                this.ttfConnection.updateArtifact(updateReqest, (error, response) => (error && reject(error)) || resolve(response)));
+            this.refreshDefinition();
         }
     }
 
