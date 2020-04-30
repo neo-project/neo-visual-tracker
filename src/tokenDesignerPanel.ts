@@ -49,6 +49,9 @@ export class TokenDesignerPanel {
     private disposed = false;
 
     static async openNewFormula(ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
+        //
+        // TODO: Automatically name based on tooling (and keep name up-to-date as user edits)
+        //
         let symbolName = await vscode.window.showInputBox({ 
             ignoreFocusOut: true, 
             prompt: 'Choose a name for the formula',
