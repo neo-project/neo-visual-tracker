@@ -225,6 +225,8 @@ export class TokenDesignerPanel {
                 message.artifactId,
                 message.propertyName,
                 message.value);
+        } else if (message.e === tokenDesignerEvents.SetDefinitionName) {
+            await this.setDefinitionName(message.name);
         }
     }
 
@@ -310,6 +312,35 @@ export class TokenDesignerPanel {
         }
     }
 
+    private async saveDefintion(deleteAndRecreate: boolean = false) {
+        if (this.definition) {
+            if (deleteAndRecreate) {
+                // Saving and deleting (instead of updating) allows for artifact names
+                // to be changed and prevents the gRPC server from creating version
+                // subfolders.
+                const deleteSymbol = new ttfArtifact.ArtifactSymbol();
+                deleteSymbol.setType(ttfArtifact.ArtifactType.TEMPLATE_DEFINITION);
+                deleteSymbol.setTooling(this.definition?.getArtifact()?.getArtifactSymbol()?.getTooling() || '');
+                const deleteRequest = new ttfArtifact.DeleteArtifactRequest();
+                deleteRequest.setArtifactSymbol(deleteSymbol);
+                await new Promise((resolve, reject) => 
+                    this.ttfConnection.deleteArtifact(deleteRequest, (error, response) => (error && reject(error)) || resolve(response)));
+                const newArtifactRequest = new ttfArtifact.NewArtifactRequest();
+                newArtifactRequest.setType(ttfArtifact.ArtifactType.TEMPLATE_DEFINITION);
+                newArtifactRequest.setArtifact(this.packTemplateDefinition(this.definition));
+                await new Promise((resolve, reject) => 
+                    this.ttfConnection.createArtifact(newArtifactRequest, (error, response) => (error && reject(error)) || resolve(response)));
+            } else {
+                const updateReqest = new ttfArtifact.UpdateArtifactRequest();
+                updateReqest.setType(ttfArtifact.ArtifactType.TEMPLATE_DEFINITION);
+                updateReqest.setArtifactTypeObject(this.packTemplateDefinition(this.definition));
+                await new Promise((resolve, reject) => 
+                    this.ttfConnection.updateArtifact(updateReqest, (error, response) => (error && reject(error)) || resolve(response)));
+            }
+            await this.refreshDefinition();
+        }
+    }
+
     private async saveFormula() {
         if (this.formula) {
             this.updateSymbol();
@@ -339,12 +370,14 @@ export class TokenDesignerPanel {
             findAndSet(this.definition.getBehaviorsList());
             this.definition.getBehaviorGroupsList().forEach(bgl => findAndSet(bgl.getBehaviorArtifactsList()));
             findAndSet(this.definition.getPropertySetsList());
-            const updateReqest = new ttfArtifact.UpdateArtifactRequest();
-            updateReqest.setType(ttfArtifact.ArtifactType.TEMPLATE_DEFINITION);
-            updateReqest.setArtifactTypeObject(this.packTemplateDefinition(this.definition));
-            await new Promise((resolve, reject) => 
-                this.ttfConnection.updateArtifact(updateReqest, (error, response) => (error && reject(error)) || resolve(response)));
-            this.refreshDefinition();
+            await this.saveDefintion();
+        }
+    }
+
+    private async setDefinitionName(name: string) {
+        if (this.definition) {
+            this.definition.getArtifact()?.setName(name);
+            await this.saveDefintion(true);
         }
     }
 

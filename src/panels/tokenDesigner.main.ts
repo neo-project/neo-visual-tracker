@@ -23,6 +23,7 @@ class Dom {
     inspectorTitle = document.getElementById('inspectorTitle') as HTMLElement;
     inspectorPropertiesTable = document.getElementById('inspectorPropertiesTable') as HTMLElement;
     inspectorPropertiesList = document.getElementById('inspectorPropertiesList') as HTMLElement;
+    nameInput = document.getElementById('nameInput') as HTMLInputElement;
     propertiesHeading = document.getElementById('propertiesHeading') as HTMLElement;
 }
 
@@ -212,6 +213,9 @@ function initializePanel() {
     dom.inspector.ondragstart = ev => {
         draggingInspector = ev;
     };
+    dom.nameInput.onblur = ev => {
+        vsCodePostMessage({ e: tokenDesignerEvents.SetDefinitionName, name: dom.nameInput.value });
+    };
 }
 
 function removeFromTokenDesign() {
@@ -241,6 +245,7 @@ function renderCanvas() {
         }
         dom.formula.innerHTML = tokenFormula.artifact?.artifactSymbol?.visual || '';
         dom.formula.title = tokenFormula.artifact?.artifactSymbol?.tooling || '';
+        dom.nameInput.style.display = 'none';
     }
     if (tokenDefinition) {
         if (tokenDefinition.tokenBase?.reference?.id) {
@@ -259,6 +264,8 @@ function renderCanvas() {
         }
         dom.formula.innerHTML = tokenDefinition.artifact?.artifactSymbol?.visual || '';
         dom.formula.title = tokenDefinition.artifact?.artifactSymbol?.tooling || '';
+        dom.nameInput.value = tokenDefinition.artifact?.name || '';
+        dom.nameInput.style.display = 'block';
     }
     renderInspector();   
 }

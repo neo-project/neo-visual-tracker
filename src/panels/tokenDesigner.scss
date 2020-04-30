@@ -68,6 +68,20 @@ h1 {
         bottom: 0;
         right: 0;
     }
+    #nameInput {
+        position: absolute;
+        padding: var(--padding);
+        margin: var(--padding);
+        font-size: 2em;
+        bottom: 0;
+        left: 0;
+        width: 50%;
+        text-overflow: ellipsis;
+        border: var(--borderWidth) solid var(--vscode-editor-background);
+        &:hover {
+            border: var(--borderWidth) solid var(--vscode-editor-selectionBackground);
+        }
+    }
     #inspector {
         #inspectorTitle {
             margin: var(--padding);
