@@ -276,8 +276,8 @@ function renderInspector() {
     }
 }
 
-function renderInspectorProperties(artifact: any, prefix: string) {
-    const propertyList = artifact.propertiesList as ttfCore.Property.AsObject[] | undefined;
+function renderInspectorProperties(artifactOrReference: any, prefix: string) {
+    const propertyList = artifactOrReference.propertiesList as ttfCore.Property.AsObject[] | undefined;
     dom.propertiesHeading.style.display = 'none';
     for (const property of propertyList || []) {
         dom.propertiesHeading.style.display = 'block';
@@ -288,11 +288,12 @@ function renderInspectorProperties(artifact: any, prefix: string) {
             row.appendChild(th);
             const td = document.createElement('td');
             const input = document.createElement('input');
-            input.value = getPropertyValueFromDefinition(artifact.artifact?.artifactSymbol?.id, property.name);
+            const id = artifactOrReference.reference?.id || artifactOrReference.artifact?.artifactSymbol?.id;
+            input.value = getPropertyValueFromDefinition(id, property.name);
             input.onchange = () => {
                 vsCodePostMessage({ 
                     e: tokenDesignerEvents.SetDefinitionProperty, 
-                    artifactId: artifact.artifact?.artifactSymbol?.id,
+                    artifactId: id,
                     propertyName: property.name,
                     value: input.value,
                 });
@@ -322,7 +323,7 @@ function renderInspectorProperties(artifact: any, prefix: string) {
             dom.inspectorPropertiesList.appendChild(listItem);
         }
     }
-    const behaviorsList = (artifact).behaviorsList as ttfCore.BehaviorReference.AsObject[] | undefined;
+    const behaviorsList = (artifactOrReference).behaviorsList as ttfCore.BehaviorReference.AsObject[] | undefined;
     for (const behavior of behaviorsList || []) {
         renderInspectorProperties(behavior,  prefix + '/' + (behavior.reference?.id || ''));
     }
