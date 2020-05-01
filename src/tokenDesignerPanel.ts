@@ -346,13 +346,27 @@ export class TokenDesignerPanel {
 
     private async saveFormula() {
         if (this.formula) {
-            this.updateSymbol();
-            const updateReqest = new ttfArtifact.UpdateArtifactRequest();
-            updateReqest.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
-            updateReqest.setArtifactTypeObject(this.packTemplateFormula(this.formula));
-            const response: ttfArtifact.UpdateArtifactResponse =
-                await new Promise((resolve, reject) => this.ttfConnection.updateArtifact(updateReqest, (error, response) => (error && reject(error)) || resolve(response)));
-            this.formula = this.unackTemplateFormula(response.getArtifactTypeObject());
+            const deleteAndRecreate = this.updateSymbol();
+            if (deleteAndRecreate) {
+                const deleteSymbol = new ttfArtifact.ArtifactSymbol();
+                deleteSymbol.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
+                deleteSymbol.setId(this.formula.getArtifact()?.getArtifactSymbol()?.getId() || '');
+                const deleteRequest = new ttfArtifact.DeleteArtifactRequest();
+                deleteRequest.setArtifactSymbol(deleteSymbol);
+                await new Promise((resolve, reject) => 
+                    this.ttfConnection.deleteArtifact(deleteRequest, (error, response) => (error && reject(error)) || resolve(response)));
+                const newArtifactRequest = new ttfArtifact.NewArtifactRequest();
+                newArtifactRequest.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
+                newArtifactRequest.setArtifact(this.packTemplateFormula(this.formula));
+                await new Promise((resolve, reject) => 
+                    this.ttfConnection.createArtifact(newArtifactRequest, (error, response) => (error && reject(error)) || resolve(response)));
+            } else {
+                const updateReqest = new ttfArtifact.UpdateArtifactRequest();
+                updateReqest.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
+                updateReqest.setArtifactTypeObject(this.packTemplateFormula(this.formula));
+                await new Promise((resolve, reject) => 
+                    this.ttfConnection.updateArtifact(updateReqest, (error, response) => (error && reject(error)) || resolve(response)));
+            }
             this.refreshFormula();
         }
     }
@@ -438,12 +452,25 @@ export class TokenDesignerPanel {
             }
             tooling += '{' + behaviorsTooling.join(',') + '}';
             visual += '{' + behaviorsVisual.join(',') + '}';
+            let containsAdditions = false;
             for (const propertySet of this.formula.getPropertySetsList()) {
+                containsAdditions = true;
                 tooling += '+' + (propertySet.getPropertySet()?.getTooling() || '?');
                 visual += '+' + (propertySet.getPropertySet()?.getVisual() || '?');
             }
-            this.formula.getArtifact()?.getArtifactSymbol()?.setTooling('[' + tooling + ']');
-            this.formula.getArtifact()?.getArtifactSymbol()?.setVisual('[' + visual + ']');
+            if (containsAdditions) {
+                tooling = '[' + tooling + ']';
+                visual = '[' + visual + ']';
+            }
+            this.formula.getArtifact()?.getArtifactSymbol()?.setTooling(tooling);
+            this.formula.getArtifact()?.getArtifactSymbol()?.setVisual(visual);
+            // By convention, formulae use their tooling symbol as their name:
+            if (this.formula.getArtifact()?.getName() !== tooling) {
+                this.formula.getArtifact()?.setName(tooling);
+                return true; // delete-and-create instead of update
+            } else {
+                return false;
+            }
         }
     }
 
