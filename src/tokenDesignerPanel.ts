@@ -49,19 +49,9 @@ export class TokenDesignerPanel {
     private disposed = false;
 
     static async openNewFormula(ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
-        //
-        // TODO: Automatically name based on tooling (and keep name up-to-date as user edits)
-        //
-        let symbolName = await vscode.window.showInputBox({ 
-            ignoreFocusOut: true, 
-            prompt: 'Choose a name for the formula',
-            validateInput: _ => _ && _.length ? '' : 'The name cannot be empty',
-        });
-        if (symbolName) {
-            const panel = new TokenDesignerPanel(ttfConnection, ttfTaxonomy, extensionPath, disposables);
-            panel.newFormula(symbolName);
-            return panel;
-        }
+        const panel = new TokenDesignerPanel(ttfConnection, ttfTaxonomy, extensionPath, disposables);
+        panel.newFormula();
+        return panel;
     }
 
     static async openExistingFormula(toolingSymbol: string, ttfConnection: ttfClient.ServiceClient, ttfTaxonomy: TokenTaxonomy, extensionPath: string, disposables: vscode.Disposable[]) {
@@ -167,7 +157,7 @@ export class TokenDesignerPanel {
             .replace(BaseHrefPlaceholder, baseHref);
     }
 
-    private async newFormula(name: string) {
+    private async newFormula() {
         const id = uuid.v1();
         const temporaryTooling = id;
         const newArtifactSymbol = new ttfArtifact.ArtifactSymbol();
@@ -178,7 +168,7 @@ export class TokenDesignerPanel {
         newArtifactSymbol.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
         newArtifactSymbol.setTemplateValidated(false);
         const newArtifact = new ttfArtifact.Artifact();
-        newArtifact.setName(name);
+        newArtifact.setName('Untitled');
         newArtifact.setArtifactSymbol(newArtifactSymbol);
         const newFormula = new ttfCore.TemplateFormula();
         newFormula.setArtifact(newArtifact);
