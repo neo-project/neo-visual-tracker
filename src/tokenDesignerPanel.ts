@@ -167,8 +167,11 @@ export class TokenDesignerPanel {
         newArtifactSymbol.setVersion('1.0,');
         newArtifactSymbol.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
         newArtifactSymbol.setTemplateValidated(false);
+        const newArtifactDefinition = new ttfArtifact.ArtifactDefinition();
+        newArtifactDefinition.setBusinessDescription('Enter a business description here');
         const newArtifact = new ttfArtifact.Artifact();
         newArtifact.setName('Untitled');
+        newArtifact.setArtifactDefinition(newArtifactDefinition);
         newArtifact.setArtifactSymbol(newArtifactSymbol);
         const newFormula = new ttfCore.TemplateFormula();
         newFormula.setArtifact(newArtifact);
@@ -220,6 +223,8 @@ export class TokenDesignerPanel {
                 message.value);
         } else if (message.e === tokenDesignerEvents.SetDefinitionName) {
             await this.setDefinitionName(message.name);
+        } else if (message.e === tokenDesignerEvents.SetFormulaDescription) {
+            await this.setFormulaDescription(message.description);
         }
     }
 
@@ -334,10 +339,10 @@ export class TokenDesignerPanel {
         }
     }
 
-    private async saveFormula() {
+    private async saveFormula(forceDeleteAndRecreate?: boolean) {
         if (this.formula) {
             const deleteAndRecreate = this.updateSymbol();
-            if (deleteAndRecreate) {
+            if (forceDeleteAndRecreate || deleteAndRecreate) {
                 const deleteSymbol = new ttfArtifact.ArtifactSymbol();
                 deleteSymbol.setType(ttfArtifact.ArtifactType.TEMPLATE_FORMULA);
                 deleteSymbol.setId(this.formula.getArtifact()?.getArtifactSymbol()?.getId() || '');
@@ -388,11 +393,11 @@ export class TokenDesignerPanel {
         }
     }
 
-    private unackTemplateFormula(input?: protobufAny.Any): ttfCore.TemplateFormula | null {
-        if (input) {
-            return input.unpack<ttfCore.TemplateFormula>(ttfCore.TemplateFormula.deserializeBinary, 'taxonomy.model.core.TemplateFormula');
+    private async setFormulaDescription(description: string) {
+        if (this.formula) {
+            this.formula.getArtifact()?.getArtifactDefinition()?.setBusinessDescription(description);
+            await this.saveFormula(true);
         }
-        return null;
     }
 
     private updateIncompatibilities() {

@@ -16,6 +16,7 @@ class Dom {
     canvas = document.getElementById('canvas') as HTMLElement;
     canvasTokenBase = document.getElementById('canvasTokenBase') as HTMLElement;
     behaviorsArea = document.getElementById('behaviorsArea') as HTMLElement;
+    descriptionInput = document.getElementById('descriptionInput') as HTMLTextAreaElement;
     formula = document.getElementById('formula') as HTMLElement;
     inspector = document.getElementById('inspector') as HTMLElement;
     inspectorDescription = document.getElementById('inspectorDescription') as HTMLElement;
@@ -216,6 +217,9 @@ function initializePanel() {
     dom.nameInput.onblur = ev => {
         vsCodePostMessage({ e: tokenDesignerEvents.SetDefinitionName, name: dom.nameInput.value });
     };
+    dom.descriptionInput.onblur = ev => {
+        vsCodePostMessage({ e: tokenDesignerEvents.SetFormulaDescription, description: dom.descriptionInput.value });
+    };
 }
 
 function removeFromTokenDesign() {
@@ -245,6 +249,8 @@ function renderCanvas() {
         }
         dom.formula.innerHTML = tokenFormula.artifact?.artifactSymbol?.visual || '';
         dom.formula.title = tokenFormula.artifact?.artifactSymbol?.tooling || '';
+        dom.descriptionInput.value = tokenFormula.artifact?.artifactDefinition?.businessDescription || '';
+        dom.descriptionInput.style.display = 'block';
         dom.nameInput.style.display = 'none';
     }
     if (tokenDefinition) {
@@ -266,6 +272,7 @@ function renderCanvas() {
         dom.formula.title = tokenDefinition.artifact?.artifactSymbol?.tooling || '';
         dom.nameInput.value = tokenDefinition.artifact?.name || '';
         dom.nameInput.style.display = 'block';
+        dom.descriptionInput.style.display = 'none';
     }
     renderInspector();   
 }

@@ -6,6 +6,7 @@ const tokenDesignerEvents = {
     Remove: 'remove',
     SetDefinitionProperty: 'setDefinitionProperty',
     SetDefinitionName: 'setName',
+    SetFormulaDescription: 'setFormulaDescription',
 };
 
 export { tokenDesignerEvents };
