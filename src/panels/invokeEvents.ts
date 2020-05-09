@@ -9,6 +9,7 @@ const invokeEvents = {
     Debug: 'debug',
     AddDebugConfig: 'addDebugConfig',
     Search: 'search',
+    CreateInvokeFile: 'createInvokeFile',
 };
 
 export { invokeEvents };

@@ -281,6 +281,7 @@ export function activate(context: vscode.ExtensionContext) {
                     context.extensionPath,
                     server.jsonFile,
                     defaultPath,
+                    neoExpressHelper,
                     context.subscriptions);
             } catch (e) {
                 console.error('Error opening new checkpoint panel ', e);
