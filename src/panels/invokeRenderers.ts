@@ -241,6 +241,10 @@ const invokeRenderers = {
                     if (invokeOnChainButton) {
                         htmlHelpers.setOnClickEvent(invokeOnChainButton, invokeEvents.InvokeOnChain, methodData.name, postMessage);
                     }
+                    const createInvokeFileButton = thisMethodDetail.querySelector(invokeSelectors.CreateInvokeFileButton);
+                    if (createInvokeFileButton) {
+                        htmlHelpers.setOnClickEvent(createInvokeFileButton, invokeEvents.CreateInvokeFile, methodData.name, postMessage);
+                    }
                     this.renderWallets(
                         thisMethod, 
                         wallets, 

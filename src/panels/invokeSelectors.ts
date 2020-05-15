@@ -23,6 +23,7 @@ const invokeSelectors = {
     InvokeOffChainButton: '.invokeOffChainButton',
     LaunchDebuggerButton: '.launchDebugger',
     AddDebugConfigButton: '.addDebugConfig',
+    CreateInvokeFileButton: '.createInvokeFileButton',
     InvocationResultPopup: '#invocationResultPopup',
     InvocationResultGasUsed: '#gas-used-value',
     InvocationResultVMState: '#vm-state-value',

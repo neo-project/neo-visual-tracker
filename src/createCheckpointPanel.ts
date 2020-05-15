@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 
 import { createEvents } from './panels/createEvents';
 import { NeoExpressHelper } from './neoExpressHelper';
-import { RpcServerExplorer } from './rpcServerExplorer';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
 const CssHrefPlaceholder : string = '[CSS_HREF]';
@@ -24,6 +23,7 @@ class ViewState {
 export class CreateCheckpointPanel {
 
     private readonly panel: vscode.WebviewPanel;
+    private readonly neoExpressHelper: NeoExpressHelper;
 
     private viewState: ViewState;
 
@@ -31,7 +31,10 @@ export class CreateCheckpointPanel {
         extensionPath: string,
         neoExpressJsonFullPath: string,
         workspacePath: string,
+        neoExpressHelper: NeoExpressHelper,
         disposables: vscode.Disposable[]) {
+
+        this.neoExpressHelper = neoExpressHelper;
 
         this.viewState = new ViewState();
         this.viewState.neoExpressJsonFullPath = neoExpressJsonFullPath;
@@ -88,7 +91,7 @@ export class CreateCheckpointPanel {
     }
 
     private async doCreate() {
-        const result = await NeoExpressHelper.createCheckpoint(
+        const result = await this.neoExpressHelper.createCheckpoint(
             this.viewState.neoExpressJsonFullPath,
             this.viewState.path,
             this.viewState.checkpointName,

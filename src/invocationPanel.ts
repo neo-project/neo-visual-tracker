@@ -170,6 +170,11 @@ export class InvocationPanel {
                 this.viewState.invocationError = this.viewState.invocationError || 'There was an error creating the debug configuration.';
                 this.panel.webview.postMessage({ viewState: this.viewState });
             }
+        } else if (message.e === invokeEvents.CreateInvokeFile) {
+            if (!(await this.createInvokeFile(message.c))) {
+                this.viewState.invocationError = this.viewState.invocationError || 'There was an error creating the invocation file.';
+                this.panel.webview.postMessage({ viewState: this.viewState });
+            }
         } else if (message.e === invokeEvents.Search) {
             await this.startSearch(message.c);
         }
@@ -270,6 +275,36 @@ export class InvocationPanel {
             this.viewState.showResult = false;
             this.viewState.broadcastResult = undefined;
             this.viewState.invocationError = 'Could not invoke ' + methodName + ': ' + e;
+        }
+    }
+
+    private async createInvokeFile(methodName: string) {
+        try {
+            for (let i = 0; i < this.viewState.contracts.length; i++) {
+                const hash = this.viewState.contracts[i].hash;
+                if (hash === this.viewState.selectedContract) {
+                    const contract = this.viewState.contracts[i];
+                    const contractName = contract.name;
+                    for (let j = 0; j < contract.functions.length; j++) {
+                        const method = contract.functions[j];
+                        if (method.name === methodName) {
+                            const args = (methodName === 'Main') ?
+                                InvocationPanel.extractInvokeFileArguments(method.parameters) :
+                                [ methodName, InvocationPanel.extractInvokeFileArguments(method.parameters) ];
+                            const fileContents = { hash, args };
+                            vscode.window.showTextDocument(
+                                await vscode.workspace.openTextDocument({ 
+                                    language: 'json', 
+                                    content: JSON.stringify(fileContents, undefined, 4),
+                                }));
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            this.viewState.invocationError = 'Error creating invocation file: ' + e.message;
+            return false;
         }
     }
 
@@ -402,6 +437,28 @@ export class InvocationPanel {
     }
 
     private static extractDebuggerArgument(parameter: any) {
+        parameter.value = parameter.value || '';
+        if (parameter.type === 'ByteArray') {
+            return parameter.value;
+        } else if (parameter.type === 'Integer') {
+            return parseInt(parameter.value) || 0;
+        } else if (parameter.type === 'String') {
+            return parameter.value;
+        } else if (parameter.type === 'Array') {
+            return InvocationPanel.parseArrayArgument(parameter.value);
+        } else if (parameter.type === 'Boolean') {
+            const normalized = parameter.value.trim().toLowerCase();
+            return (normalized === '1') || (normalized === 'true');
+        } else {
+            throw new Error('Parameters of type ' + parameter.type + ' not yet supported');
+        }
+    }
+
+    private static extractInvokeFileArguments(parameters: any[]) {
+        return parameters.map(InvocationPanel.extractInvokeFileArgument);
+    }
+
+    private static extractInvokeFileArgument(parameter: any) {
         parameter.value = parameter.value || '';
         if (parameter.type === 'ByteArray') {
             return parameter.value;
