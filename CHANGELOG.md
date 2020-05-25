@@ -13,6 +13,25 @@ will not have contiguous patch numbers. Initial major and minor releases will be
 in this file without a patch number. Patch version will be included for bug fix releases, but
 may not exactly match a publicly released version.
 
+## [Unreleased]
+
+### Added
+
+- Neo Express Storage Explorer
+- Support for Neo Express checkpoint restore
+
+### Changed
+
+- Improved Contract Invocation Panel layout
+- Optionally perfrom a NEO self-transfer before claiming GAS
+- Neo Express V2 invocation files can now be created from the Contract Invocation Panel
+- Visual Studio Code launch.json configurations can now be created from the Contract Invocation Panel
+- When creating a new Neo Express instance you can now preload GAS
+- Fixed some bugs in the interpretation of integer values returned by contracts
+- Smart contracts with no parameters can now be invoked from the Contract Invocation Panel
+- All commands can now be invoked from the Visual Studio Code Command Palette
+- Added autocomplete and search history within the block explorer
+
 ## [1.0] - 2020-02-06
 
 ### Added
