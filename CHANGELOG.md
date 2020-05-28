@@ -13,7 +13,7 @@ will not have contiguous patch numbers. Initial major and minor releases will be
 in this file without a patch number. Patch version will be included for bug fix releases, but
 may not exactly match a publicly released version.
 
-## [Unreleased]
+## [1.1] - 2020-05-28
 
 ### Added
 
@@ -23,7 +23,7 @@ may not exactly match a publicly released version.
 ### Changed
 
 - Improved Contract Invocation Panel layout
-- Optionally perfrom a NEO self-transfer before claiming GAS
+- Optionally perform a NEO self-transfer before claiming GAS
 - Neo Express V2 invocation files can now be created from the Contract Invocation Panel
 - Visual Studio Code launch.json configurations can now be created from the Contract Invocation Panel
 - When creating a new Neo Express instance you can now preload GAS
