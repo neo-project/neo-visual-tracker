@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import { createEvents } from './panels/createEvents';
+import { createCheckpointEvents } from './panels/createCheckpointEvents';
 import { NeoExpressHelper } from './neoExpressHelper';
 
 const JavascriptHrefPlaceholder : string = '[JAVASCRIPT_HREF]';
@@ -68,17 +68,33 @@ export class CreateCheckpointPanel {
     }
 
     private async onMessage(message: any) {
-        if (message.e === createEvents.Init) {
+        if (message.e === createCheckpointEvents.Init) {
             this.panel.webview.postMessage({ viewState: this.viewState });
-        } else if (message.e === createEvents.Update) {
+        } else if (message.e === createCheckpointEvents.Update) {
             this.viewState = message.c;
             this.updateViewState();
             this.viewState.showError = false;
             this.panel.webview.postMessage({ viewState: this.viewState });
-        } else if (message.e === createEvents.Create) {
+        } else if (message.e === createCheckpointEvents.Create) {
             await this.doCreate();
-        } else if (message.e === createEvents.Close) {
+        } else if (message.e === createCheckpointEvents.Close) {
             this.dispose();
+        } else if (message.e === createCheckpointEvents.PickFolder) {
+            await this.pickFolder();
+            this.panel.webview.postMessage({ viewState: this.viewState });
+        }
+    }
+
+    private async pickFolder() {
+        const result = await vscode.window.showOpenDialog({
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            defaultUri: vscode.Uri.file(this.viewState.path),
+            openLabel: "Select folder"
+        });
+        if (result?.length) {
+            this.viewState.path = result[0].fsPath;
         }
     }
 

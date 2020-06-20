@@ -4,6 +4,7 @@ const createEvents = {
     Close: 'close',
     Create: 'create',
     Init: 'init',
+    PickFolder: 'pickfolder',
     Update: 'update',
 };
 

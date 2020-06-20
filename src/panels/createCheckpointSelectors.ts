@@ -7,7 +7,6 @@ const createCheckpointSelectors = {
     CloseButton: '#close',
     CombinedPath: '.combined-path',
     CreateButton: '#create',
-    CustomPathPicker: '#custom-path-picker',
     CurrentPath: '#current-path',
     ErrorMessage: '#error-message',
     FileDoesNotExistNotice: '#file-does-not-exist-notice',
