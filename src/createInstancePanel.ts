@@ -93,6 +93,22 @@ export class CreateInstancePanel {
             await this.doCreate();
         } else if (message.e === createEvents.Close) {
             this.dispose();
+        } else if (message.e === createEvents.PickFolder) {
+            await this.pickFolder();
+            this.panel.webview.postMessage({ viewState: this.viewState });
+        }
+    }
+
+    private async pickFolder() {
+        const result = await vscode.window.showOpenDialog({
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            defaultUri: vscode.Uri.file(this.viewState.path),
+            openLabel: "Select folder"
+        });
+        if (result?.length) {
+            this.viewState.path = result[0].fsPath;
         }
     }
 

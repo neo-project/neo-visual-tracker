@@ -1,7 +1,6 @@
 import { createCheckpointEvents } from "./createCheckpointEvents";
 import { createCheckpointRenderers } from "./createCheckpointRenderers";
 import { createCheckpointSelectors } from "./createCheckpointSelectors";
-import { htmlHelpers } from "./htmlHelpers";
 
 /*
  * This code runs in the context of the WebView panel. It exchanges JSON messages with the main 
@@ -32,18 +31,11 @@ function initializePanel() {
     const vscode = acquireVsCodeApi();
     vsCodePostMessage = vscode.postMessage;
     const browseButton = document.querySelector(createCheckpointSelectors.BrowseButton) as HTMLButtonElement;
-    const customPathPicker = document.querySelector(createCheckpointSelectors.CustomPathPicker) as HTMLInputElement;
     const checkpointNameInput = document.querySelector(createCheckpointSelectors.CheckpointNameInput) as HTMLInputElement;
     const allowOverwrite = document.querySelector(createCheckpointSelectors.AllowOverwrite) as HTMLInputElement;
     const mainForm = document.querySelector(createCheckpointSelectors.MainForm) as HTMLFormElement;
     const resultForm = document.querySelector(createCheckpointSelectors.ResultForm) as HTMLFormElement;
-    browseButton.addEventListener('click', _ => customPathPicker.click());
-    customPathPicker.addEventListener('change', _ => {
-        const newPath = customPathPicker.files && customPathPicker.files.length ? (customPathPicker.files[0] as any).path : viewState.path;
-        htmlHelpers.setPlaceholder(createCheckpointSelectors.CurrentPath, htmlHelpers.text(newPath));
-        viewState.path = newPath;
-        postViewState();
-    });
+    browseButton.addEventListener('click', _ => vsCodePostMessage({ e: createCheckpointEvents.PickFolder }));
     checkpointNameInput.addEventListener('change', _ => {
         viewState.checkpointName = checkpointNameInput.value;
         postViewState();
