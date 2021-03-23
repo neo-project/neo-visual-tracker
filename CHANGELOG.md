@@ -1,4 +1,4 @@
-# Neo Visual DevTracker Change Log
+# Neo Legacy Visual DevTracker Change Log
 
 All notable changes to this project will be documented in this file.
 
@@ -12,6 +12,12 @@ of the commit that generated the build. As such, released versions of this exten
 will not have contiguous patch numbers. Initial major and minor releases will be documented
 in this file without a patch number. Patch version will be included for bug fix releases, but
 may not exactly match a publicly released version.
+
+## [1.2] - 2021-03-24
+
+### Changed
+
+- Changed extension name to "Neo Legacy Visual DevTracker"
 
 ## [1.1] - 2020-05-28
 

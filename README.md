@@ -1,10 +1,14 @@
-# Neo Visual DevTracker
+# Neo Legacy Visual DevTracker
 
 [![Build Status](https://dev.azure.com/NGDSeattle/Public/_apis/build/status/neo-project.neo-visual-tracker?branchName=master)](https://dev.azure.com/NGDSeattle/Public/_build/latest?definitionId=28&branchName=master)
 [![](https://vsmarketplacebadge.apphb.com/version-short/ngd-seattle.neo-visual-devtracker.svg)](https://marketplace.visualstudio.com/items?itemName=ngd-seattle.neo-visual-devtracker)
 
 This is a Visual Studio Code extension that supports running and interacting
-with Neo Express instances from within Visual Studio Code.
+with Neo Legacy instances from within Visual Studio Code.
+
+> Note this version of Visual DevTracker only supports [Neo Legacy](https://medium.com/neo-smart-economy/introducing-neo-n3-the-next-evolution-of-the-neo-blockchain-b2960c4def6e).
+> You can download a preview of Visual DevTracker for [Neo N3](https://medium.com/neo-smart-economy/introducing-neo-n3-the-next-evolution-of-the-neo-blockchain-b2960c4def6e)
+> from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ngd-seattle.neo3-visual-devtracker).
 
 ## Features
 
@@ -46,10 +50,10 @@ with Neo Express instances from within Visual Studio Code.
 
 ## Installation
 
-The latest released version of the Neo Visual DevTracker can be installed via the
+The latest released version of the Neo Legacy Visual DevTracker can be installed via the
 [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/vscode).
 It can be installed
-[by itself](https://marketplace.visualstudio.com/items?itemName=ngd-seattle.neo-visual-devtracker)
+[by itself](https://marketplace.visualstudio.com/items?itemName=ngd-seattle.neo-legacy-visual-devtracker)
 or as part of the
 [Neo Blockchain Toolkit](https://marketplace.visualstudio.com/items?itemName=ngd-seattle.neo-blockchain-toolkit).
 
@@ -59,7 +63,7 @@ for instructions on installing Neo Express.
 
 ### Install Preview Releases
 
-The Neo Visual DevTracker has a public [build server](https://dev.azure.com/NGDSeattle/Public/_build?definitionId=28).
+The Neo Legacy Visual DevTracker has a public [build server](https://dev.azure.com/NGDSeattle/Public/_build?definitionId=28).
 You can install preview builds of the DevTracker by navigating to the build you wish to install,
 pressing the "Artifacts" button in the upper right hand corner and downloading the VSIX-package
 artifact. The artifact is a zip file containing the DevTracker VSIX file, which can be installed
