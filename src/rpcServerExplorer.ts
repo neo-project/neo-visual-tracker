@@ -28,7 +28,14 @@ const TemplateInstructionsSecondRun = 'To update custom RPC servers, edit your J
 
 const MainNetServerListUrl = 'https://api.neoscan.io/api/main_net/v1/get_all_nodes';
 
-const TestNetServerListUrl = 'https://neoscan-testnet.io/api/main_net/v1/get_all_nodes';
+// Retrieved from http://monitor.cityofzion.io/
+const TestNetServerUrls = [
+    'http://seed1.ngd.network:20332', 
+    'http://seed2.ngd.network:20332', 
+    'http://seed3.ngd.network:20332', 
+    'https://testnet1.neo2.coz.io:443', 
+    'https://testnet2.neo2.coz.io:443',
+];
 
 const MainNetGenesisBlock = 'd42561e3d30e15be6400b6df2f328e02d2bf6354c41dce433bc57687c82144bf';
 
@@ -196,7 +203,7 @@ export class RpcServerTreeItemIdentifier {
 
 export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeItemIdentifier> {
 
-    private readonly onDidChangeTreeDataEmitter: vscode.EventEmitter<any>;
+    private readonly onDidChangeTreeDataEmitter: vscode.EventEmitter<void>;
     private readonly fileSystemWatcher: vscode.FileSystemWatcher;
     private readonly searchPattern: vscode.GlobPattern = '**/*.json';
     
@@ -254,7 +261,7 @@ export class RpcServerExplorer implements vscode.TreeDataProvider<RpcServerTreeI
         const testNetNode = RpcServerTreeItemIdentifier.fromUriFetcher(
             this.extensionPath, 
             'Test Net', 
-            RpcServerExplorer.getAllRpcServers(TestNetServerListUrl), 
+            Promise.resolve(TestNetServerUrls), 
             onUpdate);
         newRootItems.push(testNetNode);
 
