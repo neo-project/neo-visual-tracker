@@ -8,7 +8,7 @@ with Neo Legacy instances from within Visual Studio Code.
 
 > Note this version of Visual DevTracker only supports [Neo Legacy](https://medium.com/neo-smart-economy/introducing-neo-n3-the-next-evolution-of-the-neo-blockchain-b2960c4def6e).
 > You can download a preview of Visual DevTracker for [Neo N3](https://medium.com/neo-smart-economy/introducing-neo-n3-the-next-evolution-of-the-neo-blockchain-b2960c4def6e)
-> from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ngd-seattle.neo3-visual-devtracker).
+> from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ngd-seattle.neo3-visual-tracker).
 
 ## Features
 
